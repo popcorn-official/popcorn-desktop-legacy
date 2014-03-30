@@ -52,31 +52,13 @@
             // Calc torrent health
             var seeds = movie.TorrentSeeds;
             var peers = movie.TorrentPeers;
-            var ratio = peers > 0 ? (seeds / peers) : seeds;
-            var health = 0;
-            if (seeds >= 100 && seeds < 1000) {
-                if( ratio > 5 ) {
-                    health = 2;
-                } else if( ratio > 3 ) {
-                    health = 1;
-                }
-            } else if (seeds >= 1000) {
-                if( ratio > 5 ) {
-                    health = 3;
-                } else if( ratio > 3 ) {
-                    health = 2;
-                } else if( ratio > 2 ) {
-                    health = 1;
-                }
-            }
 
             var torrents = {};
             torrents[movie.Quality] = {
                 url: movie.TorrentUrl,
                 size: movie.SizeByte,
                 seed: seeds,
-                peer: peers,
-                health: health
+                peer: peers
             };
 
             var ptItem = movies[imdb];
