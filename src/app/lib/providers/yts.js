@@ -44,41 +44,75 @@
 
     var formatForPopcorn = function(items) {
         var movies = {};
+        var movieList = [];
         _.each(items, function(movie) {
             var largeCover = movie.CoverImage.replace(/_med\./, '_large.');
             var imdb = movie.ImdbCode.replace('tt', '');
+
+            // Calc torrent health
+            var seeds = movie.TorrentSeeds;
+            var peers = movie.TorrentPeers;
+            var ratio = peers > 0 ? (seeds / peers) : seeds;
+            var health = 0;
+            if (seeds >= 100 && seeds < 1000) {
+                if( ratio > 5 ) {
+                    health = 2;
+                } else if( ratio > 3 ) {
+                    health = 1;
+                }
+            } else if (seeds >= 1000) {
+                if( ratio > 5 ) {
+                    health = 3;
+                } else if( ratio > 3 ) {
+                    health = 2;
+                } else if( ratio > 2 ) {
+                    health = 1;
+                }
+            }
+
+            var torrents = {};
+            torrents[movie.Quality] = {
+                url: movie.TorrentUrl,
+                size: movie.SizeByte,
+                seed: seeds,
+                peer: peers,
+                health: health
+            };
 
             var ptItem = movies[imdb];
             if(!ptItem) {
                 ptItem = {
                     imdb:       imdb,
+
                     title:      movie.MovieTitleClean.replace(/\([^)]*\)|1080p|DIRECTORS CUT|EXTENDED|UNRATED|3D|[()]/g, ''),
                     year:       movie.MovieYear,
+
                     voteAverage:parseFloat(movie.MovieRating),
+
                     image:      largeCover,
                     bigImage:   largeCover,
-                    seeders:    movie.TorrentSeeds,
-                    leechers:   movie.TorrentPeers,
-                    videos:     {},
-                    torrents:   {}
+
+                    torrents:   torrents
                 };
+
+                movieList.push(ptItem);
             } else {
-                // Append quality and stuff
+                _.extend(ptItem.torrents, torrents);
             }
 
             movies[imdb] = ptItem;
         });
 
-        return movies;
+        return movieList;
     };
 
     Yts.prototype.extractIds = function(items) {
-        return _.chain(items).pluck('ImdbCode').map(function(id){return id.replace('tt', '');}).value();
+        return _.pluck(items, 'imdb');
     };
 
     Yts.prototype.fetch = function(filters) {
-        return queryTorrents(filters);
-            //.then(formatForPopcorn);
+        return queryTorrents(filters)
+            .then(formatForPopcorn);
     };
 
     App.Providers.Yts = Yts;
