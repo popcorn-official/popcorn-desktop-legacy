@@ -25,7 +25,7 @@
             }
         }
 
-        if (filters.page && filters.page.match(/\d+/)) {
+        if (filters.page) {
             url += '&set=' + filters.page;
         }
 
