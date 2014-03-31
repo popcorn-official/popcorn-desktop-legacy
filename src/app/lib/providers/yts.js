@@ -32,7 +32,7 @@
         request({url: url, json: true}, function(error, response, data) {
             if(error) {
                 deferred.reject(error);
-            } else if(data.error || _.isUndefined(data.MovieList)) {
+            } else if(!data || (data.error || _.isUndefined(data.MovieList))) {
                 deferred.reject(error);
             } else {
                 deferred.resolve(data.MovieList);
