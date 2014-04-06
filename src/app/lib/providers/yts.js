@@ -18,11 +18,11 @@
         }
 
         if (filters.genre) {
-            if (filters.genre == 'date') {
-                url += '&genre=all&sort=date';
-            } else {
-                url += '&genre=' + filters.genre;
-            }
+            url += '&genre=' + filters.genre;
+        }
+
+        if (filters.sorter && filters.sorter != 'popularity') {
+            url += '&sort=' + filters.sorter;
         }
 
         if (filters.page) {
