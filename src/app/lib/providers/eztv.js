@@ -4,7 +4,7 @@
     var Q = require('q');
 
     // TEST ENDPOINT
-    var URL = 'http://localhost:5000/shows';
+    var URL = 'http://limitless-hollows-3849.herokuapp.com/shows';
     var URI = require('URIjs');
 
     // TODO: Make the local cache for tvshow
