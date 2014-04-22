@@ -10,16 +10,20 @@
     var TTL = 1000 * 60 * 60 * 4; // 4 hours
 
     var Eztv = function(){
-        App.Providers.CacheProvider.call(this, 'shows', TTL);
+        App.Providers.CacheProvider.call(this, 'tvshows', TTL);
     };
 
     Eztv.prototype = Object.create(App.Providers.CacheProvider.prototype);
     Eztv.prototype.constructor = Eztv;
 
-    var queryTorrents = function() {
+    var queryTorrents = function(filters) {
         var deferred = Q.defer();
 
         var url = URL;
+
+        if (filters.page) {
+            url += '/' + filters.page;
+        }
 
         request({url: url, json: true}, function(error, response, data) {
             if(error) {
@@ -80,8 +84,8 @@
         return _.pluck(items, 'imdb');
     };
 
-    Eztv.prototype.fetch = function() {
-        return queryTorrents()
+    Eztv.prototype.fetch = function(filters) {
+        return queryTorrents(filters)
             .then(formatForPopcorn);
     };
 
