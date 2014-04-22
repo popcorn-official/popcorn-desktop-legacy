@@ -4,7 +4,8 @@
     var Q = require('q');
 
     // TEST ENDPOINT
-    var URL = 'http://limitless-hollows-3849.herokuapp.com/shows';
+    var URL = 'http://localhost:5000/shows';
+    var URI = require('URIjs');
 
     // TODO: Make the local cache for tvshow
     var TTL = 1000 * 60 * 60 * 4; // 4 hours
@@ -61,10 +62,14 @@
                     title:      data.title.replace(/\([^)]*\)|1080p|DIRECTORS CUT|EXTENDED|UNRATED|3D|[()]/g, ''),
                     year:       data.year,
 
-                    MovieRating: 0,
+                    MovieRating: data.rating,
 
                     image:      data.images.poster,
                     bigImage:   data.images.poster,
+                    backdrop:   resizeImage(data.images.fanart, '940'),
+
+                    runtime:   data.runtime,
+                    synopsis:   data.synopsis,
 
                     torrents:   data.torrents
                 };
@@ -78,6 +83,14 @@
         });
 
         return movieList;
+    };
+
+    var resizeImage = function(imageUrl, width) {
+        var uri = URI(imageUrl),
+            ext = uri.suffix(),
+            file = uri.filename().split('.' + ext)[0];
+
+        return uri.filename(file + '-' + width + '.' + ext).toString();
     };
 
     Eztv.prototype.extractIds = function(items) {
