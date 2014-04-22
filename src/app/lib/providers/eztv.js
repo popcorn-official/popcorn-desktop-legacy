@@ -4,7 +4,7 @@
     var Q = require('q');
 
     // TEST ENDPOINT
-    var URL = 'http://limitless-hollows-3849.herokuapp.com/shows';
+    var URL = 'http://limitless-hollows-3849.herokuapp.com';
     var URI = require('URIjs');
 
     // TODO: Make the local cache for tvshow
@@ -23,8 +23,14 @@
         var url = URL;
 
         if (filters.page) {
-            url += '/' + filters.page;
+            url = URL + '/shows/' + filters.page;
         }
+
+        if (filters.keywords) {
+            url = URL + '/search/' + filters.keywords;
+        }
+
+        console.log(url);
 
         request({url: url, json: true}, function(error, response, data) {
             if(error) {
@@ -45,7 +51,10 @@
         var movies = {};
         var movieList = [];
         _.each(items, function(show) {
-            var data = show.doc;
+            var data = null;
+
+            if (show.doc) data = show.doc;
+            else data = show.value;
 
             var largeCover = data.images.poster;
             var imdb = data._id.replace('tt', '');
