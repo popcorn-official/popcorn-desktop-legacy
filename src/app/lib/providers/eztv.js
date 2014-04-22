@@ -56,25 +56,35 @@
 
             var ptItem = movies[imdb];
             if(!ptItem) {
-                ptItem = {
-                    imdb:       imdb,
 
-                    title:      data.title.replace(/\([^)]*\)|1080p|DIRECTORS CUT|EXTENDED|UNRATED|3D|[()]/g, ''),
-                    year:       data.year,
+                var allTorrents = data.torrents;
+                var key, seasoncount = 0;
+                for(key in allTorrents) {
+                  seasoncount++;
+                }
 
-                    MovieRating: data.rating,
+                if (seasoncount > 0) {
+                    ptItem = {
+                        imdb:           imdb,
 
-                    image:      data.images.poster,
-                    bigImage:   data.images.poster,
-                    backdrop:   resizeImage(data.images.fanart, '940'),
+                        title:          data.title.replace(/\([^)]*\)|1080p|DIRECTORS CUT|EXTENDED|UNRATED|3D|[()]/g, ''),
+                        year:           data.year,
 
-                    runtime:   data.runtime,
-                    synopsis:   data.synopsis,
+                        MovieRating:    data.rating,
 
-                    torrents:   data.torrents
-                };
+                        image:          data.images.poster,
+                        bigImage:       data.images.poster,
+                        backdrop:       resizeImage(data.images.fanart, '940'),
 
-                movieList.push(ptItem);
+                        runtime:        data.runtime,
+                        synopsis:       data.synopsis,
+
+                        torrents:       allTorrents,
+                        seasonsCount:   seasoncount
+                    };
+
+                    movieList.push(ptItem);
+                }
             } else {
                 _.extend(ptItem.torrents, torrents);
             }
