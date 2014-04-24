@@ -4,17 +4,10 @@
     var Q = require('q');
 
     // TEST ENDPOINT
-    var URL = 'http://limitless-hollows-3849.herokuapp.com';
+    var URL = 'http://localhost:5000';
     var URI = require('URIjs');
 
-    // TODO: Make the local cache for tvshow
-    var TTL = 1000 * 60 * 60 * 4; // 4 hours
-
-    var Eztv = function(){
-        App.Providers.CacheProvider.call(this, 'tvshows', TTL);
-    };
-
-    Eztv.prototype = Object.create(App.Providers.CacheProvider.prototype);
+    var Eztv = function() {};
     Eztv.prototype.constructor = Eztv;
 
     var queryTorrents = function(filters) {
@@ -27,7 +20,7 @@
         }
 
         if (filters.keywords) {
-            url = URL + '/search/' + filters.keywords;
+            url = URL + '/shows/search/' + filters.keywords;
         }
 
         console.log(url);
@@ -51,13 +44,10 @@
         var movies = {};
         var movieList = [];
         _.each(items, function(show) {
-            var data = null;
-
-            if (show.doc) data = show.doc;
-            else data = show.value;
+            var data = show;
 
             var largeCover = data.images.poster;
-            var imdb = data._id.replace('tt', '');
+            var imdb = data.imdb_id.replace('tt', '');
 
             // Calc torrent health
             var seeds = 0;
