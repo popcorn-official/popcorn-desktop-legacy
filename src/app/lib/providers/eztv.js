@@ -7,7 +7,9 @@
     var URL = 'http://localhost:5000';
     var URI = require('URIjs');
 
-    var Eztv = function() {};
+    var Eztv = function() {
+        this.db = App.db;
+    };
     Eztv.prototype.constructor = Eztv;
 
     var queryTorrents = function(filters) {
@@ -23,31 +25,29 @@
             url = URL + '/shows/search/' + filters.keywords;
         }
 
-        console.log(url);
-
-        request({url: url, json: true}, function(error, response, data) {
-            if(error) {
-                deferred.reject(error);
-            } else if(!data || (data.error && data.error !== 'No shows found')) {
-                var err = data? data.error: 'No data returned';
-                console.error('Eztv error:', err);
-                deferred.reject(err);
-            } else {
-                deferred.resolve(data || []);
-            }
+        
+        App.db.getShows({page: filters.page}, function(err, data) {
+            console.log(err);
+            console.log(data);
+            deferred.resolve(data || []);
+            
         });
 
         return deferred.promise;
     };
 
     var formatForPopcorn = function(items) {
+
+
         var movies = {};
         var movieList = [];
         _.each(items, function(show) {
+
             var data = show;
 
             var largeCover = data.images.poster;
             var imdb = data.imdb_id.replace('tt', '');
+
 
             // Calc torrent health
             var seeds = 0;
@@ -56,36 +56,31 @@
             var ptItem = movies[imdb];
             if(!ptItem) {
 
-                var allTorrents = data.torrents;
-                var key, seasoncount = 0;
-                for(key in allTorrents) {
-                  seasoncount++;
-                }
+                
+                ptItem = {
+                    imdb:           imdb,
 
-                if (seasoncount > 0) {
-                    ptItem = {
-                        imdb:           imdb,
+                    title:          data.title.replace(/\([^)]*\)|1080p|DIRECTORS CUT|EXTENDED|UNRATED|3D|[()]/g, ''),
+                    year:           data.year,
 
-                        title:          data.title.replace(/\([^)]*\)|1080p|DIRECTORS CUT|EXTENDED|UNRATED|3D|[()]/g, ''),
-                        year:           data.year,
+                    MovieRating:    data.rating,
 
-                        MovieRating:    data.rating,
+                    image:          data.images.poster,
+                    bigImage:       data.images.poster,
+                    backdrop:       resizeImage(data.images.fanart, '940'),
 
-                        image:          data.images.poster,
-                        bigImage:       data.images.poster,
-                        backdrop:       resizeImage(data.images.fanart, '940'),
+                    runtime:        data.runtime,
+                    synopsis:       data.synopsis,
 
-                        runtime:        data.runtime,
-                        synopsis:       data.synopsis,
+                    torrents:       data.episodes,
+                    seasonsCount:   0
+                };
 
-                        torrents:       allTorrents,
-                        seasonsCount:   seasoncount
-                    };
 
-                    movieList.push(ptItem);
-                }
+                movieList.push(ptItem);
+                
             } else {
-                _.extend(ptItem.torrents, torrents);
+                _.extend(ptItem.episodes, episodes);
             }
 
             movies[imdb] = ptItem;
