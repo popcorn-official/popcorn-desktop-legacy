@@ -8,6 +8,7 @@
     var URI = require('URIjs');
 
     var Eztv = function() {};
+
     Eztv.prototype.constructor = Eztv;
 
     var queryTorrents = function(filters) {
@@ -15,95 +16,21 @@
 
         var url = URL;
 
-        if (filters.page) {
-            url = URL + '/shows/' + filters.page;
-        }
+        App.db.getShows(filters, function(err, data) {
 
-        if (filters.keywords) {
-            url = URL + '/shows/search/' + filters.keywords;
-        }
-
-        console.log(url);
-
-        request({url: url, json: true}, function(error, response, data) {
-            if(error) {
-                deferred.reject(error);
-            } else if(!data || (data.error && data.error !== 'No shows found')) {
-                var err = data? data.error: 'No data returned';
-                console.error('Eztv error:', err);
-                deferred.reject(err);
-            } else {
-                deferred.resolve(data || []);
-            }
+            deferred.resolve(data || []);
+            
         });
 
         return deferred.promise;
     };
 
     var formatForPopcorn = function(items) {
-        var movies = {};
-        var movieList = [];
-        _.each(items, function(show) {
-            var data = show;
-
-            var largeCover = data.images.poster;
-            var imdb = data.imdb_id.replace('tt', '');
-
-            // Calc torrent health
-            var seeds = 0;
-            var peers = 0;
-
-            var ptItem = movies[imdb];
-            if(!ptItem) {
-
-                var allTorrents = data.torrents;
-                var key, seasoncount = 0;
-                for(key in allTorrents) {
-                  seasoncount++;
-                }
-
-                if (seasoncount > 0) {
-                    ptItem = {
-                        imdb:           imdb,
-
-                        title:          data.title.replace(/\([^)]*\)|1080p|DIRECTORS CUT|EXTENDED|UNRATED|3D|[()]/g, ''),
-                        year:           data.year,
-
-                        MovieRating:    data.rating,
-
-                        image:          data.images.poster,
-                        bigImage:       data.images.poster,
-                        backdrop:       resizeImage(data.images.fanart, '940'),
-
-                        runtime:        data.runtime,
-                        synopsis:       data.synopsis,
-
-                        torrents:       allTorrents,
-                        seasonsCount:   seasoncount
-                    };
-
-                    movieList.push(ptItem);
-                }
-            } else {
-                _.extend(ptItem.torrents, torrents);
-            }
-
-            movies[imdb] = ptItem;
-        });
-
-        return movieList;
-    };
-
-    var resizeImage = function(imageUrl, width) {
-        var uri = URI(imageUrl),
-            ext = uri.suffix(),
-            file = uri.filename().split('.' + ext)[0];
-
-        return uri.filename(file + '-' + width + '.' + ext).toString();
+        return items;
     };
 
     Eztv.prototype.extractIds = function(items) {
-        return _.pluck(items, 'imdb');
+        return _.pluck(items, 'imdb_id');
     };
 
     Eztv.prototype.fetch = function(filters) {
