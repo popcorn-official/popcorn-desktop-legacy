@@ -3,7 +3,7 @@
     var request = require('request');
     var Q = require('q');
 
-    var URL = Settings.get('yifyApiEndpoint') + 'list.json?sort=seeds&limit=50';
+    var URL = App.settings.yifyApiEndpoint + 'list.json?sort=seeds&limit=50';
     var Yts = function() {};
 
     Yts.prototype.constructor = Yts;
