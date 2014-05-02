@@ -3,15 +3,16 @@
     var request = require('request');
     var Q = require('q');
 
-    var URL = App.settings.yifyApiEndpoint + 'list.json?sort=seeds&limit=50';
+    var URL = false;
     var Yts = function() {};
 
     Yts.prototype.constructor = Yts;
 
     var queryTorrents = function(filters) {
+        
         var deferred = Q.defer();
 
-        var url = URL;
+        var url = AdvSettings.get('yifyApiEndpoint') + 'list.json?sort=seeds&limit=50';
 
         if (filters.keywords) {
             url += '&keywords=' + filters.keywords;
