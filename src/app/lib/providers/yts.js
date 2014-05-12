@@ -15,7 +15,7 @@
         var url = AdvSettings.get('yifyApiEndpoint') + 'list.json?sort=seeds&limit=50';
 
         if (filters.keywords) {
-            url += '&keywords=' + filters.keywords;
+            url += '&keywords=' + filters.keywords.replace(/\s/g, '%');
         }
 
         if (filters.genre) {
