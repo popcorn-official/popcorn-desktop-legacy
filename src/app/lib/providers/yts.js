@@ -49,6 +49,7 @@
         var movies = {};
         var movieList = [];
         _.each(items, function(movie) {
+            if(movie.Quality == '3D') return;
             var largeCover = movie.CoverImage.replace(/_med\./, '_large.');
             var imdb = movie.ImdbCode.replace('tt', '');
 
