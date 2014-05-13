@@ -1,5 +1,6 @@
 (function(App) {
     "use strict";
+    var querystring = require("querystring");
     var request = require('request');
     var Q = require('q');
 
@@ -11,25 +12,30 @@
     var queryTorrents = function(filters) {
         
         var deferred = Q.defer();
-
-        var url = AdvSettings.get('yifyApiEndpoint') + 'list.json?sort=seeds&limit=50';
+		
+        var params = {};
+        params.sort = 'seeds';
+        params.limit = '50';
 
         if (filters.keywords) {
-            url += '&keywords=' + filters.keywords.replace(/\s/g, '%');
+            params.keywords = filters.keywords.replace(/\s/g, '% ');
         }
 
         if (filters.genre) {
-            url += '&genre=' + filters.genre;
+            params.genre = filters.genre;
         }
 
         if (filters.sorter && filters.sorter != 'popularity') {
-            url += '&sort=' + filters.sorter;
+            params.sort = filters.sorter;
         }
 
         if (filters.page) {
-            url += '&set=' + filters.page;
+            params.set = filters.page;
         }
-
+		
+        var url = AdvSettings.get('yifyApiEndpoint') + 'list.json?' + querystring.stringify(params).replace(/%E2%80%99/g,'%27');
+		
+        console.log('YTS api request to: ' + url);
         request({url: url, json: true}, function(error, response, data) {
             if(error) {
                 deferred.reject(error);
