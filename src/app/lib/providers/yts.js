@@ -39,7 +39,8 @@
 		
         var url = AdvSettings.get('yifyApiEndpoint') + 'list.json?' + querystring.stringify(params).replace(/%E2%80%99/g,'%27');
 		
-        console.log('YTS api request to: ' + url);
+        win.info('Request to YTS API');
+        win.debug(url);
         request({url: url, json: true}, function(error, response, data) {
             if(error) {
                 deferred.reject(error);
