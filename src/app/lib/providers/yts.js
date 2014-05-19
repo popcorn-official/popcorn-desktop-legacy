@@ -25,6 +25,12 @@
             params.genre = filters.genre;
         }
 
+        if(filters.order) {
+            var order = "desc";
+            if(filters.order == 1) order = "asc";
+            params.order = order;
+        }
+
         if (filters.sorter && filters.sorter != 'popularity') {
             params.sort = filters.sorter;
         }
