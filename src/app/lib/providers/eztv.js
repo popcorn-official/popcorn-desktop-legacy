@@ -68,10 +68,8 @@
             } else {
 
                 // we cache our new element
-                Database.addTVShow(data, function(err, idata) {
-                    console.timeEnd('test');
-                    callback(false, data);
-                });
+                callback(false, data);
+
             }
         });
     };
