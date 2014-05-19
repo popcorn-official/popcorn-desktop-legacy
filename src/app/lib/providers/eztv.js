@@ -5,9 +5,9 @@
     var Q = require('q');
 
     var URL = false;
-    var Tvshows = function() {};
+    var Eztv = function() {};
 
-    Tvshows.prototype.constructor = Tvshows;
+    Eztv.prototype.constructor = Eztv;
 
     var queryTorrents = function(filters) {
         
@@ -30,7 +30,7 @@
         }
         
         var url = AdvSettings.get('tvshowApiEndpoint') + 'shows/'+filters.page+'?' + querystring.stringify(params).replace(/%25%20/g,'%20');
-        
+        console.time('test');
         console.log('Api request to: ' + url);
         request({url: url, json: true}, function(error, response, data) {
             if(error) {
@@ -40,6 +40,7 @@
                 console.error('API error:', err);
                 deferred.reject(err);
             } else {
+                console.timeEnd('test');
                 deferred.resolve(data || []);
             }
         });
@@ -49,7 +50,7 @@
 
     // Single element query
     var queryTorrent = function(torrent_id, callback) {
-        
+        console.time('test');
         var url = AdvSettings.get('tvshowApiEndpoint') + 'show/' + torrent_id;
         
         console.log('Api request to: ' + url);
@@ -68,25 +69,25 @@
 
                 // we cache our new element
                 Database.addTVShow(data, function(err, idata) {
+                    console.timeEnd('test');
                     callback(false, data);
                 });
             }
         });
-        
     };
 
-    Tvshows.prototype.extractIds = function(items) {
+    Eztv.prototype.extractIds = function(items) {
         return _.pluck(items, 'imdb_id');
     };
 
-    Tvshows.prototype.fetch = function(filters) {
+    Eztv.prototype.fetch = function(filters) {
         return queryTorrents(filters);
     };
 
-    Tvshows.prototype.detail = function(torrent_id, callback) {
+    Eztv.prototype.detail = function(torrent_id, callback) {
         return queryTorrent(torrent_id, callback);
     };
 
-    App.Providers.Tvshows = Tvshows;
+    App.Providers.Eztv = Eztv;
 
 })(window.App);
