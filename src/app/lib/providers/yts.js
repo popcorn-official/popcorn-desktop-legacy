@@ -1,6 +1,6 @@
 (function(App) {
-    "use strict";
-    var querystring = require("querystring");
+    'use strict';
+    var querystring = require('querystring');
     var request = require('request');
     var Q = require('q');
 
@@ -26,9 +26,9 @@
         }
 
         if(filters.order) {
-            var order = "desc";
+            var order = 'desc';
             if(filters.order === 1) {
-                order = "asc";
+                order = 'asc';
             }
             params.order = order;
         }
@@ -41,7 +41,7 @@
             params.set = filters.page;
         }
 
-        if (Settings.movies_quality !== "all") {
+        if (Settings.movies_quality !== 'all') {
             params.quality = Settings.movies_quality;
         }
 		
