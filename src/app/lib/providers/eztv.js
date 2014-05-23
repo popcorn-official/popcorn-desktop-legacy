@@ -29,7 +29,7 @@
             params.order = filters.order;
         }
 
-        if (filters.sorter && filters.sorter != 'popularity') {
+        if (filters.sorter && filters.sorter !== 'popularity') {
             params.sort = filters.sorter;
         }
         

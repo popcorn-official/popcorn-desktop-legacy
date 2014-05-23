@@ -27,11 +27,13 @@
 
         if(filters.order) {
             var order = "desc";
-            if(filters.order == 1) order = "asc";
+            if(filters.order === 1) {
+                order = "asc";
+            }
             params.order = order;
         }
 
-        if (filters.sorter && filters.sorter != 'popularity') {
+        if (filters.sorter && filters.sorter !== 'popularity') {
             params.sort = filters.sorter;
         }
 
@@ -39,7 +41,7 @@
             params.set = filters.page;
         }
 
-        if (Settings.movies_quality != "all") {
+        if (Settings.movies_quality !== "all") {
             params.quality = Settings.movies_quality;
         }
 		
@@ -66,7 +68,7 @@
         var movies = {};
         var movieList = [];
         _.each(items, function(movie) {
-            if(movie.Quality == '3D') return;
+            if(movie.Quality === '3D') { return; }
             var largeCover = movie.CoverImage.replace(/_med\./, '_large.');
             var imdb = movie.ImdbCode.replace('tt', '');
 
