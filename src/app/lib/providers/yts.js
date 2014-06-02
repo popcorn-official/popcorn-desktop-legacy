@@ -95,7 +95,6 @@
                     MovieRating: movie.MovieRating,
 
                     image:      largeCover,
-                    bigImage:   largeCover,
 
                     torrents:   torrents
                 };
