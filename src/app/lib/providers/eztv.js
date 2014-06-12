@@ -1,6 +1,6 @@
 (function(App) {
-    "use strict";
-    var querystring = require("querystring");
+    'use strict';
+    var querystring = require('querystring');
     var request = require('request');
     var Q = require('q');
 
@@ -25,7 +25,11 @@
             params.genre = filters.genre;
         }
 
-        if (filters.sorter && filters.sorter != 'popularity') {
+        if (filters.order) {
+            params.order = filters.order;
+        }
+
+        if (filters.sorter && filters.sorter !== 'popularity') {
             params.sort = filters.sorter;
         }
         
