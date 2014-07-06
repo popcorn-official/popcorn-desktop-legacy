@@ -65,9 +65,9 @@
 	};
 
 	var formatForPopcorn = function(items) {
-		var movies = {};
+		var results = {};
 		var movieFetch = {};
-		movieFetch.movies = [];
+		movieFetch.results = [];
 		movieFetch.hasMore = (items.length === 50? true : false);
 		_.each(items, function(movie) {
 			if(movie.Quality === '3D') { return; }
@@ -86,7 +86,7 @@
 				peer: peers
 			};
 
-			var ptItem = movies[imdb];
+			var ptItem = results[imdb];
 			if(!ptItem) {
 				ptItem = {
 					imdb:     imdb,
@@ -97,18 +97,18 @@
 					torrents: torrents
 				};
 
-				movieFetch.movies.push(ptItem);
+				movieFetch.results.push(ptItem);
 			} else {
 				_.extend(ptItem.torrents, torrents);
 			}
 
-			movies[imdb] = ptItem;
+			results[imdb] = ptItem;
 		});
 		return movieFetch;
 	};
 
 	Yts.prototype.extractIds = function(items) {
-		return _.pluck(items.movies, 'imdb');
+		return _.pluck(items.results, 'imdb');
 	};
 
 	Yts.prototype.fetch = function(filters) {
