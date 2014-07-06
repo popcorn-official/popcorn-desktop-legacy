@@ -44,7 +44,7 @@
                 win.error('API error:', err);
                 deferred.reject(err);
             } else {
-                deferred.resolve(data || []);
+                deferred.resolve({results: data, hasMore: true});
             }
         });
 
@@ -78,7 +78,7 @@
     };
 
     Eztv.prototype.extractIds = function(items) {
-        return _.pluck(items, 'imdb_id');
+        return _.pluck(items.results, 'imdb_id');
     };
 
     Eztv.prototype.fetch = function(filters) {
