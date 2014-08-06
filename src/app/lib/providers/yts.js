@@ -82,6 +82,7 @@
 			torrents[movie.Quality] = {
 				url: movie.TorrentUrl,
 				size: movie.SizeByte,
+                filesize: movie.Size,
 				seed: seeds,
 				peer: peers
 			};
