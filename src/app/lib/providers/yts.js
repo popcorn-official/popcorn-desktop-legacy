@@ -10,9 +10,9 @@
 	Yts.prototype.constructor = Yts;
 
 	var queryTorrents = function(filters) {
-		
+
 		var deferred = Q.defer();
-		
+
 		var params = {};
 		params.sort = 'seeds';
 		params.limit = '50';
@@ -25,9 +25,9 @@
 			params.genre = filters.genre;
 		}
 
-		if(filters.order) {
+		if (filters.order) {
 			var order = 'desc';
-			if(filters.order === 1) {
+			if (filters.order === 1) {
 				order = 'asc';
 			}
 			params.order = order;
@@ -44,16 +44,19 @@
 		if (Settings.movies_quality !== 'all') {
 			params.quality = Settings.movies_quality;
 		}
-		
-		var url = AdvSettings.get('yifyApiEndpoint') + 'list.json?' + querystring.stringify(params).replace(/%E2%80%99/g,'%27');
-		
+
+		var url = AdvSettings.get('yifyApiEndpoint') + 'list.json?' + querystring.stringify(params).replace(/%E2%80%99/g, '%27');
+
 		win.info('Request to YTS API');
 		win.debug(url);
-		request({url: url, json: true}, function(error, response, data) {
-			if(error) {
+		request({
+			url: url,
+			json: true
+		}, function(error, response, data) {
+			if (error) {
 				deferred.reject(error);
-			} else if(!data || (data.error && data.error !== 'No movies found')) {
-				var err = data? data.error: 'No data returned';
+			} else if (!data || (data.error && data.error !== 'No movies found')) {
+				var err = data ? data.error : 'No data returned';
 				win.error('YTS error:', err);
 				deferred.reject(err);
 			} else {
@@ -68,9 +71,11 @@
 		var results = {};
 		var movieFetch = {};
 		movieFetch.results = [];
-		movieFetch.hasMore = (items.length === 50? true : false);
+		movieFetch.hasMore = (items.length === 50 ? true : false);
 		_.each(items, function(movie) {
-			if(movie.Quality === '3D') { return; }
+			if (movie.Quality === '3D') {
+				return;
+			}
 			var largeCover = movie.CoverImage.replace(/_med\./, '_large.');
 			var imdb = movie.ImdbCode;
 
@@ -82,21 +87,22 @@
 			torrents[movie.Quality] = {
 				url: movie.TorrentUrl,
 				size: movie.SizeByte,
-                filesize: movie.Size,
+				filesize: movie.Size,
 				seed: seeds,
 				peer: peers
 			};
 
 			var ptItem = results[imdb];
-			if(!ptItem) {
+			if (!ptItem) {
 				ptItem = {
-					imdb:     imdb,
-					title:    movie.MovieTitleClean.replace(/\([^)]*\)|1080p|DIRECTORS CUT|EXTENDED|UNRATED|3D|[()]/g, ''),
-					year:     movie.MovieYear,
-					genre:    movie.Genre,
-					rating:   movie.MovieRating,
-					image:    largeCover,
-					torrents: torrents
+					imdb: imdb,
+					title: movie.MovieTitleClean.replace(/\([^)]*\)|1080p|DIRECTORS CUT|EXTENDED|UNRATED|3D|[()]/g, ''),
+					year: movie.MovieYear,
+					genre: movie.Genre,
+					rating: movie.MovieRating,
+					image: largeCover,
+					torrents: torrents,
+					type: 'movie'
 				};
 
 				movieFetch.results.push(ptItem);

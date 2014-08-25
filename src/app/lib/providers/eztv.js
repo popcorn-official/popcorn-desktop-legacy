@@ -10,9 +10,9 @@
     Eztv.prototype.constructor = Eztv;
 
     var queryTorrents = function(filters) {
-        
+
         var deferred = Q.defer();
-        
+
         var params = {};
         params.sort = 'seeds';
         params.limit = '50';
@@ -32,19 +32,28 @@
         if (filters.sorter && filters.sorter !== 'popularity') {
             params.sort = filters.sorter;
         }
-        
-        var url = AdvSettings.get('tvshowApiEndpoint') + 'shows/'+filters.page+'?' + querystring.stringify(params).replace(/%25%20/g,'%20');
+
+        var url = AdvSettings.get('tvshowApiEndpoint') + 'shows/' + filters.page + '?' + querystring.stringify(params).replace(/%25%20/g, '%20');
         win.info('Request to EZTV API');
         win.debug(url);
-        request({url: url, json: true}, function(error, response, data) {
-            if(error) {
+        request({
+            url: url,
+            json: true
+        }, function(error, response, data) {
+            if (error) {
                 deferred.reject(error);
-            } else if(!data || (data.error && data.error !== 'No movies found')) {
-                var err = data? data.error: 'No data returned';
+            } else if (!data || (data.error && data.error !== 'No movies found')) {
+                var err = data ? data.error : 'No data returned';
                 win.error('API error:', err);
                 deferred.reject(err);
             } else {
-                deferred.resolve({results: data, hasMore: true});
+                data.forEach(function(entry) {
+                    entry.type = 'show';
+                });
+                deferred.resolve({
+                    results: data,
+                    hasMore: true
+                });
             }
         });
 
@@ -54,20 +63,23 @@
     // Single element query
     var queryTorrent = function(torrent_id, callback) {
         var url = AdvSettings.get('tvshowApiEndpoint') + 'show/' + torrent_id;
-        
+
         win.info('Request to EZTV API');
         win.debug(url);
-        request({url: url, json: true}, function(error, response, data) {
-            if(error) {
+        request({
+            url: url,
+            json: true
+        }, function(error, response, data) {
+            if (error) {
 
                 callback(error, false);
 
-            } else if(!data || (data.error && data.error !== 'No data returned')) {
+            } else if (!data || (data.error && data.error !== 'No data returned')) {
 
-                var err = data? data.error: 'No data returned';
+                var err = data ? data.error : 'No data returned';
                 win.error('API error:', err);
                 callback(err, false);
-            
+
             } else {
 
                 // we cache our new element
