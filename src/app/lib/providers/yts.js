@@ -95,7 +95,7 @@
 			var ptItem = results[imdb];
 			if (!ptItem) {
 				ptItem = {
-					imdb: imdb,
+					imdb_id: imdb,
 					title: movie.MovieTitleClean.replace(/\([^)]*\)|1080p|DIRECTORS CUT|EXTENDED|UNRATED|3D|[()]/g, ''),
 					year: movie.MovieYear,
 					genre: movie.Genre,
@@ -116,7 +116,7 @@
 	};
 
 	Yts.prototype.extractIds = function(items) {
-		return _.pluck(items.results, 'imdb');
+		return _.pluck(items.results, 'imdb_id');
 	};
 
 	Yts.prototype.fetch = function(filters) {
