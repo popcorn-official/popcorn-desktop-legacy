@@ -115,6 +115,32 @@
 		return movieFetch;
 	};
 
+        // Single element query
+        var queryTorrent = function(torrent_id, old_data, callback) {
+                var params = {imdb_id: torrent_id};
+                var url = AdvSettings.get('yifyApiEndpoint') + 'listimdb.json?' + querystring.stringify(params).replace(/%E2%80%99/g, '%27');
+
+                win.info('Request to YTS API');
+		win.debug(url);
+		request({
+			url: url,
+			json: true
+		}, function(error, response, data) {
+			if (error) {
+                                callback(error);
+			} else if (!data || (data.error && data.error !== 'No movies found')) {
+				var err = data ? data.error : 'No data returned';
+				win.error('YTS error:', err);
+                                callback(error);
+			} else {
+                                var ptt = formatForPopcorn (data.MovieList || []);
+                                var torrents = ptt.results.pop() || {};
+                                old_data.torrents = _.extend (old_data.torrents, torrents);
+                                callback (false, old_data);
+			}
+		});
+        };
+
 	Yts.prototype.extractIds = function(items) {
 		return _.pluck(items.results, 'imdb_id');
 	};
@@ -123,6 +149,11 @@
 		return queryTorrents(filters)
 			.then(formatForPopcorn);
 	};
+
+        Yts.prototype.detail = function(torrent_id, old_data,callback) {
+                return queryTorrent(torrent_id, old_data, callback);
+        };
+
 
 	App.Providers.Yts = Yts;
 

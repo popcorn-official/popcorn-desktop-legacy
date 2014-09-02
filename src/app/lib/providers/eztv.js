@@ -61,7 +61,7 @@
     };
 
     // Single element query
-    var queryTorrent = function(torrent_id, callback) {
+    var queryTorrent = function(torrent_id, old_data, callback) {
         var url = AdvSettings.get('tvshowApiEndpoint') + 'show/' + torrent_id;
 
         win.info('Request to EZTV API');
@@ -97,8 +97,8 @@
         return queryTorrents(filters);
     };
 
-    Eztv.prototype.detail = function(torrent_id, callback) {
-        return queryTorrent(torrent_id, callback);
+    Eztv.prototype.detail = function(torrent_id, old_data,callback) {
+        return queryTorrent(torrent_id, old_data, callback);
     };
 
     App.Providers.Eztv = Eztv;
