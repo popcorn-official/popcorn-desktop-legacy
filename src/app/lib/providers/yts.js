@@ -3,11 +3,16 @@
 	var querystring = require('querystring');
 	var request = require('request');
 	var Q = require('q');
+        var inherits = require ('util').inherits;
 
 	var URL = false;
-	var Yts = function() {};
 
-	Yts.prototype.constructor = Yts;
+        inherits (Yts, App.Providers.Generic);
+
+        function Yts() {
+                Yts.super_.call(this);
+        };
+
 
 	var queryTorrents = function(filters) {
 

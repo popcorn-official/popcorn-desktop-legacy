@@ -3,11 +3,14 @@
     var querystring = require('querystring');
     var request = require('request');
     var Q = require('q');
+    var inherits = require ('util').inherits;
 
     var URL = false;
-    var Eztv = function() {};
+    var Eztv = function() {
+        Eztv.super_.call(this);
+    };
 
-    Eztv.prototype.constructor = Eztv;
+    inherits (Eztv, App.Providers.Generic);
 
     var queryTorrents = function(filters) {
 
