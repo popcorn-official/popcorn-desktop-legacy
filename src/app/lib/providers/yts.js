@@ -11,7 +11,7 @@
 
         function Yts() {
                 Yts.super_.call(this);
-        };
+        }
 
 
 	var queryTorrents = function(filters) {
