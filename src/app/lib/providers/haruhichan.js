@@ -174,10 +174,11 @@
     var formatDetailForPopcorn = function (item, prev) {
         var img = item.malimg;
         var type = prev.type;
+        var genres = item.genres.split(', ');
 
         var ret = _.extend(prev, {
             country: 'Japan',
-            genre: 'Anime',
+            genre: genres.join (' - '),
             num_seasons: 1,
             runtime: parseTime (item.duration),
             status: statusMap[item.status],
@@ -195,13 +196,11 @@
                 banner: img
             },
             year: item.aired.split(', ')[1].replace(/ to.*/, ''),
-            type: type,
-            genres: item.genres.split(', ')
+            type: type
         });
 
         if (type === 'movie') {
             ret = _.extend (ret, {
-                genre: 'Anime',
                 rating: 0,
                 subtitle: undefined,
                 torrents: movieTorrents(item.id, item.episodes),
