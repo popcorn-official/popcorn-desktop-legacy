@@ -33,8 +33,9 @@
             params.keywords = filters.keywords.replace(/\s/g, '% ');
         }
 
-        if (filters.genre) {
-            params.genre = filters.genre;
+        var genre = filters.genre;
+        if (genre && (genre != 'All')) {
+            params.genre = genre;
         }
 
         switch (filters.order) {
@@ -179,6 +180,7 @@
         var ret = _.extend(prev, {
             country: 'Japan',
             genre: genres.join (' - '),
+            genres: genres,
             num_seasons: 1,
             runtime: parseTime (item.duration),
             status: statusMap[item.status],
