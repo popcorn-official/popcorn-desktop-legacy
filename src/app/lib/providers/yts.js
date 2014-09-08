@@ -139,7 +139,7 @@
                                 callback(error);
 			} else {
                                 var ptt = formatForPopcorn (data.MovieList || []);
-                                var torrents = ptt.results.pop() || {};
+                                var torrents = ptt.results.pop().torrents || {};
                                 old_data.torrents = _.extend (old_data.torrents, torrents);
                                 callback (false, old_data);
 			}
