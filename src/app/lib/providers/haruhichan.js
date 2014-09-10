@@ -27,6 +27,7 @@
         var params = {};
         params.sort = 'popularity';
         params.limit = '50';
+        params.type = 'All';
         params.page = (filters.page?filters.page - 1:0);
 
         if (filters.keywords) {
@@ -43,7 +44,6 @@
             params.order = 'asc';
             break;
         case -1:
-            /* fall through */
         default:
             params.order = 'desc';
             break;
@@ -51,6 +51,10 @@
 
         if (filters.sorter && filters.sorter !== 'popularity') {
             params.sort = filters.sorter;
+        }
+
+        if (filters.type && filters.type !== 'All') {
+            params.type = filters.type;
         }
 
         // XXX(xaiki): haruchichan currently doesn't support filters
