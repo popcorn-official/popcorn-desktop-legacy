@@ -35,7 +35,7 @@
         }
 
         var genre = filters.genre;
-        if (genre && (genre != 'All')) {
+        if (genre && (genre !== 'All')) {
             params.genre = genre;
         }
 
@@ -44,6 +44,7 @@
             params.order = 'asc';
             break;
         case -1:
+        /* falls through */
         default:
             params.order = 'desc';
             break;
@@ -166,7 +167,9 @@
             }
             var episode = match[1];
             if (!torrents[episode])
+            {
                 torrents[episode] = {};
+            }
             torrents[episode][quality] = {seeds: 0, peers: 0, url: item.magnet, health: 'good'};
         });
         return _.map (torrents, function (torrents, s) {
