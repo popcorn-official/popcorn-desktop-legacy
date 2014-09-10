@@ -155,17 +155,22 @@
         var torrents = {};
         _.each (dl, function (item) {
             var quality = item.quality.match (/[0-9]+p/)[0];
-                var episode = item.name.match (/[\s_]([0-9]+)[\s_]/)[1];
-                if (!torrents[episode])
-                    torrents[episode] = {};
-                torrents[episode][quality] = {seeds: 0, peers: 0, url: item.magnet, health: 'good'};
+            var match = item.name.match (/[\s_]([0-9]+(-[0-9]+)?|CM|OVA)[\s_]/);
+            if (!match) {
+                console.error ('could not match', item.name);
+                return;
+            }
+            var episode = match[1];
+            if (!torrents[episode])
+                torrents[episode] = {};
+            torrents[episode][quality] = {seeds: 0, peers: 0, url: item.magnet, health: 'good'};
         });
         return _.map (torrents, function (torrents, s) {
             return {
                 title: 'Episode ' + s,
                 torrents: torrents,
                 season: 1,
-                episode: Number(s),
+                episode: Number(s.split('-')[0]),
                 overview: 'we still don\'t have single episodes overview for anime… sorry',
                 tvdb_id: id + '-1-' + s
             };
