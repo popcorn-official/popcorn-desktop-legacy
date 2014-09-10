@@ -7,12 +7,11 @@
 
 	var URL = false;
 
-        inherits (Yts, App.Providers.Generic);
-
         function Yts() {
                 Yts.super_.call(this);
         }
-
+        
+        inherits (Yts, App.Providers.Generic);
 
 	var queryTorrents = function(filters) {
 
