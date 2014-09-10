@@ -55,7 +55,7 @@
         }
 
         if (filters.type && filters.type !== 'All') {
-            params.type = filters.type;
+            params.type = filters.type.toLowerCase();
         }
 
         // XXX(xaiki): haruchichan currently doesn't support filters
