@@ -55,7 +55,11 @@
         }
 
         if (filters.type && filters.type !== 'All') {
+            if (filters.type === 'Movies'){
+                params.type = 'movie';
+            }else{
             params.type = filters.type.toLowerCase();
+            }
         }
 
         // XXX(xaiki): haruchichan currently doesn't support filters
