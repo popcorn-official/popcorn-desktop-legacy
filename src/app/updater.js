@@ -17,16 +17,24 @@
         FILENAME = 'package.nw.new',
         VERIFY_PUBKEY =
             '-----BEGIN PUBLIC KEY-----\n' +
-            'MIIBtjCCASsGByqGSM44BAEwggEeAoGBAPNM5SX+yR8MJNrX9uCQIiy0t3IsyNHs\n' +
-            'HWA180wDDd3S+DzQgIzDXBqlYVmcovclX+1wafshVDw3xFTJGuKuva7JS3yKnjds\n' +
-            'NXbvM9CrJ2Jngfd0yQPmSh41qmJXHHSwZfPZBxQnspKjbcC5qypM5DqX9oDSJm2l\n' +
-            'fM/weiUGnIf7AhUAgokTdF7G0USfpkUUOaBOmzx2RRkCgYAyy5WJDESLoU8vHbQc\n' +
-            'rAMnPZrImUwjFD6Pa3CxhkZrulsAOUb/gmc7B0K9I6p+UlJoAvVPXOBMVG/MYeBJ\n' +
-            '19/BH5UNeI1sGT5/Kg2k2rHVpuqzcvlS/qctIENgCNMo49l3LrkHbJPXKJ6bf+T2\n' +
-            '8lFWRP2kVlrx/cHdqSi6aHoGTAOBhAACgYBTNeXBHbWDOxzSJcD6q4UDGTnHaHHP\n' +
-            'JgeCrPkH6GBa9azUsZ+3MA98b46yhWO2QuRwmFQwPiME+Brim3tHlSuXbL1e5qKf\n' +
-            'GOm3OxA3zKXG4cjy6TyEKajYlT45Q+tgt1L1HuGAJjWFRSA0PP9ctC6nH+2N3HmW\n' +
-            'RTcms0CPio56gg==\n' +
+            'MIIDOzCCAi4GByqGSM44BAEwggIhAoIBAQDXQDTqHZZLSJlfCNeREvkl9jzHW1mY\n' +
+            'WCyj+xNG63CWEL2uFgpO43IPfC4rAkIIpjB+SdOBQ0b3jPyjYC4yNzTzPQrO2XuY\n' +
+            'faxoi0ea+tzxHMzRQyPPrruOhhX7iJ48Q8VH34R0j3QhafZOkcMlI9Q5uM3GwG5d\n' +
+            'odEa3vhnFrTFQrC0TC4wzpfoAVsx6YCyhGFKzIwhfF21qmyVOMdZEFC0RNh6bXs0\n' +
+            'WM0pb80u/F+fQKMyRIF7Ktce/PMHGhWw7qTI83YlBMQSycSFQ6HkijlBRFvKX+et\n' +
+            'nn3olLJ/fUtGMoSbfkqQrZYTYVHTp0sHxHQcmSWCDRnsoOx9nvxDJ4ZrAhUAijM0\n' +
+            'aEyrdZsTrHLa8spaTmLozyUCggEBAMbW1gA+/s7Ro01XLA40xmpvNBDRVacOlSYL\n' +
+            'ReoQraBvKJCQadvVFWpio8fZ394RwxsPZv32dclu/v/7pbjelWb1pDzVNoKYJ3Gy\n' +
+            '2dLAXlf/yc0DKy3r98d+6h8+sKVeCW+i3prwQFDoDaddHqMZ1ZAdXycLYsBbI9U1\n' +
+            '2hATNBgSVB2sHUtWhoKS0WiNwjU/iWuJEaJvyfZshhplC293fxjPaPO23u3M93Yf\n' +
+            'kSRokLzWiGQ+V/5pPLjUu4CN2hNgYzpLmY7bqRiYxPdb+ZCpWwLjfYW80mykcs1B\n' +
+            '99tRz8I+C6aUVcwDaPE5ONkvYfoxT5myzcvAsDELjIpw6kw7Mw8DggEFAAKCAQAI\n' +
+            'jI4vIep0CxPVN0ojT6OfBLcmoCDKpHyODMJx/jMlM0XIO6EDy85rLGd0VY2U0GTm\n' +
+            '33Ni2bP5pMVSO6IvJm0bfcIn/M3rjcFOY9fU5nwFjRyTpGmx0fn5Bt6Ah4A69mmf\n' +
+            'jmWWmmHODquWhvaS4BIRyXSSDSmiEc55uvholol9/PD4ZvBbk/th0XP+anPRu7u1\n' +
+            'jm9mW0+sj0n0ntGJl7uzmcTDETfvPpKUjz61T530w4S5UJLup+qhCTzTUWPWrST8\n' +
+            'jnlH0o0qwvNa0+dUN+dTIyt96FW3a5KHpkQHSBkbVRLBY7Hd0SgX2Wo/nOMqsqsk\n' +
+            'eWs0crkihZMv0OADSqEY\n' +
             '-----END PUBLIC KEY-----\n';
 
     function forcedBind(func, thisVar) {

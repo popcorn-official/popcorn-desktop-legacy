@@ -1,14 +1,14 @@
 {
   "name": "Popcorn-Time",
-  "homepage": "http://popcorntime.io",
+  "homepage": "https://popcorntime.io",
   "bugs": "https://github.com/popcorn-official/popcorn-app/issues",
   "repository": {
     "type": "git",
-    "url": "https://github.com/popcorn-official/popcorn-app.git"
+    "url": "https://git.popcorntime.io/stash/scm/pt/popcorn-app.git"
   },
   "license": "GPL-3.0",
   "main": "app://host/src/app/index.html",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "scripts": {
     "postinstall": "node_modules/.bin/bower install",
     "postupdate": "node_modules/.bin/bower update",
