@@ -1,10 +1,10 @@
 {
   "name": "Popcorn-Time",
   "homepage": "https://popcorntime.io",
-  "bugs": "https://github.com/popcorn-official/popcorn-app/issues",
+  "bugs": "https://git.popcorntime.io/jira/",
   "repository": {
     "type": "git",
-    "url": "https://git.popcorntime.io/stash/scm/pt/popcorn-app.git"
+    "url": "https://git.popcorntime.io/stash/projects/PT/repos/popcorn-app/browse"
   },
   "license": "GPL-3.0",
   "main": "app://host/src/app/index.html",
