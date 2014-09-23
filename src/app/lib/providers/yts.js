@@ -1,19 +1,19 @@
-(function(App) {
+(function (App) {
 	'use strict';
 	var querystring = require('querystring');
 	var request = require('request');
 	var Q = require('q');
-        var inherits = require ('util').inherits;
+	var inherits = require('util').inherits;
 
 	var URL = false;
 
-        function Yts() {
-                Yts.super_.call(this);
-        }
-        
-        inherits (Yts, App.Providers.Generic);
+	function Yts() {
+		Yts.super_.call(this);
+	}
 
-	var queryTorrents = function(filters) {
+	inherits(Yts, App.Providers.Generic);
+
+	var queryTorrents = function (filters) {
 
 		var deferred = Q.defer();
 
@@ -56,7 +56,7 @@
 		request({
 			url: url,
 			json: true
-		}, function(error, response, data) {
+		}, function (error, response, data) {
 			if (error) {
 				deferred.reject(error);
 			} else if (!data || (data.error && data.error !== 'No movies found')) {
@@ -71,12 +71,12 @@
 		return deferred.promise;
 	};
 
-	var formatForPopcorn = function(items) {
+	var formatForPopcorn = function (items) {
 		var results = {};
 		var movieFetch = {};
 		movieFetch.results = [];
 		movieFetch.hasMore = (items.length === 50 ? true : false);
-		_.each(items, function(movie) {
+		_.each(items, function (movie) {
 			if (movie.Quality === '3D') {
 				return;
 			}
@@ -119,44 +119,46 @@
 		return movieFetch;
 	};
 
-        // Single element query
-        var queryTorrent = function(torrent_id, old_data, callback) {
-                var params = {imdb_id: torrent_id};
-                var url = AdvSettings.get('yifyApiEndpoint') + 'listimdb.json?' + querystring.stringify(params).replace(/%E2%80%99/g, '%27');
+	// Single element query
+	var queryTorrent = function (torrent_id, old_data, callback) {
+		var params = {
+			imdb_id: torrent_id
+		};
+		var url = AdvSettings.get('yifyApiEndpoint') + 'listimdb.json?' + querystring.stringify(params).replace(/%E2%80%99/g, '%27');
 
-                win.info('Request to YTS API');
+		win.info('Request to YTS API');
 		win.debug(url);
 		request({
 			url: url,
 			json: true
-		}, function(error, response, data) {
+		}, function (error, response, data) {
 			if (error) {
-                                callback(error);
+				callback(error);
 			} else if (!data || (data.error && data.error !== 'No movies found')) {
 				var err = data ? data.error : 'No data returned';
 				win.error('YTS error:', err);
-                                callback(error);
+				callback(error);
 			} else {
-                                var ptt = formatForPopcorn (data.MovieList || []);
-                                var torrents = ptt.results.pop().torrents || {};
-                                old_data.torrents = _.extend (old_data.torrents, torrents);
-                                callback (false, old_data);
+				var ptt = formatForPopcorn(data.MovieList || []);
+				var torrents = ptt.results.pop().torrents || {};
+				old_data.torrents = _.extend(old_data.torrents, torrents);
+				callback(false, old_data);
 			}
 		});
-        };
+	};
 
-	Yts.prototype.extractIds = function(items) {
+	Yts.prototype.extractIds = function (items) {
 		return _.pluck(items.results, 'imdb_id');
 	};
 
-	Yts.prototype.fetch = function(filters) {
+	Yts.prototype.fetch = function (filters) {
 		return queryTorrents(filters)
 			.then(formatForPopcorn);
 	};
 
-        Yts.prototype.detail = function(torrent_id, old_data,callback) {
-                return queryTorrent(torrent_id, old_data, callback);
-        };
+	Yts.prototype.detail = function (torrent_id, old_data, callback) {
+		return queryTorrent(torrent_id, old_data, callback);
+	};
 
 
 	App.Providers.Yts = Yts;
