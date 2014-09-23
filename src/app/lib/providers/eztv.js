@@ -1,109 +1,109 @@
-(function(App) {
-    'use strict';
-    var querystring = require('querystring');
-    var request = require('request');
-    var Q = require('q');
-    var inherits = require ('util').inherits;
+(function (App) {
+	'use strict';
+	var querystring = require('querystring');
+	var request = require('request');
+	var Q = require('q');
+	var inherits = require('util').inherits;
 
-    var URL = false;
-    var Eztv = function() {
-        Eztv.super_.call(this);
-    };
+	var URL = false;
+	var Eztv = function () {
+		Eztv.super_.call(this);
+	};
 
-    inherits (Eztv, App.Providers.Generic);
+	inherits(Eztv, App.Providers.Generic);
 
-    var queryTorrents = function(filters) {
+	var queryTorrents = function (filters) {
 
-        var deferred = Q.defer();
+		var deferred = Q.defer();
 
-        var params = {};
-        params.sort = 'seeds';
-        params.limit = '50';
+		var params = {};
+		params.sort = 'seeds';
+		params.limit = '50';
 
-        if (filters.keywords) {
-            params.keywords = filters.keywords.replace(/\s/g, '% ');
-        }
+		if (filters.keywords) {
+			params.keywords = filters.keywords.replace(/\s/g, '% ');
+		}
 
-        if (filters.genre) {
-            params.genre = filters.genre;
-        }
+		if (filters.genre) {
+			params.genre = filters.genre;
+		}
 
-        if (filters.order) {
-            params.order = filters.order;
-        }
+		if (filters.order) {
+			params.order = filters.order;
+		}
 
-        if (filters.sorter && filters.sorter !== 'popularity') {
-            params.sort = filters.sorter;
-        }
+		if (filters.sorter && filters.sorter !== 'popularity') {
+			params.sort = filters.sorter;
+		}
 
-        var url = AdvSettings.get('tvshowApiEndpoint') + 'shows/' + filters.page + '?' + querystring.stringify(params).replace(/%25%20/g, '%20');
-        win.info('Request to EZTV API');
-        win.debug(url);
-        request({
-            url: url,
-            json: true
-        }, function(error, response, data) {
-            if (error) {
-                deferred.reject(error);
-            } else if (!data || (data.error && data.error !== 'No movies found')) {
-                var err = data ? data.error : 'No data returned';
-                win.error('API error:', err);
-                deferred.reject(err);
-            } else {
-                data.forEach(function(entry) {
-                    entry.type = 'show';
-                });
-                deferred.resolve({
-                    results: data,
-                    hasMore: true
-                });
-            }
-        });
+		var url = AdvSettings.get('tvshowApiEndpoint') + 'shows/' + filters.page + '?' + querystring.stringify(params).replace(/%25%20/g, '%20');
+		win.info('Request to EZTV API');
+		win.debug(url);
+		request({
+			url: url,
+			json: true
+		}, function (error, response, data) {
+			if (error) {
+				deferred.reject(error);
+			} else if (!data || (data.error && data.error !== 'No movies found')) {
+				var err = data ? data.error : 'No data returned';
+				win.error('API error:', err);
+				deferred.reject(err);
+			} else {
+				data.forEach(function (entry) {
+					entry.type = 'show';
+				});
+				deferred.resolve({
+					results: data,
+					hasMore: true
+				});
+			}
+		});
 
-        return deferred.promise;
-    };
+		return deferred.promise;
+	};
 
-    // Single element query
-    var queryTorrent = function(torrent_id, old_data, callback) {
-        var url = AdvSettings.get('tvshowApiEndpoint') + 'show/' + torrent_id;
+	// Single element query
+	var queryTorrent = function (torrent_id, old_data, callback) {
+		var url = AdvSettings.get('tvshowApiEndpoint') + 'show/' + torrent_id;
 
-        win.info('Request to EZTV API');
-        win.debug(url);
-        request({
-            url: url,
-            json: true
-        }, function(error, response, data) {
-            if (error) {
+		win.info('Request to EZTV API');
+		win.debug(url);
+		request({
+			url: url,
+			json: true
+		}, function (error, response, data) {
+			if (error) {
 
-                callback(error, false);
+				callback(error, false);
 
-            } else if (!data || (data.error && data.error !== 'No data returned')) {
+			} else if (!data || (data.error && data.error !== 'No data returned')) {
 
-                var err = data ? data.error : 'No data returned';
-                win.error('API error:', err);
-                callback(err, false);
+				var err = data ? data.error : 'No data returned';
+				win.error('API error:', err);
+				callback(err, false);
 
-            } else {
+			} else {
 
-                // we cache our new element
-                callback(false, data);
+				// we cache our new element
+				callback(false, data);
 
-            }
-        });
-    };
+			}
+		});
+	};
 
-    Eztv.prototype.extractIds = function(items) {
-        return _.pluck(items.results, 'imdb_id');
-    };
+	Eztv.prototype.extractIds = function (items) {
+		return _.pluck(items.results, 'imdb_id');
+	};
 
-    Eztv.prototype.fetch = function(filters) {
-        return queryTorrents(filters);
-    };
+	Eztv.prototype.fetch = function (filters) {
+		return queryTorrents(filters);
+	};
 
-    Eztv.prototype.detail = function(torrent_id, old_data,callback) {
-        return queryTorrent(torrent_id, old_data, callback);
-    };
+	Eztv.prototype.detail = function (torrent_id, old_data, callback) {
+		return queryTorrent(torrent_id, old_data, callback);
+	};
 
-    App.Providers.Eztv = Eztv;
+	App.Providers.Eztv = Eztv;
 
 })(window.App);
