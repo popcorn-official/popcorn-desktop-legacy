@@ -124,32 +124,31 @@
 	};
 
 	// Single element query
-	var queryTorrent = function (torrent_id, prev_data, callback) {
-		var id = torrent_id.split('-')[1];
-		var url = URL + 'anime.php?id=' + id;
+	var queryTorrent = function (torrent_id, prev_data) {
+		return new Promise(function(resolve, reject) {
+			var id = torrent_id.split('-')[1];
+			var url = URL + 'anime.php?id=' + id;
 
-		win.info('Request to HARUHICHAN API');
-		win.debug(url);
-		request({
-			url: url,
-			json: true
-		}, function (error, response, data) {
-			if (error) {
+			win.info('Request to HARUHICHAN API');
+			win.debug(url);
+			request({
+				url: url,
+				json: true
+			}, function (error, response, data) {
+				if (error) {
+					reject(error);
+				} else if (!data || (data.error && data.error !== 'No data returned')) {
 
-				callback(error, false);
+					var err = data ? data.error : 'No data returned';
+					win.error('API error:', err);
+					reject(err);
 
-			} else if (!data || (data.error && data.error !== 'No data returned')) {
+				} else {
 
-				var err = data ? data.error : 'No data returned';
-				win.error('API error:', err);
-				callback(err, false);
-
-			} else {
-
-				// we cache our new element
-				callback(false, formatDetailForPopcorn(data, prev_data));
-
-			}
+					// we cache our new element
+					resolve(formatDetailForPopcorn(data, prev_data));
+				}
+			});
 		});
 	};
 
@@ -254,8 +253,8 @@
 			.then(formatForPopcorn);
 	};
 
-	Haruhichan.prototype.detail = function (torrent_id, prev_data, callback) {
-		return queryTorrent(torrent_id, prev_data, callback);
+	Haruhichan.prototype.detail = function (torrent_id, prev_data) {
+		return queryTorrent(torrent_id, prev_data);
 	};
 
 	App.Providers.Haruhichan = Haruhichan;
