@@ -121,7 +121,7 @@
 
 	// Single element query
 	var queryTorrent = function (torrent_id, old_data) {
-		return new Promise(function (resolve, reject) {
+		return Q.Promise(function (resolve, reject) {
 			var params = {
 				imdb_id: torrent_id
 			};

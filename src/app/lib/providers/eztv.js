@@ -65,7 +65,7 @@
 
 	// Single element query
 	var queryTorrent = function (torrent_id, old_data) {
-		return new Promise(function (resolve, reject) {
+		return Q.Promise(function (resolve, reject) {
 			var url = AdvSettings.get('tvshowApiEndpoint') + 'show/' + torrent_id;
 
 			win.info('Request to EZTV API');

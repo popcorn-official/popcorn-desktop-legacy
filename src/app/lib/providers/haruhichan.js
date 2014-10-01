@@ -125,7 +125,7 @@
 
 	// Single element query
 	var queryTorrent = function (torrent_id, prev_data) {
-		return new Promise(function(resolve, reject) {
+		return Q.Promise(function (resolve, reject) {
 			var id = torrent_id.split('-')[1];
 			var url = URL + 'anime.php?id=' + id;
 
