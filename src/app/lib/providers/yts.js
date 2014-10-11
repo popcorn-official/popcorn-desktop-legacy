@@ -75,7 +75,7 @@
 		var results = {};
 		var movieFetch = {};
 		movieFetch.results = [];
-		movieFetch.hasMore = (items.length === 50 ? true : false);
+		movieFetch.hasMore = (Number(items.length) > 1 ? true : false);
 		_.each(items, function (movie) {
 			if (movie.Quality === '3D') {
 				return;
