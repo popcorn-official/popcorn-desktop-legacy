@@ -120,30 +120,32 @@
 	};
 
 	// Single element query
-	var queryTorrent = function (torrent_id, old_data, callback) {
-		var params = {
-			imdb_id: torrent_id
-		};
-		var url = AdvSettings.get('yifyApiEndpoint') + 'listimdb.json?' + querystring.stringify(params).replace(/%E2%80%99/g, '%27');
+	var queryTorrent = function (torrent_id, old_data) {
+		return Q.Promise(function (resolve, reject) {
+			var params = {
+				imdb_id: torrent_id
+			};
+			var url = AdvSettings.get('yifyApiEndpoint') + 'listimdb.json?' + querystring.stringify(params).replace(/%E2%80%99/g, '%27');
 
-		win.info('Request to YTS API');
-		win.debug(url);
-		request({
-			url: url,
-			json: true
-		}, function (error, response, data) {
-			if (error) {
-				callback(error);
-			} else if (!data || (data.error && data.error !== 'No movies found')) {
-				var err = data ? data.error : 'No data returned';
-				win.error('YTS error:', err);
-				callback(error);
-			} else {
-				var ptt = formatForPopcorn(data.MovieList || []);
-				var torrents = ptt.results.pop().torrents || {};
-				old_data.torrents = _.extend(old_data.torrents, torrents);
-				callback(false, old_data);
-			}
+			win.info('Request to YTS API');
+			win.debug(url);
+			request({
+				url: url,
+				json: true
+			}, function (error, response, data) {
+				if (error) {
+					reject(error);
+				} else if (!data || (data.error && data.error !== 'No movies found')) {
+					var err = data ? data.error : 'No data returned';
+					win.error('YTS error:', err);
+					reject(err);
+				} else {
+					var ptt = formatForPopcorn(data.MovieList || []);
+					var torrents = ptt.results.pop().torrents || {};
+					old_data.torrents = _.extend(old_data.torrents, torrents);
+					resolve(old_data);
+				}
+			});
 		});
 	};
 
@@ -156,8 +158,8 @@
 			.then(formatForPopcorn);
 	};
 
-	Yts.prototype.detail = function (torrent_id, old_data, callback) {
-		return queryTorrent(torrent_id, old_data, callback);
+	Yts.prototype.detail = function (torrent_id, old_data) {
+		return queryTorrent(torrent_id, old_data);
 	};
 
 
