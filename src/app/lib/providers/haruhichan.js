@@ -31,7 +31,7 @@
 		params.page = (filters.page ? filters.page - 1 : 0);
 
 		if (filters.keywords) {
-			params.keywords = filters.keywords.replace(/\s/g, '% ');
+			params.search = filters.keywords.replace(/\s/g, '% ');
 		}
 
 		var genre = filters.genre;
