@@ -70,7 +70,7 @@
 			url: url,
 			json: true
 		}, function (error, response, data) {
-			if (error) {
+			if (error || response.statusCode >= 400) {
 				deferred.reject(error);
 			} else if (!data || (data.error && data.error !== 'No movies found')) {
 				var err = data ? data.error : 'No data returned';
@@ -135,7 +135,7 @@
 				url: url,
 				json: true
 			}, function (error, response, data) {
-				if (error) {
+				if (error || response.statusCode >= 400) {
 					reject(error);
 				} else if (!data || (data.error && data.error !== 'No data returned')) {
 
