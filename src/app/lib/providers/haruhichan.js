@@ -34,19 +34,19 @@
 			params.search = filters.keywords.replace(/\s/g, '% ');
 		}
 
-		var genre = filters.genre;
-		if (genre && (genre !== 'All')) {
-			params.genre = genre;
+		var genres = filters.genre;
+		if (genres && (genres !== 'All')) {
+			params.genres = genres;
 		}
 
 		switch (filters.order) {
 		case 1:
-			params.order = 'asc';
+			params.order = 'desc';
 			break;
 		case -1:
 			/* falls through */
 		default:
-			params.order = 'desc';
+			params.order = 'asc';
 			break;
 		}
 
@@ -217,7 +217,7 @@
 				hated: 0,
 				loved: 0,
 				votes: 0,
-				percentage: item.score
+				percentage: Math.round(item.score) * 10
 			},
 			images: {
 				poster: img,
@@ -230,7 +230,7 @@
 
 		if (type === 'movie') {
 			ret = _.extend(ret, {
-				rating: 0,
+				rating: item.score,
 				subtitle: undefined,
 				torrents: movieTorrents(item.id, item.episodes),
 			});
