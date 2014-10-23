@@ -34,9 +34,9 @@
 			params.search = filters.keywords.replace(/\s/g, '% ');
 		}
 
-		var genre = filters.genre;
-		if (genre && (genre !== 'All')) {
-			params.genre = genre;
+		var genres = filters.genre;
+		if (genres && (genres !== 'All')) {
+			params.genres = genres;
 		}
 
 		switch (filters.order) {
