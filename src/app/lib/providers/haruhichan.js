@@ -217,7 +217,7 @@
 				hated: 0,
 				loved: 0,
 				votes: 0,
-				percentage: item.score
+				percentage: Math.round(item.score) * 10
 			},
 			images: {
 				poster: img,
@@ -230,7 +230,7 @@
 
 		if (type === 'movie') {
 			ret = _.extend(ret, {
-				rating: 0,
+				rating: item.score,
 				subtitle: undefined,
 				torrents: movieTorrents(item.id, item.episodes),
 			});
