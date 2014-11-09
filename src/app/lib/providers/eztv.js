@@ -36,7 +36,7 @@
 			params.sort = filters.sorter;
 		}
 
-		var url = AdvSettings.get('tvshowApiEndpoint') + 'shows/' + filters.page + '?' + querystring.stringify(params).replace(/%25%20/g, '%20');
+		var url = AdvSettings.get('tvshowAPI').url + 'shows/' + filters.page + '?' + querystring.stringify(params).replace(/%25%20/g, '%20');
 		win.info('Request to EZTV API');
 		win.debug(url);
 		request({
@@ -66,7 +66,7 @@
 	// Single element query
 	var queryTorrent = function (torrent_id, old_data) {
 		return Q.Promise(function (resolve, reject) {
-			var url = AdvSettings.get('tvshowApiEndpoint') + 'show/' + torrent_id;
+			var url = AdvSettings.get('tvshowAPI').url + 'show/' + torrent_id;
 
 			win.info('Request to EZTV API');
 			win.debug(url);
