@@ -49,7 +49,7 @@
 			params.quality = Settings.movies_quality;
 		}
 
-		var url = AdvSettings.get('yifyApiEndpoint') + 'list.json?' + querystring.stringify(params).replace(/%E2%80%99/g, '%27');
+		var url = AdvSettings.get('ytsAPI').url + 'list.json?' + querystring.stringify(params).replace(/%E2%80%99/g, '%27');
 
 		win.info('Request to YTS API');
 		win.debug(url);
@@ -125,7 +125,7 @@
 			var params = {
 				imdb_id: torrent_id
 			};
-			var url = AdvSettings.get('yifyApiEndpoint') + 'listimdb.json?' + querystring.stringify(params).replace(/%E2%80%99/g, '%27');
+			var url = AdvSettings.get('ytsAPI').url + 'listimdb.json?' + querystring.stringify(params).replace(/%E2%80%99/g, '%27');
 
 			win.info('Request to YTS API');
 			win.debug(url);
