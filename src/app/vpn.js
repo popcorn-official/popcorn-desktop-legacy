@@ -54,6 +54,7 @@
 					});
 
 			} else if (process.platform === 'win32') {
+
 				return this.installRunAs()
 					.then(self.installWin)
 					.then(function() {
@@ -115,6 +116,9 @@
 		console.log(installFile);
 		return downloadFileToLocation(installFile)
 			.then(function(temp) {
+
+				console.log(temp);
+
 				// we launch the setup with admin privilege silently
 				// and we install openvpn in openvpn/
 				try {
