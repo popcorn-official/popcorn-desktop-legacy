@@ -237,7 +237,7 @@
 		var tempPath = temp.mkdirSync('popcorntime-openvpn-');
 		tempPath = path.join(tempPath, 'setup.exe');
 		var stream = fs.createWriteStream(tempPath);
-		stream.on('end', function() {
+		stream.on('finish', function() {
 			defer.resolve(tempPath);
 		});
 		stream.on('error', function() {
