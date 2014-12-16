@@ -236,16 +236,14 @@
 		var defer = Q.defer();
 		var tempPath = temp.mkdirSync('popcorntime-openvpn-');
 		tempPath = path.join(tempPath, 'setup.exe');
-		console.log(tempPath);
 		var stream = fs.createWriteStream(tempPath);
 		stream.on('finish', function() {
-			console.log('finish');
 			defer.resolve(tempPath);
 		});
 		stream.on('error', function() {
 			defer.resolve(false);
 		});
-		request.createReadStream({
+		createReadStream({
 			url: url
 		}, function(requestStream) {
 			requestStream.pipe(stream);
