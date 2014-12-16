@@ -185,7 +185,7 @@
 									console.log(err);
 								}
 
-								fs.appendFile(newConfig, '\nuser-pass-auth ' + tempPath, function (err) {
+								fs.appendFile(newConfig, '\r\nuser-pass-auth ' + tempPath, function (err) {
 									openvpn = path.resolve(process.cwd(), 'openvpn', 'bin', 'openvpnserv.exe');
 									args = ['-start'];
 
