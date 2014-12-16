@@ -174,27 +174,68 @@
 						var args = ['--daemon', '--config', vpnConfig, '--auth-user-pass', tempPath];
 						// execption for windows openvpn path
 						if (process.platform === 'win32') {
-							openvpn = path.resolve(process.cwd(), 'openvpn', 'bin', 'openvpn.exe');
-							args = ['--config', vpnConfig, '--auth-user-pass', tempPath];
-						}
 
-						if (fs.existsSync(openvpn)) {
-							// if all works we'll launch our openvpn as admin
-							if (runas(openvpn, args, {
-									admin: true
-								}) != 0) {
-								console.log('something wrong');
-								defer.reject('unable_to_launch');
-							} else {
+							var programFiles = process.env["ProgramFiles(x86)"] ? process.env["ProgramFiles(x86)"] : process.env["ProgramFiles"];
 
-								// ok openvpn is launched...
-								console.log('openvpn launched');
-								defer.resolve();
+							// we copy our openvpn.conf for the windows service
+							fs.mkdirSync(path.resolve(programFiles, 'OpenVPN'));
+							fs.mkdirSync(path.resolve(programFiles, 'OpenVPN', 'config'));
+							var newConfig = path.resolve(programFiles, 'OpenVPN', 'config', 'openvpn.conf');
 
-							}
+							console.log(newConfig);
+
+							mv(vpnConfig, newConfig, function(err) {
+
+								if (err) {
+									console.log(err);
+								}
+
+								fs.appendFile(newConfig, 'user-pass-auth ' + tempPath, function (err) {
+									openvpn = path.resolve(process.cwd(), 'openvpn', 'bin', 'openvpnserv.exe');
+									args = ['-start'];
+
+									if (fs.existsSync(openvpn)) {
+										// if all works we'll launch our openvpn as admin
+										if (runas(openvpn, args, {
+												admin: true
+											}) != 0) {
+											console.log('something wrong');
+											defer.reject('unable_to_launch');
+										} else {
+
+											// ok openvpn is launched...
+											console.log('openvpn launched');
+											defer.resolve();
+
+										}
+									} else {
+										defer.reject('openvpn_command_not_found');
+									}
+								});
+
+							});
+
 						} else {
-							defer.reject('openvpn_command_not_found');
+							if (fs.existsSync(openvpn)) {
+								// if all works we'll launch our openvpn as admin
+								if (runas(openvpn, args, {
+										admin: true
+									}) != 0) {
+									console.log('something wrong');
+									defer.reject('unable_to_launch');
+								} else {
+
+									// ok openvpn is launched...
+									console.log('openvpn launched');
+									defer.resolve();
+
+								}
+							} else {
+								defer.reject('openvpn_command_not_found');
+							}
 						}
+
+
 
 					} catch (e) {
 						defer.reject('error_runas');
