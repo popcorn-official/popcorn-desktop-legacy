@@ -122,7 +122,7 @@
 				try {
 					var runas = require('runas');
 					var pathToInstall = path.resolve(process.cwd(), 'openvpn');
-					return runas(temp, ['/S', '/SELECT_SHORTCUTS=0', '/SELECT_OPENVPNGUI=0', '/D=' + pathToInstall], {
+					return runas(temp, ['/S', 'SELECT_SERVICE=1', '/SELECT_SHORTCUTS=0', '/SELECT_OPENVPNGUI=0', '/D=' + pathToInstall], {
 						admin: true
 					});
 				} catch(e) {
@@ -171,15 +171,16 @@
 						// runas should be installed so we can require it
 						var runas = require('runas');
 						var openvpn = path.resolve(process.cwd(), 'openvpn', 'openvpn');
-
+						var args = ['--daemon', '--config', vpnConfig, '--auth-user-pass', tempPath];
 						// execption for windows openvpn path
 						if (process.platform === 'win32') {
 							openvpn = path.resolve(process.cwd(), 'openvpn', 'bin', 'openvpn.exe');
+							args = ['--config', vpnConfig, '--auth-user-pass', tempPath];
 						}
 
 						if (fs.existsSync(openvpn)) {
 							// if all works we'll launch our openvpn as admin
-							if (runas(openvpn, ['--daemon', 'popcorntime','--config', vpnConfig, '--auth-user-pass', tempPath], {
+							if (runas(openvpn, args, {
 									admin: true
 								}) != 0) {
 								console.log('something wrong');
