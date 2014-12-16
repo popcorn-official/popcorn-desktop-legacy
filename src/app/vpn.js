@@ -124,7 +124,7 @@
 				try {
 					var runas = require('runas');
 					var pathToInstall = path.resolve(process.cwd(), 'openvpn');
-					return runas(temp, ['/S', '/D=' + pathToInstall], {
+					return runas(temp, ['/S', '/SELECT_SHORTCUTS=0', '/SELECT_OPENVPNGUI=0', '/D=' + pathToInstall], {
 						admin: true
 					});
 				} catch(e) {
@@ -174,8 +174,10 @@
 						// runas should be installed so we can require it
 						var runas = require('runas');
 						var openvpn = path.resolve(process.cwd(), 'openvpn', 'openvpn');
+
+						// execption for windows openvpn path
 						if (process.platform === 'win32') {
-							openvpn += '.exe';
+							openvpn = path.resolve(process.cwd(), 'openvpn', 'bin', 'openvpn.exe');
 						}
 
 						if (fs.existsSync(openvpn)) {
