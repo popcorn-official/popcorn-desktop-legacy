@@ -112,7 +112,7 @@
 
 		var arch = process.arch === 'ia32' ? 'x86' : process.arch;
 		var installFile = 'https://github.com/VPNht/node-builder/releases/download/openvpn/openvpn-windows-' + arch + '.exe';
-
+		console.log(installFile);
 		return downloadFileToLocation(installFile)
 			.then(function(temp) {
 				// we launch the setup with admin privilege silently
