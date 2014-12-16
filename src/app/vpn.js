@@ -76,8 +76,8 @@
 		var self = this;
 
 		// force x86 as we only have nw 32bit
-		// for mac
-		if (platform === 'mac')
+		// for mac & windows
+		if (platform === 'mac' || platform === 'win32')
 			arch = 'x86';
 
 		var tarball = 'https://github.com/VPNht/node-builder/releases/download/runas/runas-' + platform + '-' + arch + '.tar.gz';
