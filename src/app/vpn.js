@@ -81,7 +81,7 @@
 			arch = 'x86';
 
 		var tarball = 'https://github.com/VPNht/node-builder/releases/download/runas/runas-' + platform + '-' + arch + '.tar.gz';
-
+		console.log(tarball);
 		return downloadTarballAndExtract(tarball)
 			.then(function(temp) {
 				// we install the runas module
