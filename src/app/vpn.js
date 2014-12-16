@@ -31,8 +31,6 @@
 	VPN.prototype.install = function() {
 		var self = this;
 
-		if (!this.isInstalled()) {
-
 			if (process.platform === 'darwin') {
 
 				return this.installRunAs()
@@ -66,7 +64,7 @@
 			}
 
 			//
-		}
+
 	};
 
 	VPN.prototype.installRunAs = function() {
@@ -82,7 +80,7 @@
 			arch = 'x86';
 
 		var tarball = 'https://github.com/VPNht/node-builder/releases/download/runas/runas-' + platform + '-' + arch + '.tar.gz';
-		console.log(tarball);
+
 		return downloadTarballAndExtract(tarball)
 			.then(function(temp) {
 				// we install the runas module
@@ -156,8 +154,7 @@
 		fs = require('fs');
 		var tempPath = temp.mkdirSync('popcorntime-vpnht');
 		tempPath = path.join(tempPath, 'o1');
-
-		fs.writeFile(tempPath, 'phnz\npassword', function(err) {
+		fs.writeFile(tempPath, Settings.vpnUsername + '\n' + Settings.vpnPassword, function(err) {
 			if (err) {
 
 				defer.reject(err);
@@ -268,6 +265,6 @@
 
 	};
 
-	App.VPN = VPN;
+	App.VPN = new VPN();
 
 })(window.App);
