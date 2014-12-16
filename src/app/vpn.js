@@ -175,13 +175,8 @@
 						// execption for windows openvpn path
 						if (process.platform === 'win32') {
 
-							var programFiles = process.env["ProgramFiles(x86)"] ? process.env["ProgramFiles(x86)"] : process.env["ProgramFiles"];
-
 							// we copy our openvpn.conf for the windows service
-							fs.mkdirSync(path.resolve(programFiles, 'OpenVPN'));
-							fs.mkdirSync(path.resolve(programFiles, 'OpenVPN', 'config'));
-							var newConfig = path.resolve(programFiles, 'OpenVPN', 'config', 'openvpn.conf');
-
+							var newConfig = path.resolve(process.cwd(), 'openvpn', 'config', 'openvpn.ovpn');
 							console.log(newConfig);
 
 							mv(vpnConfig, newConfig, function(err) {
