@@ -179,7 +179,7 @@
 
 						if (fs.existsSync(openvpn)) {
 							// if all works we'll launch our openvpn as admin
-							if (runas(openvpn, ['--config', vpnConfig, '--auth-user-pass', tempPath], {
+							if (runas(openvpn, ['--daemon', 'popcorntime','--config', vpnConfig, '--auth-user-pass', tempPath], {
 									admin: true
 								}) != 0) {
 								console.log('something wrong');
