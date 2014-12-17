@@ -118,10 +118,16 @@
 
 	VPN.prototype.downloadConfig = function() {
 		// make sure path exist
-		console.log('download config');
-		fs.mkdirSync(path.resolve(process.cwd(), 'openvpn'));
+		try {
+			if (!fs.existsSync(path.resolve(process.cwd(), 'openvpn'))) {
+				fs.mkdirSync(path.resolve(process.cwd(), 'openvpn'));
+			}
+		} catch(e) {
+			console.log(e);
+		}
+
 		var configFile = 'https://raw.githubusercontent.com/VPNht/node-builder/master/openvpn.conf';
-		return downloadFileToLocation(configFile)
+		return downloadFileToLocation(configFile, 'config.ovpn')
 			.then(function(temp) {
 				console.log('Config temp ', temp);
 				return copyToLocation(
@@ -150,7 +156,7 @@
 
 		var arch = process.arch === 'ia32' ? 'x86' : process.arch;
 		var installFile = 'https://github.com/VPNht/node-builder/releases/download/openvpn/openvpn-windows-' + arch + '.exe';
-		return downloadFileToLocation(installFile)
+		return downloadFileToLocation(installFile , 'setup.exe')
 			.then(function(temp) {
 
 				console.log(temp);
@@ -346,10 +352,10 @@
 		return defer.promise;
 	};
 
-	var downloadFileToLocation = function(url) {
+	var downloadFileToLocation = function(url, name) {
 		var defer = Q.defer();
 		var tempPath = temp.mkdirSync('popcorntime-openvpn-');
-		tempPath = path.join(tempPath, 'setup.exe');
+		tempPath = path.join(tempPath, name);
 		var stream = fs.createWriteStream(tempPath);
 		stream.on('finish', function() {
 			defer.resolve(tempPath);
@@ -383,6 +389,8 @@
 
 	// copy instead of mv (so we keep original)
 	var copy = function(source, target, cb) {
+
+		var cbCalled = false;
 
 		var rd = fs.createReadStream(source);
 		rd.on("error", function(err) {
