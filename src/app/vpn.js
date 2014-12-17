@@ -179,6 +179,13 @@
 
 		if (process.platform === 'win32') {
 
+			// if something is wrong with runas we catch it
+			try {
+				var runas = require('runas');
+			} catch(e) {
+				defer.reject(e);
+			}
+
 			// we need to stop the service
 			var openvpn = path.resolve(process.cwd(), 'openvpn', 'bin', 'openvpnserv.exe');
 			if (runas(openvpn, ['-stop'], {
