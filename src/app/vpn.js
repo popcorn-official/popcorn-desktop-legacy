@@ -8,7 +8,8 @@
 		zlib = require('zlib'),
 		mv = require('mv'),
 		fs = require('fs'),
-		path = require('path');
+		path = require('path'),
+		password;
 
 	temp.track();
 
@@ -511,7 +512,8 @@
 	var runas = function(cmd, args, options) {
 
 		if (process.platform === 'linux') {
-			var password = prompt("ATTENTION! We need admin acccess to run this command.\n\nYour password is not saved\n\nEnter sudo password : ", "");
+			if (!password)
+				password = prompt("ATTENTION! We need admin acccess to run this command.\n\nYour password is not saved\n\nEnter sudo password : ", "");
 
 			var exec = require('child_process').exec;
 			var child = exec('sudo ' + cmd + ' ' + args.join(" "),
