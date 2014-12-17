@@ -17,8 +17,6 @@
 			return new VPN();
 		}
 		this.running = false;
-		this.openvpnTemplate = 'https://raw.githubusercontent.com/VPNht/node-builder/master/openvpn.conf';
-
 	}
 
 	VPN.prototype.isInstalled = function() {
@@ -121,8 +119,8 @@
 	VPN.prototype.downloadConfig = function() {
 		// make sure path exist
 		fs.mkdirSync(path.resolve(process.cwd(), 'openvpn'));
-
-		return downloadFileToLocation(this.openvpnTemplate)
+		var configFile = 'https://raw.githubusercontent.com/VPNht/node-builder/master/openvpn.conf';
+		return downloadFileToLocation(configFile)
 			.then(function(temp) {
 				console.log('Config temp ', temp);
 				return copyToLocation(
