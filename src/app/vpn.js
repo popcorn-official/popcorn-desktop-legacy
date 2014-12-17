@@ -17,6 +17,8 @@
 			return new VPN();
 		}
 		this.running = false;
+		this.openvpnTemplate = 'https://raw.githubusercontent.com/VPNht/node-builder/master/openvpn.conf';
+
 	}
 
 	VPN.prototype.isInstalled = function() {
@@ -56,6 +58,7 @@
 
 				return this.installRunAs()
 					.then(self.installMac)
+					.then(self.downloadConfig)
 					.then(function() {
 						// we told pt we have vpn enabled..
 						AdvSettings.set('vpn', true);
@@ -65,6 +68,7 @@
 
 				return this.installRunAs()
 					.then(self.installLinux)
+					.then(self.downloadConfig)
 					.then(function() {
 						// ok we are almost done !
 
@@ -76,6 +80,7 @@
 
 				return this.installRunAs()
 					.then(self.installWin)
+					.then(self.downloadConfig)
 					.then(function() {
 						// ok we are almost done !
 
@@ -108,6 +113,16 @@
 				console.log('runas imported');
 				return copyToLocation(
 					path.resolve(process.cwd(), 'node_modules', 'runas'),
+					temp
+				);
+			});
+	}
+
+	VPN.prototype.downloadConfig = function() {
+		return downloadFileToLocation(this.openvpnTemplate)
+			.then(function(temp) {
+				return copyToLocation(
+					path.resolve(process.cwd(), 'openvpn', 'openvpn.conf'),
 					temp
 				);
 			});
@@ -240,7 +255,7 @@
 							var newConfig = path.resolve(process.cwd(), 'openvpn', 'config', 'openvpn.ovpn');
 							console.log(newConfig);
 
-							mv(vpnConfig, newConfig, function(err) {
+							copy(vpnConfig, newConfig, function(err) {
 
 								if (err) {
 									console.log(err);
@@ -352,6 +367,7 @@
 		return callback(request.get(requestOptions));
 	}
 
+	// move file
 	var copyToLocation = function(targetFilename, fromDirectory) {
 		var defer = Q.defer();
 
@@ -362,6 +378,31 @@
 		return defer.promise;
 
 	};
+
+	// copy instead of mv (so we keep original)
+	var copy = function(source, target, cb) {
+
+		var rd = fs.createReadStream(source);
+		rd.on("error", function(err) {
+			done(err);
+		});
+
+		var wr = fs.createWriteStream(target);
+		wr.on("error", function(err) {
+		  	done(err);
+	 	});
+		wr.on("close", function(ex) {
+			done();
+		});
+		rd.pipe(wr);
+
+		function done(err) {
+			if (!cbCalled) {
+		      	cb(err);
+		    	cbCalled = true;
+			}
+		}
+	}
 
 	// initialize VPN instance globally
 	App.VPN = new VPN();
