@@ -17,6 +17,7 @@
 			return new VPN();
 		}
 		this.running = false;
+		this.ip = false;
 	}
 
 	VPN.prototype.isInstalled = function() {
@@ -37,6 +38,9 @@
 			var task = require('ms-task');
 			task.pidOf( 'openvpnserv.exe', function(err, data){
 				if (data.length > 0 && err == null) {
+					// set our current ip
+					self.getIp();
+
 					self.running = true;
 					defer.resolve(true);
 				} else {
@@ -44,7 +48,37 @@
 					defer.resolve(false);
 				}
 			});
+		} else {
+
+			getPid()
+				.then(function(pid) {
+					if (pid) {
+						self.getIp();
+						self.running = true;
+						defer.resolve(true);
+					} else {
+						self.running = false;
+						defer.resolve(false);
+					}
+				});
+
 		}
+
+		return defer.promise;
+	};
+
+	VPN.prototype.getIp = function (callback) {
+		var defer = Q.defer();
+		var self = this;
+
+		request('http://curlmyip.com/', function (error, response, body) {
+		  	if (!error && response.statusCode === 200) {
+		    	self.ip = body.trim();
+				defer.resolve(self.ip);
+			} else {
+				defer.reject(error);
+			}
+		});
 
 		return defer.promise;
 	};
@@ -55,8 +89,8 @@
 			if (process.platform === 'darwin') {
 
 				return this.installRunAs()
-					.then(self.downloadConfig)
 					.then(self.installMac)
+					.then(self.downloadConfig)
 					.then(function() {
 						// we told pt we have vpn enabled..
 						AdvSettings.set('vpn', true);
@@ -65,8 +99,8 @@
 			} else if (process.platform === 'linux') {
 
 				return this.installRunAs()
-					.then(self.downloadConfig)
 					.then(self.installLinux)
+					.then(self.downloadConfig)
 					.then(function() {
 						// ok we are almost done !
 
@@ -224,7 +258,7 @@
 				console.log('something wrong');
 				defer.reject('unable_to_stop');
 			} else {
-
+				self.getIp();
 				self.running = false;
 				console.log('openvpn stoped');
 				defer.resolve();
@@ -232,6 +266,44 @@
 			}
 
 			defer.resolve();
+		} else {
+			getPid()
+				.then(function(pid) {
+
+					console.log(pid);
+
+					if (pid) {
+
+						// if something is wrong with runas we catch it
+						try {
+							var runas = require('runas');
+						} catch(e) {
+							defer.reject(e);
+						}
+
+						_.each(pid, function(p) {
+
+							console.log('killing', p);
+
+							if (runas('kill', ['-9', p], {
+									admin: true
+								}) != 0) {
+								console.log('something wrong');
+							} else {
+								self.getIp();
+								self.running = false;
+								console.log('openvpn stoped');
+							};
+						});
+
+						defer.resolve();
+
+					} else {
+						console.log('no pid found');
+						self.running = false;
+						defer.reject('no_pid_found');
+					}
+				});
 		}
 
 		return defer.promise;
@@ -290,6 +362,8 @@
 
 											self.running = true;
 											console.log('openvpn launched');
+											// set our current ip
+											self.getIp();
 											defer.resolve();
 
 										}
@@ -306,12 +380,18 @@
 								if (runas(openvpn, args, {
 										admin: true
 									}) != 0) {
+
+									// we didnt got success but process run anyways..
 									console.log('something wrong');
-									defer.reject('unable_to_launch');
+									self.running = true;
+									self.getIp();
+									defer.resolve();
 								} else {
 
 									self.running = true;
 									console.log('openvpn launched');
+									// set our current ip
+									self.getIp();
 									defer.resolve();
 
 								}
@@ -418,6 +498,27 @@
 		    	cbCalled = true;
 			}
 		}
+	}
+
+	var getPid = function() {
+		var defer = Q.defer();
+		var exec = require('child_process').exec;
+
+		exec("ps -ef | awk '/[o]penvpn/{print $2}'",
+			function (error, stdout, stderr) {
+				if (error !== null) {
+				console.log('exec error: ' + error);
+				}
+
+				if (stdout.length > 0) {
+					defer.resolve(_.pick(stdout.split("\n"), _.identity));
+				} else {
+					self.running = false;
+					defer.resolve(false);
+				}
+			});
+
+		return defer.promise;
 	}
 
 	// initialize VPN instance globally
