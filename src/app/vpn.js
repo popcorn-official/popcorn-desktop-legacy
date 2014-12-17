@@ -210,8 +210,12 @@
 				defer.reject(e);
 			}
 
+			var root = process.cwd().split(path.sep)[0];
+			root = path.join(root, 'Windows', 'System32', 'net.exe');
+			console.log(root);
+			
 			// we need to stop the service
-			if (runas('net stop', ['OpenVPNService'], {
+			if (runas(root, ['stop','OpenVPNService'], {
 					admin: true
 				}) != 0) {
 				console.log('something wrong');
