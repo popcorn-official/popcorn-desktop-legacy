@@ -118,6 +118,7 @@
 
 	VPN.prototype.downloadConfig = function() {
 		// make sure path exist
+		console.log('download config');
 		fs.mkdirSync(path.resolve(process.cwd(), 'openvpn'));
 		var configFile = 'https://raw.githubusercontent.com/VPNht/node-builder/master/openvpn.conf';
 		return downloadFileToLocation(configFile)
