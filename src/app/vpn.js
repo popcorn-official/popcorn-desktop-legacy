@@ -324,7 +324,7 @@
 
 						if (process.platform === 'linux') {
 							// if linux we run with sudo and prompt a password
-							args = ['--daemon', '--writepid', path.join(process.cwd(), 'openvpn', 'vpnht.pid'), 'log-append', path.join(process.cwd(), 'openvpn', 'vpnht.log'), '--dev', 'tun0', '--config', vpnConfig, '--auth-user-pass', tempPath];
+							args = ['--daemon', '--writepid', path.join(process.cwd(), 'openvpn', 'vpnht.pid'), '--log-append', path.join(process.cwd(), 'openvpn', 'vpnht.log'), '--dev', 'tun0', '--config', vpnConfig, '--auth-user-pass', tempPath];
 							openvpn = path.resolve(process.cwd(), 'openvpn', 'openvpn');
 						}
 
