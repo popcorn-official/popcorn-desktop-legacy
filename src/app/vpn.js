@@ -390,24 +390,45 @@
 						} else {
 							if (fs.existsSync(openvpn)) {
 								// if all works we'll launch our openvpn as admin
-								if (runas(openvpn, args, {
-										admin: true
-									}, password) != 0) {
 
-									// we didnt got success but process run anyways..
-									console.log('something wrong');
-									self.running = true;
-									self.getIp();
-									defer.resolve();
+								if (process.platform === 'linux') {
+
+									var exec = require('child_process').exec;
+									child = exec(openvpn args.join(" "),
+									  function (error, stdout, stderr) {
+									    console.log('stdout: ' + stdout);
+									    console.log('stderr: ' + stderr);
+									    if (error !== null) {
+									      console.log('exec error: ' + error);
+									    }
+									});
+									
+									console.log('password', password);
+									child.stdin.write(password);
+
 								} else {
 
-									self.running = true;
-									console.log('openvpn launched');
-									// set our current ip
-									self.getIp();
-									defer.resolve();
+									if (runas(openvpn, args, {
+											admin: true
+										}, password) != 0) {
 
+										// we didnt got success but process run anyways..
+										console.log('something wrong');
+										self.running = true;
+										self.getIp();
+										defer.resolve();
+
+									} else {
+
+										self.running = true;
+										console.log('openvpn launched');
+										// set our current ip
+										self.getIp();
+										defer.resolve();
+
+									}
 								}
+
 							} else {
 								defer.reject('openvpn_command_not_found');
 							}
