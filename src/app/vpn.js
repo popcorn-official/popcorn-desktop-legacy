@@ -30,10 +30,12 @@
 
 	VPN.prototype.isRunning = function() {
 		// win32
+		console.log(process.platform);
 		if (process.platform === 'win32') {
 			var task = require('ms-task');
 			task.pidOf( 'openvpnserv.exe', function(err, data){
-
+				console.log(data);
+				console.log(data.length);
 				if (data.length > 0 && !err) {
 					return true;
 				} else {
