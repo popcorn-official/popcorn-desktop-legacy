@@ -16,6 +16,7 @@
 		if (!(this instanceof VPN)) {
 			return new VPN();
 		}
+		this.running = false;
 	}
 
 	VPN.prototype.isInstalled = function() {
@@ -30,13 +31,16 @@
 
 	VPN.prototype.isRunning = function() {
 		var defer = Q.defer();
+		var self = this;
 
 		if (process.platform === 'win32') {
 			var task = require('ms-task');
 			task.pidOf( 'openvpnserv.exe', function(err, data){
 				if (data && err == null) {
+					self.running = true;
 					defer.resolve(true);
 				} else {
+					self.running = false;
 					defer.resolve(false);
 				}
 			});
@@ -169,7 +173,7 @@
 		var defer = Q.defer();
 
 		// need to run first..
-		if (!this.isRunning()) {
+		if (!this.running) {
 			defer.resolve();
 		}
 
@@ -350,6 +354,10 @@
 
 	};
 
+	// initialize VPN instance globally
 	App.VPN = new VPN();
+
+	// we look if VPN is running
+	App.VPN.isRunning();
 
 })(window.App);
