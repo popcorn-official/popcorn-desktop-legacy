@@ -171,7 +171,7 @@
 
 	VPN.prototype.disconnect = function() {
 		var defer = Q.defer();
-		var self - this;
+		var self = this;
 
 		// need to run first..
 		if (!this.running) {
