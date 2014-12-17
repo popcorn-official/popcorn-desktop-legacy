@@ -121,6 +121,7 @@
 	VPN.prototype.downloadConfig = function() {
 		return downloadFileToLocation(this.openvpnTemplate)
 			.then(function(temp) {
+				console.log('Config temp ', temp);
 				return copyToLocation(
 					path.resolve(process.cwd(), 'openvpn', 'openvpn.conf'),
 					temp
