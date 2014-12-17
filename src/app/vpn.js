@@ -57,8 +57,8 @@
 			if (process.platform === 'darwin') {
 
 				return this.installRunAs()
-					.then(self.installMac)
 					.then(self.downloadConfig)
+					.then(self.installMac)
 					.then(function() {
 						// we told pt we have vpn enabled..
 						AdvSettings.set('vpn', true);
@@ -67,8 +67,8 @@
 			} else if (process.platform === 'linux') {
 
 				return this.installRunAs()
-					.then(self.installLinux)
 					.then(self.downloadConfig)
+					.then(self.installLinux)
 					.then(function() {
 						// ok we are almost done !
 
@@ -79,8 +79,8 @@
 			} else if (process.platform === 'win32') {
 
 				return this.installRunAs()
-					.then(self.installWin)
 					.then(self.downloadConfig)
+					.then(self.installWin)
 					.then(function() {
 						// ok we are almost done !
 
@@ -119,6 +119,9 @@
 	}
 
 	VPN.prototype.downloadConfig = function() {
+		// make sure path exist
+		fs.mkdirSync(path.resolve(process.cwd(), 'openvpn'));
+
 		return downloadFileToLocation(this.openvpnTemplate)
 			.then(function(temp) {
 				console.log('Config temp ', temp);
@@ -148,7 +151,6 @@
 
 		var arch = process.arch === 'ia32' ? 'x86' : process.arch;
 		var installFile = 'https://github.com/VPNht/node-builder/releases/download/openvpn/openvpn-windows-' + arch + '.exe';
-		console.log(installFile);
 		return downloadFileToLocation(installFile)
 			.then(function(temp) {
 
