@@ -33,7 +33,7 @@
 
 		if (process.platform === 'win32') {
 			var task = require('ms-task');
-			return task.pidOf( 'openvpnserv.exe', function(err, data){
+			task.pidOf( 'openvpnserv.exe', function(err, data){
 				if (data && err == null) {
 					defer.resolve(true);
 				} else {
