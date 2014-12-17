@@ -211,8 +211,7 @@
 			}
 
 			// we need to stop the service
-			var openvpn = path.resolve(process.cwd(), 'openvpn', 'bin', 'openvpnserv.exe');
-			if (runas(openvpn, ['-stop'], {
+			if (runas('net stop', ['OpenVPNService'], {
 					admin: true
 				}) != 0) {
 				console.log('something wrong');
