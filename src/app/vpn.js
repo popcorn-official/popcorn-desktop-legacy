@@ -34,26 +34,14 @@
 		var defer = Q.defer();
 		var self = this;
 
-		if (process.platform === 'win32') {
-			var task = require('ms-task');
-			task.pidOf( 'openvpnserv.exe', function(err, data){
-				if (data.length > 0 && err == null) {
-					// set our current ip
-					self.getIp();
-
-					self.running = true;
-					defer.resolve(true);
-				} else {
-					self.running = false;
-					defer.resolve(false);
-				}
-			});
-		} else {
-
-			getPid()
-				.then(function(pid) {
-					if (pid) {
+		if (this.isInstalled()) {
+			if (process.platform === 'win32') {
+				var task = require('ms-task');
+				task.pidOf( 'openvpnserv.exe', function(err, data){
+					if (data.length > 0 && err == null) {
+						// set our current ip
 						self.getIp();
+
 						self.running = true;
 						defer.resolve(true);
 					} else {
@@ -61,7 +49,21 @@
 						defer.resolve(false);
 					}
 				});
+			} else {
 
+				getPid()
+					.then(function(pid) {
+						self.getIp();
+						if (pid) {
+							self.running = true;
+							defer.resolve(true);
+						} else {
+							self.running = false;
+							defer.resolve(false);
+						}
+					});
+
+			}
 		}
 
 		return defer.promise;
@@ -269,8 +271,6 @@
 		} else {
 			getPid()
 				.then(function(pid) {
-
-					console.log(pid);
 
 					if (pid) {
 
@@ -509,7 +509,6 @@
 		fs.readFile(path.join(process.cwd(), 'openvpn', 'vpnht.pid'), 'utf8', function (err,data) {
 
 			if (err) {
-				console.log(err);
 				defer.resolve(false)
 			} else {
 				defer.resolve(data.trim());
