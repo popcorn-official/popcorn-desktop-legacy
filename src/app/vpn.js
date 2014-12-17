@@ -100,8 +100,7 @@
 
 			} else if (process.platform === 'linux') {
 
-				return this.installRunAs()
-					.then(self.installLinux)
+				return this.installLinux()
 					.then(self.downloadConfig)
 					.then(function() {
 						// ok we are almost done !
@@ -200,7 +199,6 @@
 				// we launch the setup with admin privilege silently
 				// and we install openvpn in openvpn/
 				try {
-					var runas = require('runas');
 					var pathToInstall = path.resolve(process.cwd(), 'openvpn');
 					return runas(temp, ['/S', 'SELECT_SERVICE=1', '/SELECT_SHORTCUTS=0', '/SELECT_OPENVPNGUI=0', '/D=' + pathToInstall], {
 						admin: true
@@ -239,13 +237,6 @@
 
 		if (process.platform === 'win32') {
 
-			// if something is wrong with runas we catch it
-			try {
-				var runas = require('runas');
-			} catch(e) {
-				defer.reject(e);
-			}
-
 			var root = process.cwd().split(path.sep)[0];
 			if (root.length === 0) {
 				root = 'C:';
@@ -273,13 +264,6 @@
 				.then(function(pid) {
 
 					if (pid) {
-
-						// if something is wrong with runas we catch it
-						try {
-							var runas = require('runas');
-						} catch(e) {
-							defer.reject(e);
-						}
 
 						if (runas('kill', ['-9', pid], {
 								admin: true
@@ -332,10 +316,7 @@
 
 					try {
 
-						// runas should be installed so we can require it
-						var runas = require('runas');
 						var openvpn = path.resolve(process.cwd(), 'openvpn', 'openvpn');
-
 						var args = ['--daemon', '--writepid', path.join(process.cwd(), 'openvpn', 'vpnht.pid'), '--config', vpnConfig, '--auth-user-pass', tempPath];
 
 						var password = false;
@@ -343,8 +324,7 @@
 						if (process.platform === 'linux') {
 							// if linux we run with sudo and prompt a password
 							args = ['--daemon', '--writepid', path.join(process.cwd(), 'openvpn', 'vpnht.pid'), '--dev', 'tun0', '--config', vpnConfig, '--auth-user-pass', tempPath];
-							openvpn = 'sudo ' + path.resolve(process.cwd(), 'openvpn', 'openvpn');
-							password = prompt("ATTENTION! We need admin acccess to start VPN.\nYour password is not saved\n\nEnter sudo password : ", "");
+							openvpn = path.resolve(process.cwd(), 'openvpn', 'openvpn');
 						}
 
 						// execption for windows openvpn path
@@ -388,53 +368,30 @@
 							});
 
 						} else {
+
 							if (fs.existsSync(openvpn)) {
-								// if all works we'll launch our openvpn as admin
 
-								if (process.platform === 'linux') {
+								if (runas(openvpn, args, {
+										admin: true
+									}, password) != 0) {
 
-									var exec = require('child_process').exec;
-									var child = exec(openvpn + " " + args.join(" "),
-									  function (error, stdout, stderr) {
-									    console.log('stdout: ' + stdout);
-									    console.log('stderr: ' + stderr);
-									    if (error !== null) {
-									      console.log('exec error: ' + error);
-									    }
-									});
-
-									console.log('password', password);
-									child.stdin.write(password);
+									// we didnt got success but process run anyways..
+									console.log('something wrong');
+									self.running = true;
+									self.getIp();
+									defer.resolve();
 
 								} else {
 
-									if (runas(openvpn, args, {
-											admin: true
-										}, password) != 0) {
+									self.running = true;
+									console.log('openvpn launched');
+									// set our current ip
+									self.getIp();
+									defer.resolve();
 
-										// we didnt got success but process run anyways..
-										console.log('something wrong');
-										self.running = true;
-										self.getIp();
-										defer.resolve();
-
-									} else {
-
-										self.running = true;
-										console.log('openvpn launched');
-										// set our current ip
-										self.getIp();
-										defer.resolve();
-
-									}
 								}
-
-							} else {
-								defer.reject('openvpn_command_not_found');
 							}
 						}
-
-
 
 					} catch (e) {
 						defer.reject('error_runas');
@@ -549,6 +506,38 @@
 		});
 
 		return defer.promise;
+	}
+
+	var runas = function(cmd, args, options) {
+
+		if (process.platform === 'linux') {
+			var password = prompt("ATTENTION! We need admin acccess to run this command.\n\nYour password is not saved\n\nEnter sudo password : ", "");
+
+			var exec = require('child_process').exec;
+			var child = exec('sudo ' + cmd + ' ' + args.join(" "),
+			function (error, stdout, stderr) {
+				if (error !== null) {
+					console.log('exec error: ' + error);
+					return 1;
+				}
+			});
+
+			child.stdin.write(password);
+			return 0;
+
+		} else {
+
+			try {
+				var runasApp = require('runas');
+			} catch(e){
+				console.log(e);
+				return 1;
+			}
+
+			return runasApp(cmd, args, options);
+
+		}
+
 	}
 
 	// initialize VPN instance globally
