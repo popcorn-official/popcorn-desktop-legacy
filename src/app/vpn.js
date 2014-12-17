@@ -171,6 +171,7 @@
 
 	VPN.prototype.disconnect = function() {
 		var defer = Q.defer();
+		var self - this;
 
 		// need to run first..
 		if (!this.running) {
@@ -195,7 +196,7 @@
 				defer.reject('unable_to_stop');
 			} else {
 
-				// ok openvpn is launched...
+				self.running = false;
 				console.log('openvpn stoped');
 				defer.resolve();
 
@@ -209,6 +210,7 @@
 
 	VPN.prototype.connect = function() {
 		var defer = Q.defer();
+		var self = this;
 		// we are writing a temp auth file
 		fs = require('fs');
 		var tempPath = temp.mkdirSync('popcorntime-vpnht');
@@ -257,7 +259,7 @@
 											defer.reject('unable_to_launch');
 										} else {
 
-											// ok openvpn is launched...
+											self.running = true;
 											console.log('openvpn launched');
 											defer.resolve();
 
@@ -279,7 +281,7 @@
 									defer.reject('unable_to_launch');
 								} else {
 
-									// ok openvpn is launched...
+									self.running = true;
 									console.log('openvpn launched');
 									defer.resolve();
 
