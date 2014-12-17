@@ -37,7 +37,8 @@
 				console.log(data);
 				console.log(err);
 				console.log(data.length);
-				if (data.length > 0 && err === null) {
+				if (data && err == null) {
+					console.log('true');
 					return true;
 				} else {
 					return false;
