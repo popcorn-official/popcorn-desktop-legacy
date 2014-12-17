@@ -281,20 +281,22 @@
 							defer.reject(e);
 						}
 
-						_.each(pid, function(p) {
-
-							console.log('killing', p);
-
-							if (runas('kill', ['-9', p], {
-									admin: true
-								}) != 0) {
+						if (runas('kill', ['-9', pid], {
+								admin: true
+							}) != 0) {
 								console.log('something wrong');
-							} else {
-								self.getIp();
-								self.running = false;
-								console.log('openvpn stoped');
-							};
-						});
+						} else {
+							// we'll delete our pid file
+							try {
+								fs.unlinkSync(path.join(process.cwd(), 'openvpn', 'vpnht.pid'));
+							} catch(e) {
+								console.log(e);
+							}
+
+							self.getIp();
+							self.running = false;
+							console.log('openvpn stoped');
+						};
 
 						defer.resolve();
 
@@ -333,7 +335,7 @@
 						// runas should be installed so we can require it
 						var runas = require('runas');
 						var openvpn = path.resolve(process.cwd(), 'openvpn', 'openvpn');
-						var args = ['--daemon', '--config', vpnConfig, '--auth-user-pass', tempPath];
+						var args = ['--daemon', '--writepid', path.join(process.cwd(), 'openvpn', 'vpnht.pid'), '--config', vpnConfig, '--auth-user-pass', tempPath];
 						// execption for windows openvpn path
 						if (process.platform === 'win32') {
 
@@ -504,19 +506,16 @@
 		var defer = Q.defer();
 		var exec = require('child_process').exec;
 
-		exec("ps -ef | awk '/[o]penvpn/{print $2}'",
-			function (error, stdout, stderr) {
-				if (error !== null) {
-				console.log('exec error: ' + error);
-				}
+		fs.readFile(path.join(process.cwd(), 'openvpn', 'vpnht.pid'), 'utf8', function (err,data) {
 
-				if (stdout.length > 0) {
-					defer.resolve(_.pick(stdout.split("\n"), _.identity));
-				} else {
-					self.running = false;
-					defer.resolve(false);
-				}
-			});
+			if (err) {
+				console.log(err);
+				defer.resolve(false)
+			} else {
+				defer.resolve(data.trim());
+			}
+
+		});
 
 		return defer.promise;
 	}
