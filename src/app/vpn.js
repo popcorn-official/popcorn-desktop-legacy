@@ -29,22 +29,19 @@
 	};
 
 	VPN.prototype.isRunning = function() {
-
 		// win32
 		if (process.platform === 'win32') {
 			var task = require('ms-task');
 			task.pidOf( 'openvpnserv.exe', function(err, data){
 
-				console.log(err);
-				console.log(data);
-
+				if (data.length > 0 && !err) {
+					return true;
+				} else {
+					return false;
+				}
 			});
 		}
-
-
 	};
-
-
 
 	VPN.prototype.install = function() {
 		var self = this;
@@ -164,6 +161,37 @@
 					temp
 				);
 			});
+	}
+
+	VPN.prototype.disconnect = function() {
+		var defer = Q.defer();
+
+		// need to run first..
+		if (!this.isRunning()) {
+			defer.resolve();
+		}
+
+		if (process.platform === 'win32') {
+
+			// we need to stop the service
+			var openvpn = path.resolve(process.cwd(), 'openvpn', 'bin', 'openvpnserv.exe');
+			if (runas(openvpn, ['-stop'], {
+					admin: true
+				}) != 0) {
+				console.log('something wrong');
+				defer.reject('unable_to_stop');
+			} else {
+
+				// ok openvpn is launched...
+				console.log('openvpn stoped');
+				defer.resolve();
+
+			}
+
+			defer.resolve();
+		}
+
+		return defer.promise;
 	}
 
 	VPN.prototype.connect = function() {
