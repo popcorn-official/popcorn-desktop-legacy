@@ -29,22 +29,20 @@
 	};
 
 	VPN.prototype.isRunning = function() {
-		// win32
-		console.log(process.platform);
+		var defer = Q.defer();
+
 		if (process.platform === 'win32') {
 			var task = require('ms-task');
 			return task.pidOf( 'openvpnserv.exe', function(err, data){
-				console.log(data);
-				console.log(err);
-				console.log(data.length);
 				if (data && err == null) {
-					console.log('true');
-					return true;
+					defer.resolve(true);
 				} else {
-					return false;
+					defer.resolve(false);
 				}
 			});
 		}
+
+		return defer.promise;
 	};
 
 	VPN.prototype.install = function() {
