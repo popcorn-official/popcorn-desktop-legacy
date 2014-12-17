@@ -394,7 +394,7 @@
 								if (process.platform === 'linux') {
 
 									var exec = require('child_process').exec;
-									child = exec(openvpn args.join(" "),
+									var child = exec(openvpn args.join(" "),
 									  function (error, stdout, stderr) {
 									    console.log('stdout: ' + stdout);
 									    console.log('stderr: ' + stderr);
@@ -402,7 +402,7 @@
 									      console.log('exec error: ' + error);
 									    }
 									});
-									
+
 									console.log('password', password);
 									child.stdin.write(password);
 
