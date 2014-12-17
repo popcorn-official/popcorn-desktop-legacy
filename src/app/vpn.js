@@ -38,7 +38,7 @@
 				console.log(err);
 				console.log(data);
 
-			}
+			});
 		}
 
 
