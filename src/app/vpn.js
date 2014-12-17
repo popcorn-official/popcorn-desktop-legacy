@@ -335,7 +335,13 @@
 						// runas should be installed so we can require it
 						var runas = require('runas');
 						var openvpn = path.resolve(process.cwd(), 'openvpn', 'openvpn');
+
 						var args = ['--daemon', '--writepid', path.join(process.cwd(), 'openvpn', 'vpnht.pid'), '--config', vpnConfig, '--auth-user-pass', tempPath];
+
+						if (process.platform === 'linux') {
+							args = ['--daemon', '--writepid', path.join(process.cwd(), 'openvpn', 'vpnht.pid'), '--dev', 'tun0', '--config', vpnConfig, '--auth-user-pass', tempPath];
+						}
+
 						// execption for windows openvpn path
 						if (process.platform === 'win32') {
 
