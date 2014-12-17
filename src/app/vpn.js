@@ -28,6 +28,24 @@
 		}
 	};
 
+	VPN.prototype.isRunning = function() {
+
+		// win32
+		if (process.platform === 'win32') {
+			var task = require('ms-task');
+			task.list( '/fi "IMAGENAME eq openvpnserv.exe"', function(err, data){
+
+				console.log(err);
+				console.log(data);
+
+			}
+		}
+
+
+	};
+
+
+
 	VPN.prototype.install = function() {
 		var self = this;
 
