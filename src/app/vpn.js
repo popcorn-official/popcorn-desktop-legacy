@@ -338,8 +338,13 @@
 
 						var args = ['--daemon', '--writepid', path.join(process.cwd(), 'openvpn', 'vpnht.pid'), '--config', vpnConfig, '--auth-user-pass', tempPath];
 
+						var password = false;
+
 						if (process.platform === 'linux') {
+							// if linux we run with sudo and prompt a password
 							args = ['--daemon', '--writepid', path.join(process.cwd(), 'openvpn', 'vpnht.pid'), '--dev', 'tun0', '--config', vpnConfig, '--auth-user-pass', tempPath];
+							openvpn = 'sudo ' + path.resolve(process.cwd(), 'openvpn', 'openvpn');
+							password = prompt("ATTENTION! We need admin acccess to start VPN.\nYour password is not saved\n\nEnter sudo password : ", "");
 						}
 
 						// execption for windows openvpn path
@@ -387,7 +392,7 @@
 								// if all works we'll launch our openvpn as admin
 								if (runas(openvpn, args, {
 										admin: true
-									}) != 0) {
+									}, password) != 0) {
 
 									// we didnt got success but process run anyways..
 									console.log('something wrong');
