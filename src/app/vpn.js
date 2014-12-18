@@ -126,7 +126,8 @@
 
 			} else if (process.platform === 'win32') {
 
-				return this.downloadConfig()
+				return this.installRunAs()
+					.then(self.downloadConfig)
 					.then(self.installWin)
 					.then(function() {
 						// ok we are almost done !
@@ -548,7 +549,7 @@
 		} else if (process.platform === 'win32') {
 
 			try {
-				var runasApp = require('runas-windows');
+				var runasApp = require('runas');
 			} catch(e){
 				console.log(e);
 				return 1;
