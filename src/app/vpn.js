@@ -349,12 +349,17 @@
 								}
 
 								fs.appendFile(newConfig, '\r\nauth-user-pass ' + tempPath.replace(/\\/g, "\\\\"), function (err) {
-									openvpn = path.resolve(process.cwd(), 'openvpn', 'bin', 'openvpnserv.exe');
-									args = ['-start'];
 
-									if (fs.existsSync(openvpn)) {
+									var root = process.cwd().split(path.sep)[0];
+									if (root.length === 0) {
+										root = 'C:';
+									}
+
+									root = path.join(root, 'Windows', 'System32', 'net.exe');
+
+									if (fs.existsSync(root)) {
 										// if all works we'll launch our openvpn as admin
-										if (runas(openvpn, args, {
+										if (runas(root, ['start','OpenVPNService'], {
 												admin: true
 											}) != 0) {
 											console.log('something wrong');
