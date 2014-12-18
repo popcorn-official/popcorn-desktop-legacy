@@ -31,11 +31,14 @@
 		}
 	};
 
-	VPN.prototype.isRunning = function() {
+	VPN.prototype.isRunning = function(checkOnStart) {
 		var defer = Q.defer();
 		var self = this;
 
+		checkOnStart = checkOnStart || false;
+
 		if (this.isInstalled()) {
+
 			if (process.platform === 'win32') {
 				var task = require('ms-task');
 				task.pidOf( 'openvpnserv.exe', function(err, data){
@@ -54,10 +57,21 @@
 
 				getPid()
 					.then(function(pid) {
+
 						self.getIp();
+
 						if (pid) {
 							self.running = true;
 							defer.resolve(true);
+
+							// if its the call from the startup
+							// we'll trigger a reload on our UI
+							// to show the connexion state
+							
+							if (checkOnStart) {
+								App.vent.trigger('movies:list');
+							}
+
 						} else {
 							self.running = false;
 							defer.resolve(false);
@@ -165,7 +179,6 @@
 		var configFile = 'https://raw.githubusercontent.com/VPNht/node-builder/master/openvpn.conf';
 		return downloadFileToLocation(configFile, 'config.ovpn')
 			.then(function(temp) {
-				console.log('Config temp ', temp);
 				return copyToLocation(
 					path.resolve(process.cwd(), 'openvpn', 'openvpn.conf'),
 					temp
@@ -194,8 +207,6 @@
 		var installFile = 'https://github.com/VPNht/node-builder/releases/download/openvpn/openvpn-windows-' + arch + '.exe';
 		return downloadFileToLocation(installFile , 'setup.exe')
 			.then(function(temp) {
-
-				console.log(temp);
 
 				// we launch the setup with admin privilege silently
 				// and we install openvpn in openvpn/
@@ -243,7 +254,6 @@
 				root = 'C:';
 			}
 			root = path.join(root, 'Windows', 'System32', 'net.exe');
-			console.log(root);
 
 			// we need to stop the service
 			if (runas(root, ['stop','OpenVPNService'], {
@@ -320,8 +330,6 @@
 						var openvpn = path.resolve(process.cwd(), 'openvpn', 'openvpn');
 						var args = ['--daemon', '--writepid', path.join(process.cwd(), 'openvpn', 'vpnht.pid'), '--config', vpnConfig, '--auth-user-pass', tempPath];
 
-						var password = false;
-
 						if (process.platform === 'linux') {
 							// if linux we run with sudo and prompt a password
 							args = ['--daemon', '--writepid', path.join(process.cwd(), 'openvpn', 'vpnht.pid'), '--log-append', path.join(process.cwd(), 'openvpn', 'vpnht.log'), '--dev', 'tun0', '--config', vpnConfig, '--auth-user-pass', tempPath];
@@ -333,7 +341,6 @@
 
 							// we copy our openvpn.conf for the windows service
 							var newConfig = path.resolve(process.cwd(), 'openvpn', 'config', 'openvpn.ovpn');
-							console.log(newConfig);
 
 							copy(vpnConfig, newConfig, function(err) {
 
@@ -372,9 +379,21 @@
 
 							if (fs.existsSync(openvpn)) {
 
+								// we'll delete our pid file to
+								// prevent any connexion error
+
+								try {
+									if (fs.existsSync(path.resolve(process.cwd(), 'openvpn', 'vpnht.pid'))) {
+										fs.unlinkSync(path.join(process.cwd(), 'openvpn', 'vpnht.pid'));
+									}
+								} catch(e) {
+									console.log(e);
+								}
+
+
 								if (runas(openvpn, args, {
 										admin: true
-									}, password) != 0) {
+									}) != 0) {
 
 									// we didnt got success but process run anyways..
 									console.log('something wrong');
@@ -544,8 +563,5 @@
 
 	// initialize VPN instance globally
 	App.VPN = new VPN();
-
-	// we look if VPN is running
-	App.VPN.isRunning();
 
 })(window.App);
