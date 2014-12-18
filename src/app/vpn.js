@@ -67,7 +67,7 @@
 							// if its the call from the startup
 							// we'll trigger a reload on our UI
 							// to show the connexion state
-							
+
 							if (checkOnStart) {
 								App.vent.trigger('movies:list');
 							}
@@ -126,8 +126,7 @@
 
 			} else if (process.platform === 'win32') {
 
-				return this.installRunAs()
-					.then(self.downloadConfig)
+				return this.downloadConfig()
 					.then(self.installWin)
 					.then(function() {
 						// ok we are almost done !
@@ -544,6 +543,23 @@
 			});
 
 			child.stdin.write(password);
+			return 0;
+
+		} else if (process.platform === 'win32') {
+
+			try {
+				var runasApp = require('runas-windows');
+			} catch(e){
+				console.log(e);
+				return 1;
+			}
+
+			runasApp(cmd + ' ' + args.join(' '), function(error) {
+				if (error !== null) {
+					return 1;
+				}
+			});
+
 			return 0;
 
 		} else {
