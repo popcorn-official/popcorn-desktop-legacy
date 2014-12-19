@@ -40,9 +40,14 @@
 		if (this.isInstalled()) {
 
 			if (process.platform === 'win32') {
+				var root = process.cwd().split(path.sep)[0];
+				if (root.length === 0) {
+					root = 'C:';
+				}
+				root = path.join(root, 'Windows', 'System32', 'sc.exe');
 
 				var exec = require('child_process').exec;
-				var child = exec('sc query OpenVPNService | findstr /i "STATE"',
+				var child = exec(root + ' query OpenVPNService | findstr /i "STATE"',
 				function (error, stdout, stderr) {
 					if (error !== null) {
 						console.log('exec error: ' + error);
@@ -50,7 +55,8 @@
 					} else {
 
 						console.log(error)
-						console.log(stdout.trim())
+						console.log(stdout.trim().indexOf("RUNNING"))
+						console.log(stdout)
 						console.log(stderr)
 
 					}
