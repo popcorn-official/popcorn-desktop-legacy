@@ -168,7 +168,7 @@
 		// make sure path doesn't exist (for update)
 		try {
 			if (fs.existsSync(path.resolve(process.cwd(), 'node_modules', 'runas'))) {
-				fs.rmdirSync(path.resolve(process.cwd(), 'node_modules', 'runas')));
+				fs.rmdirSync(path.resolve(process.cwd(), 'node_modules', 'runas'));
 			}
 		} catch(e) {
 			console.log(e);
