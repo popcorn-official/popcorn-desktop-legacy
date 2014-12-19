@@ -276,12 +276,12 @@
 			root = path.join(root, 'Windows', 'System32', 'net.exe');
 
 			// we need to stop the service
-			runas(root, ['stop','OpenVPNService']);
-
-			self.getIp();
-			self.running = false;
-			console.log('openvpn stoped');
-			defer.resolve();
+			runas(root, ['stop','OpenVPNService'], function() {
+				self.getIp();
+				self.running = false;
+				console.log('openvpn stoped');
+				defer.resolve();
+			});
 
 
 		} else {
@@ -302,7 +302,7 @@
 						self.getIp();
 						self.running = false;
 						console.log('openvpn stoped');
-					
+
 						defer.resolve();
 
 					} else {
