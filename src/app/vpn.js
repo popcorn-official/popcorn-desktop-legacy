@@ -290,23 +290,19 @@
 
 					if (pid) {
 
-						if (runas('kill', ['-9', pid], {
-								admin: true
-							}) != 0) {
-								console.log('something wrong');
-						} else {
-							// we'll delete our pid file
-							try {
-								fs.unlinkSync(path.join(process.cwd(), 'openvpn', 'vpnht.pid'));
-							} catch(e) {
-								console.log(e);
-							}
+						runas('kill', ['-9', pid], { admin: true });
 
-							self.getIp();
-							self.running = false;
-							console.log('openvpn stoped');
-						};
+						// we'll delete our pid file
+						try {
+							fs.unlinkSync(path.join(process.cwd(), 'openvpn', 'vpnht.pid'));
+						} catch(e) {
+							console.log(e);
+						}
 
+						self.getIp();
+						self.running = false;
+						console.log('openvpn stoped');
+					
 						defer.resolve();
 
 					} else {
