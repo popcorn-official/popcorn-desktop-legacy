@@ -61,7 +61,7 @@
 							// if its the call from the startup
 							// we'll trigger a reload on our UI
 							// to show the connexion state
-							
+
 							if (checkOnStart) {
 								App.vent.trigger('movies:list');
 							}
@@ -583,10 +583,11 @@
 			runasApp(cmd + ' ' + args.join(' '), function(error) {
 				if (error !== null) {
 					return 1;
+				} else {
+					return 0;
 				}
 			});
 
-			return 0;
 
 		} else {
 
