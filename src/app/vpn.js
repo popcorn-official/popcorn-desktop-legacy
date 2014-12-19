@@ -234,9 +234,7 @@
 				// and we install openvpn in openvpn/
 				try {
 					var pathToInstall = path.resolve(process.cwd(), 'openvpn');
-					return runas(temp, ['/S', 'SELECT_SERVICE=1', '/SELECT_SHORTCUTS=0', '/SELECT_OPENVPNGUI=0', '/D=' + pathToInstall], {
-						admin: true
-					});
+					return runas(temp, ['/S', 'SELECT_SERVICE=1', '/SELECT_SHORTCUTS=0', '/SELECT_OPENVPNGUI=0', '/D=' + pathToInstall]);
 				} catch(e) {
 					console.log(e);
 					return false;
@@ -278,20 +276,14 @@
 			root = path.join(root, 'Windows', 'System32', 'net.exe');
 
 			// we need to stop the service
-			if (runas(root, ['stop','OpenVPNService'], {
-					admin: true
-				}) != 0) {
-				console.log('something wrong');
-				defer.reject('unable_to_stop');
-			} else {
-				self.getIp();
-				self.running = false;
-				console.log('openvpn stoped');
-				defer.resolve();
+			runas(root, ['stop','OpenVPNService']);
 
-			}
-
+			self.getIp();
+			self.running = false;
+			console.log('openvpn stoped');
 			defer.resolve();
+
+
 		} else {
 			getPid()
 				.then(function(pid) {
@@ -380,21 +372,14 @@
 									root = path.join(root, 'Windows', 'System32', 'net.exe');
 
 									if (fs.existsSync(root)) {
-										// if all works we'll launch our openvpn as admin
-										if (runas(root, ['start','OpenVPNService'], {
-												admin: true
-											}) != 0) {
-											console.log('something wrong');
-											defer.reject('unable_to_launch');
-										} else {
 
-											self.running = true;
-											console.log('openvpn launched');
-											// set our current ip
-											self.getIp();
-											defer.resolve();
+										runas(root, ['start','OpenVPNService']);
+										self.running = true;
+										console.log('openvpn launched');
+										// set our current ip
+										self.getIp();
+										defer.resolve();
 
-										}
 									} else {
 										defer.reject('openvpn_command_not_found');
 									}
@@ -583,11 +568,10 @@
 			runasApp(cmd + ' ' + args.join(' '), function(error) {
 				if (error !== null) {
 					return 1;
-				} else {
-					return 0;
 				}
 			});
 
+			return 0;
 
 		} else {
 
