@@ -54,10 +54,22 @@
 						return 1;
 					} else {
 
-						console.log(error)
-						console.log(stdout.trim().indexOf("RUNNING"))
-						console.log(stdout)
-						console.log(stderr)
+						if (stdout.trim().indexOf("RUNNING") > 1) {
+							self.running = true;
+							defer.resolve(true);
+
+							// if its the call from the startup
+							// we'll trigger a reload on our UI
+							// to show the connexion state
+							
+							if (checkOnStart) {
+								App.vent.trigger('movies:list');
+							}
+
+						} else {
+							self.running = false;
+							defer.resolve(false);
+						}
 
 					}
 
