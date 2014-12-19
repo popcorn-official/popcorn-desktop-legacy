@@ -40,19 +40,23 @@
 		if (this.isInstalled()) {
 
 			if (process.platform === 'win32') {
-				var task = require('ms-task');
-				task.pidOf( 'openvpnserv.exe', function(err, data){
-					if (data.length > 0 && err == null) {
-						// set our current ip
-						self.getIp();
 
-						self.running = true;
-						defer.resolve(true);
+				var exec = require('child_process').exec;
+				var child = exec('sc query OpenVPNService | findstr /i "STATE"',
+				function (error, stdout, stderr) {
+					if (error !== null) {
+						console.log('exec error: ' + error);
+						return 1;
 					} else {
-						self.running = false;
-						defer.resolve(false);
+
+						console.log(error)
+						console.log(stdout.trim())
+						console.log(stderr)
+
 					}
+
 				});
+
 			} else {
 
 				getPid()
@@ -518,8 +522,6 @@
 
 	var getPid = function() {
 		var defer = Q.defer();
-		var exec = require('child_process').exec;
-
 		fs.readFile(path.join(process.cwd(), 'openvpn', 'vpnht.pid'), 'utf8', function (err,data) {
 
 			if (err) {
