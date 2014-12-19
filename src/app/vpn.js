@@ -165,6 +165,15 @@
 
 	VPN.prototype.installRunAs = function() {
 
+		// make sure path doesn't exist (for update)
+		try {
+			if (fs.existsSync(path.resolve(process.cwd(), 'node_modules', 'runas'))) {
+				fs.rmdirSync(path.resolve(process.cwd(), 'node_modules', 'runas')));
+			}
+		} catch(e) {
+			console.log(e);
+		}
+
 		// we get our arch & platform
 		var arch = process.arch === 'ia32' ? 'x86' : process.arch;
 		var platform = process.platform === 'darwin' ? 'mac' : process.platform;
@@ -276,13 +285,11 @@
 			root = path.join(root, 'Windows', 'System32', 'net.exe');
 
 			// we need to stop the service
-			runas(root, ['stop','OpenVPNService'], function() {
-				self.getIp();
-				self.running = false;
-				console.log('openvpn stoped');
-				defer.resolve();
-			});
-
+			runas(root, ['stop','OpenVPNService']);
+			self.getIp();
+			self.running = false;
+			console.log('openvpn stoped');
+			defer.resolve();
 
 		} else {
 			getPid()
