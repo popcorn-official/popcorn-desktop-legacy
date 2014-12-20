@@ -1,4 +1,4 @@
-(function(App) {
+(function (App) {
 	'use strict';
 
 	var request = require('request'),
@@ -21,7 +21,7 @@
 		this.ip = false;
 	}
 
-	VPN.prototype.isInstalled = function() {
+	VPN.prototype.isInstalled = function () {
 		// just to make sure we have a config value
 		var installed = AdvSettings.get('vpn');
 		if (installed) {
@@ -31,7 +31,7 @@
 		}
 	};
 
-	VPN.prototype.isDisabled = function() {
+	VPN.prototype.isDisabled = function () {
 		//disabled on demand
 		var disabled = AdvSettings.get('vpnDisabledPerm');
 		if (disabled) {
@@ -40,8 +40,8 @@
 			return false;
 		}
 	};
-	
-	VPN.prototype.isRunning = function(checkOnStart) {
+
+	VPN.prototype.isRunning = function (checkOnStart) {
 		var defer = Q.defer();
 		var self = this;
 
@@ -58,37 +58,37 @@
 
 				var exec = require('child_process').exec;
 				var child = exec(root + ' query OpenVPNService | findstr /i "STATE"',
-				function (error, stdout, stderr) {
-					if (error !== null) {
-						console.log('exec error: ' + error);
-						return 1;
-					} else {
+					function (error, stdout, stderr) {
+						if (error !== null) {
+							console.log('exec error: ' + error);
+							return 1;
+						} else {
 
-						if (stdout.trim().indexOf("RUNNING") > 1) {
-							self.running = true;
-							defer.resolve(true);
+							if (stdout.trim().indexOf('RUNNING') > 1) {
+								self.running = true;
+								defer.resolve(true);
 
-							// if its the call from the startup
-							// we'll trigger a reload on our UI
-							// to show the connexion state
+								// if its the call from the startup
+								// we'll trigger a reload on our UI
+								// to show the connexion state
 
-							if (checkOnStart) {
-								App.vent.trigger('movies:list');
+								if (checkOnStart) {
+									App.vent.trigger('movies:list');
+								}
+
+							} else {
+								self.running = false;
+								defer.resolve(false);
 							}
 
-						} else {
-							self.running = false;
-							defer.resolve(false);
 						}
 
-					}
-
-				});
+					});
 
 			} else {
 
 				getPid()
-					.then(function(pid) {
+					.then(function (pid) {
 
 						self.getIp();
 
@@ -121,8 +121,8 @@
 		var self = this;
 
 		request('http://curlmyip.com/', function (error, response, body) {
-		  	if (!error && response.statusCode === 200) {
-		    	self.ip = body.trim();
+			if (!error && response.statusCode === 200) {
+				self.ip = body.trim();
 				defer.resolve(self.ip);
 			} else {
 				defer.reject(error);
@@ -132,55 +132,55 @@
 		return defer.promise;
 	};
 
-	VPN.prototype.install = function() {
+	VPN.prototype.install = function () {
 		var self = this;
 
-			if (process.platform === 'darwin') {
+		if (process.platform === 'darwin') {
 
-				return this.installRunAs()
-					.then(self.installMac)
-					.then(self.downloadConfig)
-					.then(function() {
-						// we told pt we have vpn enabled..
-						AdvSettings.set('vpn', true);
-					});
+			return this.installRunAs()
+				.then(self.installMac)
+				.then(self.downloadConfig)
+				.then(function () {
+					// we told pt we have vpn enabled..
+					AdvSettings.set('vpn', true);
+				});
 
-			} else if (process.platform === 'linux') {
+		} else if (process.platform === 'linux') {
 
-				return this.installLinux()
-					.then(self.downloadConfig)
-					.then(function() {
-						// ok we are almost done !
+			return this.installLinux()
+				.then(self.downloadConfig)
+				.then(function () {
+					// ok we are almost done !
 
-						// we told pt we have vpn enabled..
-						AdvSettings.set('vpn', true);
-					});
+					// we told pt we have vpn enabled..
+					AdvSettings.set('vpn', true);
+				});
 
-			} else if (process.platform === 'win32') {
+		} else if (process.platform === 'win32') {
 
-				return this.installRunAs()
-					.then(self.downloadConfig)
-					.then(self.installWin)
-					.then(function() {
-						// ok we are almost done !
+			return this.installRunAs()
+				.then(self.downloadConfig)
+				.then(self.installWin)
+				.then(function () {
+					// ok we are almost done !
 
-						// we told pt we have vpn enabled..
-						AdvSettings.set('vpn', true);
-					});
-			}
+					// we told pt we have vpn enabled..
+					AdvSettings.set('vpn', true);
+				});
+		}
 
-			//
+		//
 
 	};
 
-	VPN.prototype.installRunAs = function() {
+	VPN.prototype.installRunAs = function () {
 
 		// make sure path doesn't exist (for update)
 		try {
 			if (fs.existsSync(path.resolve(process.cwd(), 'node_modules', 'runas'))) {
 				fs.rmdirSync(path.resolve(process.cwd(), 'node_modules', 'runas'));
 			}
-		} catch(e) {
+		} catch (e) {
 			console.log(e);
 		}
 
@@ -191,13 +191,15 @@
 
 		// force x86 as we only have nw 32bit
 		// for mac & windows
-		if (platform === 'mac' || platform === 'win32')
+		if (platform === 'mac' || platform === 'win32') {
 			arch = 'x86';
+		}
+
 
 		var tarball = 'https://s3-eu-west-1.amazonaws.com/vpnht/runas-' + platform + '-' + arch + '.tar.gz';
 
 		return downloadTarballAndExtract(tarball)
-			.then(function(temp) {
+			.then(function (temp) {
 				// we install the runas module
 				console.log('runas imported');
 				return copyToLocation(
@@ -205,34 +207,34 @@
 					temp
 				);
 			});
-	}
+	};
 
-	VPN.prototype.downloadConfig = function() {
+	VPN.prototype.downloadConfig = function () {
 		// make sure path exist
 		try {
 			if (!fs.existsSync(path.resolve(process.cwd(), 'openvpn'))) {
 				fs.mkdirSync(path.resolve(process.cwd(), 'openvpn'));
 			}
-		} catch(e) {
+		} catch (e) {
 			console.log(e);
 		}
 
 		var configFile = 'https://s3-eu-west-1.amazonaws.com/vpnht/openvpn.conf';
 		return downloadFileToLocation(configFile, 'config.ovpn')
-			.then(function(temp) {
+			.then(function (temp) {
 				return copyToLocation(
 					path.resolve(process.cwd(), 'openvpn', 'openvpn.conf'),
 					temp
 				);
 			});
-	}
+	};
 
-	VPN.prototype.installMac = function() {
+	VPN.prototype.installMac = function () {
 
 		var tarball = 'https://s3-eu-west-1.amazonaws.com/vpnht/openvpn-mac.tar.gz';
 
 		return downloadTarballAndExtract(tarball)
-			.then(function(temp) {
+			.then(function (temp) {
 				// we install openvpn
 				return copyToLocation(
 					path.resolve(process.cwd(), 'openvpn'),
@@ -240,44 +242,44 @@
 				);
 			});
 
-	}
+	};
 
-	VPN.prototype.installWin = function() {
+	VPN.prototype.installWin = function () {
 
 		var arch = process.arch === 'ia32' ? 'x86' : process.arch;
 		var installFile = 'https://s3-eu-west-1.amazonaws.com/vpnht/openvpn-windows-' + arch + '.exe';
-		return downloadFileToLocation(installFile , 'setup.exe')
-			.then(function(temp) {
+		return downloadFileToLocation(installFile, 'setup.exe')
+			.then(function (temp) {
 
 				// we launch the setup with admin privilege silently
 				// and we install openvpn in openvpn/
 				try {
 					var pathToInstall = path.resolve(process.cwd(), 'openvpn');
 					return runas(temp, ['/S', 'SELECT_SERVICE=1', '/SELECT_SHORTCUTS=0', '/SELECT_OPENVPNGUI=0', '/D=' + pathToInstall]);
-				} catch(e) {
+				} catch (e) {
 					console.log(e);
 					return false;
 				}
 
 			});
-	}
+	};
 
-	VPN.prototype.installLinux = function() {
+	VPN.prototype.installLinux = function () {
 		// we get our arch & platform
 		var arch = process.arch === 'ia32' ? 'x86' : process.arch;
 		var tarball = 'https://s3-eu-west-1.amazonaws.com/vpnht/openvpn-linux-' + arch + '.tar.gz';
 
 		return downloadTarballAndExtract(tarball)
-			.then(function(temp) {
+			.then(function (temp) {
 				// we install openvpn
 				return copyToLocation(
 					path.resolve(process.cwd(), 'openvpn'),
 					temp
 				);
 			});
-	}
+	};
 
-	VPN.prototype.disconnect = function() {
+	VPN.prototype.disconnect = function () {
 		var defer = Q.defer();
 		var self = this;
 
@@ -295,7 +297,7 @@
 			root = path.join(root, 'Windows', 'System32', 'net.exe');
 
 			// we need to stop the service
-			runas(root, ['stop','OpenVPNService']);
+			runas(root, ['stop', 'OpenVPNService']);
 			self.getIp();
 			self.running = false;
 			console.log('openvpn stoped');
@@ -303,16 +305,18 @@
 
 		} else {
 			getPid()
-				.then(function(pid) {
+				.then(function (pid) {
 
 					if (pid) {
 
-						runas('kill', ['-9', pid], { admin: true });
+						runas('kill', ['-9', pid], {
+							admin: true
+						});
 
 						// we'll delete our pid file
 						try {
 							fs.unlinkSync(path.join(process.cwd(), 'openvpn', 'vpnht.pid'));
-						} catch(e) {
+						} catch (e) {
 							console.log(e);
 						}
 
@@ -331,16 +335,16 @@
 		}
 
 		return defer.promise;
-	}
+	};
 
-	VPN.prototype.connect = function() {
+	VPN.prototype.connect = function () {
 		var defer = Q.defer();
 		var self = this;
 		// we are writing a temp auth file
 		fs = require('fs');
 		var tempPath = temp.mkdirSync('popcorntime-vpnht');
 		tempPath = path.join(tempPath, 'o1');
-		fs.writeFile(tempPath, Settings.vpnUsername + '\n' + Settings.vpnPassword, function(err) {
+		fs.writeFile(tempPath, Settings.vpnUsername + '\n' + Settings.vpnPassword, function (err) {
 			if (err) {
 
 				defer.reject(err);
@@ -369,13 +373,13 @@
 							// we copy our openvpn.conf for the windows service
 							var newConfig = path.resolve(process.cwd(), 'openvpn', 'config', 'openvpn.ovpn');
 
-							copy(vpnConfig, newConfig, function(err) {
+							copy(vpnConfig, newConfig, function (err) {
 
 								if (err) {
 									console.log(err);
 								}
 
-								fs.appendFile(newConfig, '\r\nauth-user-pass ' + tempPath.replace(/\\/g, "\\\\"), function (err) {
+								fs.appendFile(newConfig, '\r\nauth-user-pass ' + tempPath.replace(/\\/g, '\\\\'), function (err) {
 
 									var root = process.cwd().split(path.sep)[0];
 									if (root.length === 0) {
@@ -386,7 +390,7 @@
 
 									if (fs.existsSync(root)) {
 
-										runas(root, ['start','OpenVPNService']);
+										runas(root, ['start', 'OpenVPNService']);
 										self.running = true;
 										console.log('openvpn launched');
 										// set our current ip
@@ -411,14 +415,14 @@
 									if (fs.existsSync(path.resolve(process.cwd(), 'openvpn', 'vpnht.pid'))) {
 										fs.unlinkSync(path.join(process.cwd(), 'openvpn', 'vpnht.pid'));
 									}
-								} catch(e) {
+								} catch (e) {
 									console.log(e);
 								}
 
 
 								if (runas(openvpn, args, {
 										admin: true
-									}) != 0) {
+									}) !== 0) {
 
 									// we didnt got success but process run anyways..
 									console.log('something wrong');
@@ -450,98 +454,98 @@
 		});
 
 		return defer.promise;
-	}
+	};
 
-	var downloadTarballAndExtract = function(url) {
+	var downloadTarballAndExtract = function (url) {
 		var defer = Q.defer();
 		var tempPath = temp.mkdirSync('popcorntime-openvpn-');
 		var stream = tar.Extract({
 			path: tempPath
 		});
 
-		stream.on('end', function() {
+		stream.on('end', function () {
 			defer.resolve(tempPath);
 		});
-		stream.on('error', function() {
+		stream.on('error', function () {
 			defer.resolve(false);
 		});
 		createReadStream({
 			url: url
-		}, function(requestStream) {
+		}, function (requestStream) {
 			requestStream.pipe(zlib.createGunzip()).pipe(stream);
 		});
 
 		return defer.promise;
 	};
 
-	var downloadFileToLocation = function(url, name) {
+	var downloadFileToLocation = function (url, name) {
 		var defer = Q.defer();
 		var tempPath = temp.mkdirSync('popcorntime-openvpn-');
 		tempPath = path.join(tempPath, name);
 		var stream = fs.createWriteStream(tempPath);
-		stream.on('finish', function() {
+		stream.on('finish', function () {
 			defer.resolve(tempPath);
 		});
-		stream.on('error', function() {
+		stream.on('error', function () {
 			defer.resolve(false);
 		});
 		createReadStream({
 			url: url
-		}, function(requestStream) {
+		}, function (requestStream) {
 			requestStream.pipe(stream);
 		});
 		return defer.promise;
 	};
 
-	var createReadStream = function(requestOptions, callback) {
+	var createReadStream = function (requestOptions, callback) {
 		return callback(request.get(requestOptions));
-	}
+	};
 
 	// move file
-	var copyToLocation = function(targetFilename, fromDirectory) {
+	var copyToLocation = function (targetFilename, fromDirectory) {
 		var defer = Q.defer();
 
-		mv(fromDirectory, targetFilename, function(err) {
+		mv(fromDirectory, targetFilename, function (err) {
 			defer.resolve(err);
-		})
+		});
 
 		return defer.promise;
 
 	};
 
 	// copy instead of mv (so we keep original)
-	var copy = function(source, target, cb) {
+	var copy = function (source, target, cb) {
 
 		var cbCalled = false;
 
 		var rd = fs.createReadStream(source);
-		rd.on("error", function(err) {
+		rd.on('error', function (err) {
 			done(err);
 		});
 
 		var wr = fs.createWriteStream(target);
-		wr.on("error", function(err) {
-		  	done(err);
-	 	});
-		wr.on("close", function(ex) {
+		wr.on('error', function (err) {
+			done(err);
+		});
+		wr.on('close', function (ex) {
 			done();
 		});
 		rd.pipe(wr);
 
 		function done(err) {
 			if (!cbCalled) {
-		      	cb(err);
-		    	cbCalled = true;
+				cb(err);
+				cbCalled = true;
 			}
 		}
-	}
+	};
 
-	var getPid = function() {
+	var getPid = function () {
 		var defer = Q.defer();
-		fs.readFile(path.join(process.cwd(), 'openvpn', 'vpnht.pid'), 'utf8', function (err,data) {
+		fs.readFile(path.join(process.cwd(), 'openvpn', 'vpnht.pid'), 'utf8', function (err, data) {
 
 			if (err) {
-				defer.resolve(false)
+				defer.resolve(false);
 			} else {
 				defer.resolve(data.trim());
 			}
@@ -549,22 +553,23 @@
 		});
 
 		return defer.promise;
-	}
+	};
 
-	var runas = function(cmd, args, options) {
-
+	var runas = function (cmd, args, options) {
+		var runasApp;
 		if (process.platform === 'linux') {
-			if (!password)
-				password = prompt("ATTENTION! We need admin acccess to run this command.\n\nYour password is not saved\n\nEnter sudo password : ", "");
+			if (!password) {
+				password = prompt('ATTENTION! We need admin acccess to run this command.\n\nYour password is not saved\n\nEnter sudo password : ', '');
+			}
 
 			var exec = require('child_process').exec;
-			var child = exec('sudo ' + cmd + ' ' + args.join(" "),
-			function (error, stdout, stderr) {
-				if (error !== null) {
-					console.log('exec error: ' + error);
-					return 1;
-				}
-			});
+			var child = exec('sudo ' + cmd + ' ' + args.join(' '),
+				function (error, stdout, stderr) {
+					if (error !== null) {
+						console.log('exec error: ' + error);
+						return 1;
+					}
+				});
 
 			child.stdin.write(password);
 			return 0;
@@ -572,34 +577,33 @@
 		} else if (process.platform === 'win32') {
 
 			try {
-				var runasApp = require('runas');
-			} catch(e){
+
+				runasApp = require('runas');
+				runasApp(cmd + ' ' + args.join(' '), function (error) {
+					if (error !== null) {
+						return 1;
+					}
+				});
+				return 0;
+
+			} catch (e) {
 				console.log(e);
 				return 1;
 			}
-
-			runasApp(cmd + ' ' + args.join(' '), function(error) {
-				if (error !== null) {
-					return 1;
-				}
-			});
-
-			return 0;
 
 		} else {
 
 			try {
-				var runasApp = require('runas');
-			} catch(e){
+				runasApp = require('runas');
+				return runasApp(cmd, args, options);
+			} catch (e) {
 				console.log(e);
 				return 1;
 			}
 
-			return runasApp(cmd, args, options);
-
 		}
 
-	}
+	};
 
 	// initialize VPN instance globally
 	App.VPN = new VPN();
