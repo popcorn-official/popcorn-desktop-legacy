@@ -21,9 +21,9 @@
 			win.info('Connecting VPN');
 		},
 
-        onClose: function() {
-            clearInterval(timerEvent);
-        },
+		onClose: function () {
+			clearInterval(timerEvent);
+		},
 
 		onShow: function () {
 			var self = this;
@@ -34,63 +34,62 @@
 
 			this.ui.inittext.text(i18n.__('Please, allow ~ 1 minute'));
 			this.ui.initstatus.text(i18n.__('Status: Connecting to VPN...'));
-            this.ui.cancelblock.show();
+			this.ui.cancelblock.show();
 
 			App.VPN.getIp()
-				.then(function(currentIp) {
-		            // we trigger our connexion
-		            App.VpnConnexion = App.VPN.connect().then(function () {
+				.then(function (currentIp) {
+					// we trigger our connexion
+					App.VpnConnexion = App.VPN.connect().then(function () {
 
-		                // we'll monitor our ip change every 15 sec
-		                timerEvent = setInterval(function () {
+						// we'll monitor our ip change every 15 sec
+						timerEvent = setInterval(function () {
 							self.monitorIp(currentIp);
 						}, 5000);
-		            });
+					});
 				});
 
 		},
 
-        monitorIp: function(currentIp) {
-            this.ui.initstatus.text(i18n.__('Status: Monitoring connexion - ') + currentIp);
+		monitorIp: function (currentIp) {
+			this.ui.initstatus.text(i18n.__('Status: Monitoring connexion - ') + currentIp);
 			var self = this;
-            App.VPN.getIp()
-                .then(function(newIp) {
+			App.VPN.getIp()
+				.then(function (newIp) {
 
 					console.log(currentIp);
 					console.log(newIp);
 
 					self.ui.initstatus.text(i18n.__('Status: Monitoring connexion - ') + newIp);
 
-                    // we have a new ip...
-                    if (newIp !== currentIp) {
+					// we have a new ip...
+					if (newIp !== currentIp) {
 
-                        self.ui.initstatus.text(i18n.__('Status: Connected'));
-                        setTimeout(function(){
+						self.ui.initstatus.text(i18n.__('Status: Connected'));
+						setTimeout(function () {
 							self.close();
-                            App.vent.trigger('movies:list');
-                        }, 3000);
+							App.vent.trigger('movies:list');
+						}, 3000);
 
-                    }
+					}
 
-                });
+				});
 
-        },
+		},
 
-		cancelConnexion: function(e) {
+		cancelConnexion: function (e) {
 			e.preventDefault();
 			var self = this;
 			// we kill all process
 			App.VPN.disconnect()
-				.then(function() {
+				.then(function () {
 					App.vent.trigger('movies:list');
 					self.close();
 				})
-				.catch(function() {
+				.catch(function () {
 					App.vent.trigger('movies:list');
 					self.close();
-				})
+				});
 		}
-
 
 
 	});
