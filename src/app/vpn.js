@@ -31,6 +31,16 @@
 		}
 	};
 
+	VPN.prototype.isDisabled = function() {
+		//disabled on demand
+		var disabled = AdvSettings.get('vpnDisabledPerm');
+		if (disabled) {
+			return true;
+		} else {
+			return false;
+		}
+	};
+	
 	VPN.prototype.isRunning = function(checkOnStart) {
 		var defer = Q.defer();
 		var self = this;
