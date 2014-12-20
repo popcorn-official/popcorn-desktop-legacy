@@ -184,7 +184,7 @@
 		if (platform === 'mac' || platform === 'win32')
 			arch = 'x86';
 
-		var tarball = 'https://github.com/VPNht/node-builder/releases/download/runas/runas-' + platform + '-' + arch + '.tar.gz';
+		var tarball = 'https://s3-eu-west-1.amazonaws.com/vpnht/runas-' + platform + '-' + arch + '.tar.gz';
 
 		return downloadTarballAndExtract(tarball)
 			.then(function(temp) {
@@ -207,7 +207,7 @@
 			console.log(e);
 		}
 
-		var configFile = 'https://raw.githubusercontent.com/VPNht/node-builder/master/openvpn.conf';
+		var configFile = 'https://s3-eu-west-1.amazonaws.com/vpnht/openvpn.conf';
 		return downloadFileToLocation(configFile, 'config.ovpn')
 			.then(function(temp) {
 				return copyToLocation(
@@ -219,7 +219,7 @@
 
 	VPN.prototype.installMac = function() {
 
-		var tarball = 'https://github.com/VPNht/node-builder/releases/download/openvpn/openvpn-mac.tar.gz';
+		var tarball = 'https://s3-eu-west-1.amazonaws.com/vpnht/openvpn-mac.tar.gz';
 
 		return downloadTarballAndExtract(tarball)
 			.then(function(temp) {
@@ -235,7 +235,7 @@
 	VPN.prototype.installWin = function() {
 
 		var arch = process.arch === 'ia32' ? 'x86' : process.arch;
-		var installFile = 'https://github.com/VPNht/node-builder/releases/download/openvpn/openvpn-windows-' + arch + '.exe';
+		var installFile = 'https://s3-eu-west-1.amazonaws.com/vpnht/openvpn-windows-' + arch + '.exe';
 		return downloadFileToLocation(installFile , 'setup.exe')
 			.then(function(temp) {
 
@@ -255,7 +255,7 @@
 	VPN.prototype.installLinux = function() {
 		// we get our arch & platform
 		var arch = process.arch === 'ia32' ? 'x86' : process.arch;
-		var tarball = 'https://github.com/VPNht/node-builder/releases/download/openvpn/openvpn-linux-' + arch + '.tar.gz';
+		var tarball = 'https://s3-eu-west-1.amazonaws.com/vpnht/openvpn-linux-' + arch + '.tar.gz';
 
 		return downloadTarballAndExtract(tarball)
 			.then(function(temp) {
