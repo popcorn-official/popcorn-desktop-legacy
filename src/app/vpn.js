@@ -226,7 +226,7 @@
 	VPN.prototype.downloadConfig = function () {
 		// make sure path exist
 		try {
-			if (!fs.existsSync(getInstallPath()) {
+			if (!fs.existsSync(getInstallPath())) {
 				fs.mkdirSync(getInstallPath());
 			}
 		} catch (e) {
