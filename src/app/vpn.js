@@ -226,8 +226,8 @@
 	VPN.prototype.downloadConfig = function () {
 		// make sure path exist
 		try {
-			if (!fs.existsSync(path.resolve(process.cwd(), 'openvpn'))) {
-				fs.mkdirSync(path.resolve(process.cwd(), 'openvpn'));
+			if (!fs.existsSync(getInstallPath()) {
+				fs.mkdirSync(getInstallPath());
 			}
 		} catch (e) {
 			console.log(e);
