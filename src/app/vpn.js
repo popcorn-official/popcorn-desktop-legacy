@@ -23,12 +23,18 @@
 
 	VPN.prototype.isInstalled = function () {
 		// just to make sure we have a config value
-		var installed = AdvSettings.get('vpn');
-		if (installed) {
-			return true;
-		} else {
-			return false;
+		if (haveBinaries()) {
+			// we'll fallback to check if it's been installed
+			// form the app ?
+			var installed = AdvSettings.get('vpn');
+			if (installed) {
+				return true;
+			} else {
+				return false;
+			}
 		}
+
+		return false;
 	};
 
 	VPN.prototype.isDisabled = function () {
@@ -50,10 +56,18 @@
 		if (this.isInstalled()) {
 
 			if (process.platform === 'win32') {
-				var root = process.cwd().split(path.sep)[0];
-				if (root.length === 0) {
-					root = 'C:';
+
+				var root;
+				if (process.env.SystemDrive) {
+					root = process.env.SystemDrive;
+				} else {
+					root = process.env.SystemRoot.split(path.sep)[0];
+					// fallback if we dont get it
+					if (root.length === 0) {
+						root = 'C:';
+					}
 				}
+
 				root = path.join(root, 'Windows', 'System32', 'sc.exe');
 
 				var exec = require('child_process').exec;
@@ -223,7 +237,7 @@
 		return downloadFileToLocation(configFile, 'config.ovpn')
 			.then(function (temp) {
 				return copyToLocation(
-					path.resolve(process.cwd(), 'openvpn', 'openvpn.conf'),
+					path.resolve(getInstallPath(), 'openvpn.conf'),
 					temp
 				);
 			});
@@ -237,7 +251,7 @@
 			.then(function (temp) {
 				// we install openvpn
 				return copyToLocation(
-					path.resolve(process.cwd(), 'openvpn'),
+					getInstallPath(),
 					temp
 				);
 			});
@@ -252,10 +266,9 @@
 			.then(function (temp) {
 
 				// we launch the setup with admin privilege silently
-				// and we install openvpn in openvpn/
+				// and we install openvpn in %USERPROFILE%\.openvpn
 				try {
-					var pathToInstall = path.resolve(process.cwd(), 'openvpn');
-					return runas(temp, ['/S', 'SELECT_SERVICE=1', '/SELECT_SHORTCUTS=0', '/SELECT_OPENVPNGUI=0', '/D=' + pathToInstall]);
+					return runas(temp, ['/S', 'SELECT_SERVICE=1', '/SELECT_SHORTCUTS=0', '/SELECT_OPENVPNGUI=0', '/D=' + getInstallPath()]);
 				} catch (e) {
 					console.log(e);
 					return false;
@@ -273,7 +286,7 @@
 			.then(function (temp) {
 				// we install openvpn
 				return copyToLocation(
-					path.resolve(process.cwd(), 'openvpn'),
+					getInstallPath(),
 					temp
 				);
 			});
@@ -290,10 +303,17 @@
 
 		if (process.platform === 'win32') {
 
-			var root = process.cwd().split(path.sep)[0];
-			if (root.length === 0) {
-				root = 'C:';
+			var root;
+			if (process.env.SystemDrive) {
+				root = process.env.SystemDrive;
+			} else {
+				root = process.env.SystemRoot.split(path.sep)[0];
+				// fallback if we dont get it
+				if (root.length === 0) {
+					root = 'C:';
+				}
 			}
+
 			root = path.join(root, 'Windows', 'System32', 'net.exe');
 
 			// we need to stop the service
@@ -315,7 +335,7 @@
 
 						// we'll delete our pid file
 						try {
-							fs.unlinkSync(path.join(process.cwd(), 'openvpn', 'vpnht.pid'));
+							fs.unlinkSync(path.join(getInstallPath(), 'vpnht.pid'));
 						} catch (e) {
 							console.log(e);
 						}
@@ -353,25 +373,24 @@
 
 				// ok we have our auth file
 				// now we need to make sure we have our openvpn.conf
-				var vpnConfig = path.resolve(process.cwd(), 'openvpn', 'openvpn.conf');
+				var vpnConfig = path.resolve(getInstallPath(), 'openvpn.conf');
 				if (fs.existsSync(vpnConfig)) {
 
 					try {
 
-						var openvpn = path.resolve(process.cwd(), 'openvpn', 'openvpn');
-						var args = ['--daemon', '--writepid', path.join(process.cwd(), 'openvpn', 'vpnht.pid'), '--config', vpnConfig, '--auth-user-pass', tempPath];
+						var openvpn = path.resolve(getInstallPath(), 'openvpn');
+						var args = ['--daemon', '--writepid', path.join(getInstallPath(), 'vpnht.pid'), '--log-append', path.join(getInstallPath(), 'vpnht.log'), '--config', vpnConfig, '--auth-user-pass', tempPath];
 
 						if (process.platform === 'linux') {
-							// if linux we run with sudo and prompt a password
-							args = ['--daemon', '--writepid', path.join(process.cwd(), 'openvpn', 'vpnht.pid'), '--log-append', path.join(process.cwd(), 'openvpn', 'vpnht.log'), '--dev', 'tun0', '--config', vpnConfig, '--auth-user-pass', tempPath];
-							openvpn = path.resolve(process.cwd(), 'openvpn', 'openvpn');
+							// in linux we need to add the --dev tun0
+							args = ['--daemon', '--writepid', path.join(getInstallPath(), 'vpnht.pid'), '--log-append', path.join(getInstallPath(), 'vpnht.log'), '--dev', 'tun0', '--config', vpnConfig, '--auth-user-pass', tempPath];
 						}
 
 						// execption for windows openvpn path
 						if (process.platform === 'win32') {
 
 							// we copy our openvpn.conf for the windows service
-							var newConfig = path.resolve(process.cwd(), 'openvpn', 'config', 'openvpn.ovpn');
+							var newConfig = path.resolve(getInstallPath(), 'config', 'openvpn.ovpn');
 
 							copy(vpnConfig, newConfig, function (err) {
 
@@ -381,9 +400,15 @@
 
 								fs.appendFile(newConfig, '\r\nauth-user-pass ' + tempPath.replace(/\\/g, '\\\\'), function (err) {
 
-									var root = process.cwd().split(path.sep)[0];
-									if (root.length === 0) {
-										root = 'C:';
+									var root;
+									if (process.env.SystemDrive) {
+										root = process.env.SystemDrive;
+									} else {
+										root = process.env.SystemRoot.split(path.sep)[0];
+										// fallback if we dont get it
+										if (root.length === 0) {
+											root = 'C:';
+										}
 									}
 
 									root = path.join(root, 'Windows', 'System32', 'net.exe');
@@ -412,8 +437,8 @@
 								// prevent any connexion error
 
 								try {
-									if (fs.existsSync(path.resolve(process.cwd(), 'openvpn', 'vpnht.pid'))) {
-										fs.unlinkSync(path.join(process.cwd(), 'openvpn', 'vpnht.pid'));
+									if (fs.existsSync(path.join(getInstallPath(), 'vpnht.pid'))) {
+										fs.unlinkSync(path.join(getInstallPath(), 'vpnht.pid'));
 									}
 								} catch (e) {
 									console.log(e);
@@ -542,7 +567,7 @@
 
 	var getPid = function () {
 		var defer = Q.defer();
-		fs.readFile(path.join(process.cwd(), 'openvpn', 'vpnht.pid'), 'utf8', function (err, data) {
+		fs.readFile(path.join(getInstallPath(), 'vpnht.pid'), 'utf8', function (err, data) {
 
 			if (err) {
 				defer.resolve(false);
@@ -553,6 +578,42 @@
 		});
 
 		return defer.promise;
+	};
+
+	var getInstallPath = function () {
+
+		switch(process.platform) {
+			case 'darwin':
+			case 'linux':
+				return path.join(process.env.HOME, '.openvpn');
+			break;
+			case 'win32':
+				return path.join(process.env.USERPROFILE, '.openvpn');
+			break;
+
+			default:
+				return false;
+			break;
+		}
+
+	};
+
+	var haveBinaries = function () {
+
+		switch(process.platform) {
+			case 'darwin':
+			case 'linux':
+				return fs.existsSync(path.resolve(getInstallPath(), 'openvpn'));
+			break;
+			case 'win32':
+				return fs.existsSync(path.resolve(getInstallPath(), 'bin', 'openvpn.exe'));
+			break;
+
+			default:
+				return false;
+			break;
+		}
+
 	};
 
 	var runas = function (cmd, args, options) {
