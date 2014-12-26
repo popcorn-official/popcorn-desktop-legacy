@@ -51,7 +51,7 @@
 		},
 
 		monitorIp: function (currentIp) {
-			this.ui.initstatus.text(i18n.__('Status: Monitoring connexion - ') + currentIp);
+			this.ui.initstatus.text(i18n.__('Status: Monitoring connection') + ' - ' + currentIp);
 			var self = this;
 			App.VPN.getIp()
 				.then(function (newIp) {
@@ -59,7 +59,7 @@
 					console.log(currentIp);
 					console.log(newIp);
 
-					self.ui.initstatus.text(i18n.__('Status: Monitoring connexion - ') + newIp);
+					self.ui.initstatus.text(i18n.__('Status: Monitoring connection') + ' - ' + newIp);
 
 					// we have a new ip...
 					if (newIp !== currentIp) {

@@ -620,7 +620,8 @@
 		var runasApp;
 		if (process.platform === 'linux') {
 			if (!password) {
-				password = prompt('ATTENTION! We need admin acccess to run this command.\n\nYour password is not saved\n\nEnter sudo password : ', '');
+				var pwStrings = i18n.__('ATTENTION! We need admin access to run this command.') + '\n\n' + i18n.__('Your password is not saved') + '\n\n' + i18n.__('Enter sudo password :');
+				password = prompt(pwStrings, '');
 			}
 
 			var exec = require('child_process').exec;
