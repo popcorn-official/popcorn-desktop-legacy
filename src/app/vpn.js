@@ -14,7 +14,7 @@ var request = require('request');
     VPNClient.prototype.launch = function() {
     	var vpnClient = gui.Window.open('https://client.vpn.ht/', {
         	position: 'center',
-        	frame: false,
+        	//frame: false,
         	focus: true,
         	toolbar: false,
         	resizable: false,
