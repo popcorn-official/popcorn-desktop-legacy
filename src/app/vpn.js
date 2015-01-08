@@ -48,16 +48,18 @@ var request = require('request');
 	}
 
 	VPNClient.prototype.getStatus = function(callback) {
-	  request({
-	    url: 'https://vpn.ht/status?json'
-	  }, function(error, response, body) {
-	    if (response.statusCode === 200) {
-	      body = JSON.parse(body);
-	      return callback(body.connected);
-	    } else {
-	      return callback(false);
-	    }
-	  });
+		request({
+	  		url: 'https://vpn.ht/status?json'
+	  	}, function(error, response, body) {
+			if (error) {
+				callback(false);
+			} else if (response.statusCode === 200) {
+		      	body = JSON.parse(body);
+		      	return callback(body.connected);
+		    } else {
+		      	return callback(false);
+		    }
+		});
 	};
 
 	// function exposed to the client as well
