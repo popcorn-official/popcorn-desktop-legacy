@@ -90,6 +90,7 @@
 			var torrents = {};
 			torrents[movie.Quality] = {
 				url: movie.TorrentUrl,
+				magnet: movie.TorrentMagnetUrl,
 				size: movie.SizeByte,
 				filesize: movie.Size,
 				seed: seeds,
