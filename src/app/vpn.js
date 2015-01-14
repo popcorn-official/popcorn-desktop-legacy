@@ -38,9 +38,9 @@ var request = require('request');
 				// we'll launch our connection monitoring
 				// every 5 mins
 				self.monitorStatus();
-			})
+			});
 		}
-	}
+	};
 	// used to hide in the titlebar
 	VPNClient.prototype.isDisabled = function() {
 		var disabled = App.settings.vpnDisabledPerm;
@@ -49,7 +49,7 @@ var request = require('request');
 		} else {
 			return false;
 		}
-	}
+	};
 
 	VPNClient.prototype.getStatus = function(callback) {
 		request({
@@ -70,11 +70,11 @@ var request = require('request');
 		var self = this;
 		setInterval(function () {
 			self.getStatus(function(status) {
-				self.connected = connected
+				self.connected = status;
 				if (status === true) {
-					$('.vpn-connect').css("color","#266E3E").removeClass('fa-unlock-alt').addClass('fa-lock').attr('data-original-title', i18n.__("Disconnect VPN")).attr('id', 'filterbar-vpn-disconnect');
+					$('.vpn-connect').css('color','#266E3E').removeClass('fa-unlock-alt').addClass('fa-lock').attr('data-original-title', i18n.__('Disconnect VPN')).attr('id', 'filterbar-vpn-disconnect');
 				} else {
-					$('.vpn-connect').css("color","#CC0000").removeClass('fa-lock').addClass('fa-unlock-alt').attr('data-original-title', i18n.__("Connect VPN")).attr('id', 'filterbar-vpn-connect');
+					$('.vpn-connect').css('color','#CC0000').removeClass('fa-lock').addClass('fa-unlock-alt').attr('data-original-title', i18n.__('Connect VPN')).attr('id', 'filterbar-vpn-connect');
 				}
 			});
 
@@ -84,12 +84,12 @@ var request = require('request');
 	// function exposed to the client as well
 	VPNClient.prototype.setVPNClient = function(Client){
 		window.App.VPN = Client;
-	}
-	
+	};
+
 	VPNClient.prototype.setVPNStatus = function(connected) {
-		this.connected = connected
+		this.connected = connected;
 		App.vent.trigger('movies:list');
-	}
+	};
 
 	// initialize VPN instance globally
 	App.VPNClient = new VPNClient();
