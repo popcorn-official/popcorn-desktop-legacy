@@ -89,7 +89,7 @@
 
 			var torrents = {};
 			torrents[movie.Quality] = {
-				url: movie.TorrentUrl,
+				url: movie.TorrentUrl.replace(/^https?:\/\/yts\..*\//, AdvSettings.get('ytsAPI').url).replace('/api', ''), // make sure the url is correct, in case a proxy is used
 				magnet: movie.TorrentMagnetUrl,
 				size: movie.SizeByte,
 				filesize: movie.Size,
