@@ -3,6 +3,14 @@ var request = require('request');
 (function(App) {
 	'use strict';
 
+	function disconnectIcon() {
+		$('.vpn-connect').css('color','#266E3E').removeClass('fa-unlock-alt').addClass('fa-lock').attr('data-original-title', i18n.__('Disconnect VPN')).attr('id', 'filterbar-vpn-disconnect');
+	}
+
+	function connectIcon() {
+		$('.vpn-connect').css('color','#CC0000').removeClass('fa-lock').addClass('fa-unlock-alt').attr('data-original-title', i18n.__('Connect VPN')).attr('id', 'filterbar-vpn-connect');
+	}
+
     function VPNClient() {
     	if (!(this instanceof VPNClient)) {
     		return new VPNClient();
@@ -33,8 +41,13 @@ var request = require('request');
 		// if we have it we can check if we are connected
 		if (App.settings.vpnUsername && App.settings.vpnPassword) {
 			this.getStatus(function(connected) {
+				self.connected = connected;
 				// update current status
-				self.setVPNStatus(connected);
+				if (connected === true) {
+					disconnectIcon();
+				} else {
+					connectIcon();
+				}
 				// we'll launch our connection monitoring
 				// every 5 mins
 				self.monitorStatus();
@@ -72,9 +85,9 @@ var request = require('request');
 			self.getStatus(function(status) {
 				self.connected = status;
 				if (status === true) {
-					$('.vpn-connect').css('color','#266E3E').removeClass('fa-unlock-alt').addClass('fa-lock').attr('data-original-title', i18n.__('Disconnect VPN')).attr('id', 'filterbar-vpn-disconnect');
+					disconnectIcon();
 				} else {
-					$('.vpn-connect').css('color','#CC0000').removeClass('fa-lock').addClass('fa-unlock-alt').attr('data-original-title', i18n.__('Connect VPN')).attr('id', 'filterbar-vpn-connect');
+					connectIcon();
 				}
 			});
 
@@ -86,9 +99,21 @@ var request = require('request');
 		window.App.VPN = Client;
 	};
 
+	// function called from the VPN client
+	// usefull for user who can't load movie tab
 	VPNClient.prototype.setVPNStatus = function(connected) {
 		this.connected = connected;
 		App.vent.trigger('movies:list');
+	};
+
+	// function called from filter bar view to update icon
+	// with cached value
+	VPNClient.prototype.setVPNStatusCached = function() {
+		if (this.connected) {
+			disconnectIcon();
+		} else {
+			connectIcon();
+		}
 	};
 
 	// initialize VPN instance globally
