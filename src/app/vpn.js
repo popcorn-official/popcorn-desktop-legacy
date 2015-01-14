@@ -33,7 +33,11 @@ var request = require('request');
 		// if we have it we can check if we are connected
 		if (App.settings.vpnUsername && App.settings.vpnPassword) {
 			this.getStatus(function(connected) {
+				// update current status
 				self.setVPNStatus(connected);
+				// we'll launch our connection monitoring
+				// every 5 mins
+				self.monitorStatus();
 			})
 		}
 	}
@@ -62,10 +66,26 @@ var request = require('request');
 		});
 	};
 
+	VPNClient.prototype.monitorStatus = function() {
+		var self = this;
+		setInterval(function () {
+			self.getStatus(function(status) {
+				self.connected = connected
+				if (status === true) {
+					$('.vpn-connect').css("color","#266E3E").removeClass('fa-unlock-alt').addClass('fa-lock').attr('data-original-title', i18n.__("Disconnect VPN")).attr('id', 'filterbar-vpn-disconnect');
+				} else {
+					$('.vpn-connect').css("color","#CC0000").removeClass('fa-lock').addClass('fa-unlock-alt').attr('data-original-title', i18n.__("Connect VPN")).attr('id', 'filterbar-vpn-connect');
+				}
+			});
+
+		}, 300000);
+	};
+
 	// function exposed to the client as well
 	VPNClient.prototype.setVPNClient = function(Client){
 		window.App.VPN = Client;
 	}
+	
 	VPNClient.prototype.setVPNStatus = function(connected) {
 		this.connected = connected
 		App.vent.trigger('movies:list');
