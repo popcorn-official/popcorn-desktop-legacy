@@ -109,7 +109,7 @@
 				imdb_id: 'mal-' + item.id,
 				slug: item.name.toLowerCase().replace(/\s/g, '-'),
 				title: item.name,
-				year: item.year,
+				year: item.aired.split(', ')[1].replace(/ to.*/, ''),
 				type: type,
 				item_data: item.type
 			};
