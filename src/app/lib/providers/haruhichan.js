@@ -93,7 +93,6 @@
 	};
 
 	var formatForPopcorn = function (items) {
-		console.log(_.pluck(items, 'type'));
 		var results = _.map(items, function (item) {
 			var img = item.malimg;
 			var type = (item.type === 'Movie') ? 'movie' : 'show';
@@ -240,7 +239,6 @@
 			});
 		}
 
-		console.log('haruhiret', ret);
 		return ret;
 	};
 
