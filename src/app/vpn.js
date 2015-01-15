@@ -4,11 +4,27 @@ var request = require('request');
 	'use strict';
 
 	function disconnectIcon() {
-		$('.vpn-connect').css('color','#266E3E').removeClass('fa-unlock-alt').addClass('fa-lock').attr('data-original-title', i18n.__('Disconnect VPN')).attr('id', 'filterbar-vpn-disconnect');
+		var vpnButton = $('.vpn-connect');
+		vpnButton.css('color','#266E3E').removeClass('fa-unlock-alt').addClass('fa-lock').attr('data-original-title', i18n.__('Disconnect VPN')).attr('id', 'filterbar-vpn-disconnect');
+		vpnButton.hover(function () {
+			$(this).addClass('fa-unlock-alt');
+			$(this).removeClass('fa-lock');
+		}, function () {
+			$(this).addClass('fa-lock');
+			$(this).removeClass('fa-unlock-alt');
+		});
 	}
 
 	function connectIcon() {
-		$('.vpn-connect').css('color','#CC0000').removeClass('fa-lock').addClass('fa-unlock-alt').attr('data-original-title', i18n.__('Connect VPN')).attr('id', 'filterbar-vpn-connect');
+		var vpnButton = $('.vpn-connect');
+		vpnButton.css('color','#CC0000').removeClass('fa-lock').addClass('fa-unlock-alt').attr('data-original-title', i18n.__('Connect VPN')).attr('id', 'filterbar-vpn-connect');
+		vpnButton.hover(function () {
+			$(this).addClass('fa-lock');
+			$(this).removeClass('fa-unlock-alt');
+		}, function () {
+			$(this).addClass('fa-unlock-alt');
+			$(this).removeClass('fa-lock');
+		});
 	}
 
     function VPNClient() {
