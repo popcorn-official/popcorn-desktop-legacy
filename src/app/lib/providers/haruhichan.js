@@ -21,7 +21,6 @@
 	inherits(Haruhichan, App.Providers.Generic);
 
 	var queryTorrents = function (filters) {
-		// http://ptp.haruhichan.com/list.php?page=0&sort=rank&order=desc&limit=50&state=1
 		var deferred = Q.defer();
 
 		var params = {};
@@ -64,7 +63,6 @@
 
 		// XXX(xaiki): haruchichan currently doesn't support filters
 		var url = URL + 'list.php?' + querystring.stringify(params).replace(/%25%20/g, '%20');
-		win.info('Request to HARUHICHAN API');
 		win.debug(url);
 		request({
 			url: url,
@@ -172,7 +170,6 @@
 			var quality = item.quality.match(/[0-9]+p/)[0];
 			var match = item.name.match(/[\s_]([0-9]+(-[0-9]+)?|CM|OVA)[\s_]/);
 			if (!match) {
-				console.error('could not match', item.name);
 				return;
 			}
 			var episode = match[1];
@@ -192,7 +189,7 @@
 				torrents: torrents,
 				season: 1,
 				episode: Number(s.split('-')[0]),
-				overview: 'we still don\'t have single episodes overview for anime… sorry',
+				overview: i18n.__('We still don\'t have single episode overviews for anime… Sorry'),
 				tvdb_id: id + '-1-' + s
 			};
 		});
@@ -204,7 +201,7 @@
 		var genres = item.genres.split(', ');
 
 		var ret = _.extend(prev, {
-			country: 'Japan',
+			country: i18n.__('Japan'),
 			genre: genres.join(' - '),
 			genres: genres,
 			num_seasons: 1,
