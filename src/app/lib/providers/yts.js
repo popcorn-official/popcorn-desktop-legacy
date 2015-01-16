@@ -105,23 +105,19 @@
 
 	// Single element query
 	var queryTorrent = function (torrent_id, old_data) {
-		return Q.Promise(function (resolve, reject) {
-			var params = {
-				imdb_id: torrent_id
-			};
+		var params = {
+			imdb_id: torrent_id
+		};
 
-			var endpoint = AdvSettings.get('ytsAPI');
-			var url = 'listimdb.json?' + querystring.stringify(params).replace(/%E2%80%99/g, '%27');
-			win.info('Request to YTS API');
+		var endpoint = AdvSettings.get('ytsAPI');
+		var url = 'listimdb.json?' + querystring.stringify(params).replace(/%E2%80%99/g, '%27');
+		win.info('Request to YTS API');
 
-			requestTorrent(endpoint, url, endpoint.index).then(function (data) {
-				var ptt = formatForPopcorn(data);
-				var torrents = ptt.results.pop().torrents || {};
-				old_data.torrents = _.extend(old_data.torrents, torrents);
-				resolve(old_data);
-			}, function (err) {
-				reject(err);
-			});
+		return requestTorrent(endpoint, url, endpoint.index).then(function (data) {
+			var ptt = formatForPopcorn(data);
+			var torrents = ptt.results.pop().torrents || {};
+			old_data.torrents = _.extend(old_data.torrents, torrents);
+			return old_data;
 		});
 	};
 
