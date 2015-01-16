@@ -80,7 +80,7 @@
 
 					var err = data ? data.error : 'No data returned';
 					win.error('API error:', err);
-					resolve(false);
+					reject(err);
 
 				} else {
 					// we cache our new element
