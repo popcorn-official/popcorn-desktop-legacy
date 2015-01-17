@@ -80,6 +80,12 @@
 			if (movie.Quality === '3D') {
 				return;
 			}
+
+			// Don't display unwanted qualities
+			if (Settings.movies_quality !== 'all' && movie.Quality !== Settings.movies_quality) {
+				return;
+			}
+
 			var largeCover = movie.CoverImage.replace(/_med\./, '_large.');
 			var imdb = movie.ImdbCode;
 
@@ -123,11 +129,11 @@
 	// Single element query
 	var queryTorrent = function (torrent_id, old_data) {
 		return Q.Promise(function (resolve, reject) {
+			
 			var params = {
 				imdb_id: torrent_id
 			};
 			var url = AdvSettings.get('ytsAPI').url + 'listimdb.json?' + querystring.stringify(params).replace(/%E2%80%99/g, '%27');
-
 			win.info('Request to YTS API');
 			win.debug(url);
 			request({
