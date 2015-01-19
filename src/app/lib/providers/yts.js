@@ -63,6 +63,12 @@
 			if (movie.Quality === '3D') {
 				return;
 			}
+
+			// Don't display unwanted qualities
+			if (Settings.movies_quality !== 'all' && movie.Quality !== Settings.movies_quality) {
+				return;
+			}
+
 			var largeCover = movie.CoverImage.replace(/_med\./, '_large.');
 			var imdb = movie.ImdbCode;
 
