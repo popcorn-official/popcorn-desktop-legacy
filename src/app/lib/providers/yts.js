@@ -15,8 +15,6 @@
 
 	var queryTorrents = function (filters) {
 
-		var deferred = Q.defer();
-
 		var params = {};
 		params.sort = 'seeds';
 		params.limit = '50';
@@ -49,26 +47,11 @@
 			params.quality = Settings.movies_quality;
 		}
 
-		var url = AdvSettings.get('ytsAPI').url + 'list.json?' + querystring.stringify(params).replace(/%E2%80%99/g, '%27');
-
+		var endpoint = AdvSettings.get('ytsAPI');
+		var url = 'list.json?' + querystring.stringify(params).replace(/%E2%80%99/g, '%27');
 		win.info('Request to YTS API');
-		win.debug(url);
-		request({
-			url: url,
-			json: true
-		}, function (error, response, data) {
-			if (error || response.statusCode >= 400) {
-				deferred.reject(error);
-			} else if (!data || (data.error && data.error !== 'No movies found')) {
-				var err = data ? data.error : 'No data returned';
-				win.error('YTS error:', err);
-				deferred.reject(err);
-			} else {
-				deferred.resolve(data.MovieList || []);
-			}
-		});
 
-		return deferred.promise;
+		return requestTorrent(endpoint, url, endpoint.index);
 	};
 
 	var formatForPopcorn = function (items) {
@@ -128,29 +111,47 @@
 
 	// Single element query
 	var queryTorrent = function (torrent_id, old_data) {
+		var params = {
+			imdb_id: torrent_id
+		};
+
+		var endpoint = AdvSettings.get('ytsAPI');
+		var url = 'listimdb.json?' + querystring.stringify(params).replace(/%E2%80%99/g, '%27');
+		win.info('Request to YTS API');
+
+		return requestTorrent(endpoint, url, endpoint.index).then(function (data) {
+			var ptt = formatForPopcorn(data);
+			var torrents = ptt.results.pop().torrents || {};
+			old_data.torrents = _.extend(old_data.torrents, torrents);
+			return old_data;
+		});
+	};
+
+	var requestTorrent = function (endpoint, url, originalIndex) {
+		win.debug(endpoint.url + url);
 		return Q.Promise(function (resolve, reject) {
-			
-			var params = {
-				imdb_id: torrent_id
-			};
-			var url = AdvSettings.get('ytsAPI').url + 'listimdb.json?' + querystring.stringify(params).replace(/%E2%80%99/g, '%27');
-			win.info('Request to YTS API');
-			win.debug(url);
 			request({
-				url: url,
-				json: true
+				url: endpoint.url + url,
+				json: true,
+				timeout: 5000
 			}, function (error, response, data) {
 				if (error || response.statusCode >= 400) {
-					reject(error);
+					var nextEndpoint = AdvSettings.getNextApiEndpoint(endpoint);
+					if (nextEndpoint.index === originalIndex) {
+						reject(error);
+					} else {
+						requestTorrent(nextEndpoint, url, originalIndex).then(resolve, reject);
+					}
 				} else if (!data || (data.error && data.error !== 'No movies found')) {
 					var err = data ? data.error : 'No data returned';
-					win.error('YTS error:', err);
-					reject(err);
+					var nextEndpoint = AdvSettings.getNextApiEndpoint(endpoint);
+					if (nextEndpoint.index === originalIndex) {
+						reject(err);
+					} else {
+						requestTorrent(nextEndpoint, url, originalIndex).then(resolve, reject);
+					}
 				} else {
-					var ptt = formatForPopcorn(data.MovieList || []);
-					var torrents = ptt.results.pop().torrents || {};
-					old_data.torrents = _.extend(old_data.torrents, torrents);
-					resolve(old_data);
+					resolve(data.MovieList || []);
 				}
 			});
 		});
