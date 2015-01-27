@@ -21,7 +21,7 @@
 			win.info('Connecting VPN');
 		},
 
-		onClose: function () {
+		onDestroy: function () {
 			clearInterval(timerEvent);
 		},
 
@@ -66,7 +66,7 @@
 
 						self.ui.initstatus.text(i18n.__('Status: Connected'));
 						setTimeout(function () {
-							self.close();
+							self.destroy();
 							App.vent.trigger('movies:list');
 						}, 3000);
 
@@ -83,11 +83,11 @@
 			App.VPN.disconnect()
 				.then(function () {
 					App.vent.trigger('movies:list');
-					self.close();
+					self.destroy();
 				})
 				.catch(function () {
 					App.vent.trigger('movies:list');
-					self.close();
+					self.destroy();
 				});
 		}
 
