@@ -1,176 +1,131 @@
 (function (App) {
 	'use strict';
-	var querystring = require('querystring');
-	var request = require('request');
+
 	var Q = require('q');
+	var request = require('request');
 	var inherits = require('util').inherits;
 
-	var URL = false;
-
-	function Yts() {
-		Yts.super_.call(this);
-	}
-
-	inherits(Yts, App.Providers.Generic);
-
-	var queryTorrents = function (filters) {
-
-		var params = {};
-		params.sort = 'seeds';
-		params.limit = '50';
-
-		if (filters.keywords) {
-			params.keywords = filters.keywords.replace(/\s/g, '% ');
+	function YTS() {
+		if(!(this instanceof YTS)) {
+			return new YTS();
 		}
 
-		if (filters.genre) {
+		App.Providers.Generic.call(this);
+	}
+	inherits(YTS, App.Providers.Generic);
+
+	YTS.prototype.extractIds = function (items) {
+		return _.pluck(items.results, 'imdb_id');
+	};
+
+	/*var format = function (data) {
+		return {
+			hasMore: data.movie_count > data.page_number * data.limit,
+			results: _.filter(data.movies, function(movie) {
+				// Filter any 3D only movies
+				return _.any(movie.torrents, function(torrent) {
+					return torrent.quality !== '3D';
+				});
+			})
+		};
+	};*/
+
+	var format = function(data) {
+		var results = _.chain(data.movies)
+		.filter(function(movie) {
+			// Filter any 3D only movies
+			return _.any(movie.torrents, function(torrent) {
+				return torrent.quality !== '3D';
+			});
+		}).map(function(movie) {
+			return {
+				type: 'movie',
+				imdb_id: movie.imdb_code,
+				title: movie.title,
+				year: movie.year,
+				genre: movie.genres.join(' / '),
+				rating: movie.rating,
+				image: movie.medium_cover_image,
+				torrents: _.reduce(movie.torrents, function(torrents, torrent) {
+					if(torrent.quality !== '3D') {
+						torrents[torrent.quality] = {
+							url: torrent.url,
+							magnet: 'magnet:?xt=urn:btih:' + torrent.hash + '&tr=udp://open.demonii.com:1337&tr=udp://tracker.coppersurfer.tk:6969',
+							size: torrent.size_bytes,
+							filesize: torrent.size,
+							seed: torrent.seeds,
+							peer: torrent.peers
+						};
+					}
+					return torrents;
+				}, {})
+			};
+		}).value();
+
+		return {
+			results: results,
+			hasMore: data.movie_count > data.page_number * data.limit
+		}
+	}
+
+	YTS.prototype.fetch = function (filters) {
+		var params = {
+			sort_by: 'seeds',
+			limit: 50,
+			with_rt_ratings: true
+		};
+
+		if(filters.page) {
+			params.page = filters.page;
+		}
+
+		if(filters.keywords) {
+			params.query_term = filters.keywords;
+		}
+
+		if(filters.genre) {
 			params.genre = filters.genre;
 		}
 
-		if (filters.order) {
-			var order = 'desc';
-			if (filters.order === 1) {
-				order = 'asc';
-			}
-			params.order = order;
+		if(filters.order === 1) {
+			params.order_by = 'asc';
 		}
 
 		if (filters.sorter && filters.sorter !== 'popularity') {
-			params.sort = filters.sorter;
-		}
-
-		if (filters.page) {
-			params.set = filters.page;
+			params.sort_by = filters.sorter;
 		}
 
 		if (Settings.movies_quality !== 'all') {
 			params.quality = Settings.movies_quality;
 		}
 
-		var endpoint = AdvSettings.get('ytsAPI');
-		var url = 'list.json?' + querystring.stringify(params).replace(/%E2%80%99/g, '%27');
-		win.info('Request to YTS API');
+		var defer = Q.defer();
 
-		return requestTorrent(endpoint, url, endpoint.index);
-	};
-
-	var formatForPopcorn = function (items) {
-		var results = {};
-		var movieFetch = {};
-		movieFetch.results = [];
-		movieFetch.hasMore = (Number(items.length) > 1 ? true : false);
-		_.each(items, function (movie) {
-			if (movie.Quality === '3D') {
-				return;
-			}
-
-			// Don't display unwanted qualities
-			if (Settings.movies_quality !== 'all' && movie.Quality !== Settings.movies_quality) {
-				return;
-			}
-
-			var largeCover = movie.CoverImage.replace(/_med\./, '_large.');
-			var imdb = movie.ImdbCode;
-
-			// Calc torrent health
-			var seeds = movie.TorrentSeeds;
-			var peers = movie.TorrentPeers;
-
-			var torrents = {};
-			torrents[movie.Quality] = {
-				url: movie.TorrentUrl.replace(/^https?:\/\/yts\..*\//, AdvSettings.get('ytsAPI').url).replace('/api', ''), // make sure the url is correct, in case a proxy is used
-				magnet: movie.TorrentMagnetUrl,
-				size: movie.SizeByte,
-				filesize: movie.Size,
-				seed: seeds,
-				peer: peers
-			};
-
-			var ptItem = results[imdb];
-			if (!ptItem) {
-				ptItem = {
-					imdb_id: imdb,
-					title: movie.MovieTitleClean.replace(/\([^)]*\)|1080p|DIRECTORS CUT|EXTENDED|UNRATED|3D|[()]/g, ''),
-					year: movie.MovieYear,
-					genre: movie.Genre,
-					rating: movie.MovieRating,
-					image: largeCover,
-					torrents: torrents,
-					type: 'movie'
-				};
-
-				movieFetch.results.push(ptItem);
+		request({
+			uri: 'http://cloudflare.com/api/v2/list_movies.json',
+			qs: params,
+			headers: { 'Host': 'eqwww.image.yt' },
+			strictSSL: false,
+			json: true,
+			timeout: 10000
+		}, function (err, res, data) {
+			if(err || res.statusCode >= 400) {
+				return defer.reject(err || 'Status Code is above 400');
+			} else if(!data || data.status === 'error') {
+				var err = data ? data.status_message : 'No data returned';
+				return defer.reject(err);
 			} else {
-				_.extend(ptItem.torrents, torrents);
+				return defer.resolve(format(data.data));
 			}
-
-			results[imdb] = ptItem;
 		});
-		return movieFetch;
+
+		return defer.promise;
 	};
 
-	// Single element query
-	var queryTorrent = function (torrent_id, old_data) {
-		var params = {
-			imdb_id: torrent_id
-		};
-
-		var endpoint = AdvSettings.get('ytsAPI');
-		var url = 'listimdb.json?' + querystring.stringify(params).replace(/%E2%80%99/g, '%27');
-		win.info('Request to YTS API');
-
-		return requestTorrent(endpoint, url, endpoint.index).then(function (data) {
-			var ptt = formatForPopcorn(data);
-			var torrents = ptt.results.pop().torrents || {};
-			old_data.torrents = _.extend(old_data.torrents, torrents);
-			return old_data;
-		});
+	YTS.prototype.detail = function (torrent_id, old_data) {
+		return Q(old_data);
 	};
 
-	var requestTorrent = function (endpoint, url, originalIndex) {
-		win.debug(endpoint.url + url);
-		return Q.Promise(function (resolve, reject) {
-			request({
-				url: endpoint.url + url,
-				json: true,
-				timeout: 5000
-			}, function (error, response, data) {
-				if (error || response.statusCode >= 400) {
-					var nextEndpoint = AdvSettings.getNextApiEndpoint(endpoint);
-					if (nextEndpoint.index === originalIndex) {
-						reject(error);
-					} else {
-						requestTorrent(nextEndpoint, url, originalIndex).then(resolve, reject);
-					}
-				} else if (!data || (data.error && data.error !== 'No movies found')) {
-					var err = data ? data.error : 'No data returned';
-					var nextEndpoint = AdvSettings.getNextApiEndpoint(endpoint);
-					if (nextEndpoint.index === originalIndex) {
-						reject(err);
-					} else {
-						requestTorrent(nextEndpoint, url, originalIndex).then(resolve, reject);
-					}
-				} else {
-					resolve(data.MovieList || []);
-				}
-			});
-		});
-	};
-
-	Yts.prototype.extractIds = function (items) {
-		return _.pluck(items.results, 'imdb_id');
-	};
-
-	Yts.prototype.fetch = function (filters) {
-		return queryTorrents(filters)
-			.then(formatForPopcorn);
-	};
-
-	Yts.prototype.detail = function (torrent_id, old_data) {
-		return queryTorrent(torrent_id, old_data);
-	};
-
-
-	App.Providers.Yts = Yts;
+	App.Providers.Yts = YTS;
 
 })(window.App);
