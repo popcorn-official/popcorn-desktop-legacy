@@ -43,7 +43,7 @@
 				imdb_id: movie.imdb_code,
 				title: movie.title,
 				year: movie.year,
-				genre: movie.genres.join(', '),
+				genre: movie.genres.join(' / '),
 				rating: movie.rating,
 				image: movie.medium_cover_image,
 				torrents: _.reduce(movie.torrents, function(torrents, torrent) {
