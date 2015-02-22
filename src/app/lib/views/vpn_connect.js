@@ -56,8 +56,8 @@
 			App.VPN.getIp()
 				.then(function (newIp) {
 
-					console.log(currentIp);
-					console.log(newIp);
+					win.info('VPN monitoring - IP:', currentIp);
+					win.info('VPN monitoring - IP:', newIp);
 
 					self.ui.initstatus.text(i18n.__('Status: Monitoring connection') + ' - ' + newIp);
 
