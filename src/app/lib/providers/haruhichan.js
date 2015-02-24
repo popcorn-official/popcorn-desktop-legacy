@@ -202,7 +202,7 @@
 
 		var ret = _.extend(prev, {
 			country: i18n.__('Japan'),
-			genre: genres.join(' - '),
+			genre: genres,
 			genres: genres,
 			num_seasons: 1,
 			runtime: parseTime(item.duration),
