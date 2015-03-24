@@ -85,7 +85,7 @@
 	var parseTime = function (duration) {
 		var time = duration.match(/(?:([0-9]+) h)?.*?(?:([0-9]+) min)/);
 		if (!time) {
-			return console.error('couldn\'t parse time:', time);
+			return win.error('couldn\'t parse time:', time);
 		}
 		return (time[1] ? time[1] : 0) * 60 + Number(time[2]);
 	};
