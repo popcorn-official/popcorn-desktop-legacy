@@ -72,11 +72,11 @@ var request = require('request');
 	};
 	// used to hide in the titlebar
 	VPNClient.prototype.isDisabled = function () {
-		var disabled = App.settings.vpnDisabledPerm;
-		if (disabled) {
-			return true;
-		} else {
+		var active = App.settings.activateVpn;
+		if (active) {
 			return false;
+		} else {
+			return true;
 		}
 	};
 
