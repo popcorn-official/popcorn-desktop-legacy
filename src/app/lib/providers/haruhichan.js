@@ -63,7 +63,7 @@
 
 		// XXX(xaiki): haruchichan currently doesn't support filters
 		var url = URL + 'list.php?' + querystring.stringify(params).replace(/%25%20/g, '%20');
-		win.debug(url);
+		win.info('Request to Hurahican API', url);
 		request({
 			url: url,
 			json: true
@@ -126,8 +126,7 @@
 			var id = torrent_id.split('-')[1];
 			var url = URL + 'anime.php?id=' + id;
 
-			win.info('Request to HARUHICHAN API');
-			win.debug(url);
+			win.info('Request to Hurahican API', url);
 			request({
 				url: url,
 				json: true

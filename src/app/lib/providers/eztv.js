@@ -37,8 +37,7 @@
 		}
 
 		var url = AdvSettings.get('tvshowAPI').url + 'shows/' + filters.page + '?' + querystring.stringify(params).replace(/%25%20/g, '%20');
-		win.info('Request to EZTV API');
-		win.debug(url);
+		win.info('Request to EZTV API', url);
 		request({
 			url: url,
 			json: true
@@ -68,8 +67,7 @@
 		return Q.Promise(function (resolve, reject) {
 			var url = AdvSettings.get('tvshowAPI').url + 'show/' + torrent_id;
 
-			win.info('Request to EZTV API');
-			win.debug(url);
+			win.info('Request to EZTV API', url);
 			request({
 				url: url,
 				json: true
