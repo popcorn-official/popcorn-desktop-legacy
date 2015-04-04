@@ -40,12 +40,12 @@
 
 		switch (filters.order) {
 		case 1:
-			params.order = 'asc';
+			params.order = 'desc';
 			break;
 		case -1:
 			/* falls through */
 		default:
-			params.order = 'desc';
+			params.order = 'asc';
 			break;
 		}
 
