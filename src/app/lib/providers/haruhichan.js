@@ -38,6 +38,13 @@
 			params.genres = genres;
 		}
 
+		if (filters.sorter && filters.sorter !== 'popularity') {
+			params.sort = filters.sorter;
+		}
+        if (filters.sort === 'name') {
+            params.order * -1;
+        }
+
 		switch (filters.order) {
 		case 1:
 			params.order = 'desc';
@@ -47,10 +54,6 @@
 		default:
 			params.order = 'asc';
 			break;
-		}
-
-		if (filters.sorter && filters.sorter !== 'popularity') {
-			params.sort = filters.sorter;
 		}
 
 		if (filters.type && filters.type !== 'All') {
@@ -94,6 +97,7 @@
 		var results = _.map(items, function (item) {
 			var img = item.malimg;
 			var type = (item.type === 'Movie') ? 'movie' : 'show';
+            var aired = (item.aired.indexOf(', ') !== -1) ? item.aired.split(', ')[1] : item.aired;
 
 			var ret = {
 				images: {
@@ -107,7 +111,7 @@
 				imdb_id: 'mal-' + item.id,
 				slug: item.name.toLowerCase().replace(/\s/g, '-'),
 				title: item.name,
-				year: item.aired.split(', ')[1].replace(/ to.*/, ''),
+				year: aired.replace(/ to.*/, ''),
 				type: type,
 				item_data: item.type
 			};
