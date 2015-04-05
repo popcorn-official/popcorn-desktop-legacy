@@ -41,9 +41,9 @@
 		if (filters.sorter && filters.sorter !== 'popularity') {
 			params.sort = filters.sorter;
 		}
-        if (filters.sort === 'name') {
-            params.order * -1;
-        }
+		if (filters.sort === 'name') {
+			params.order * -1;
+		}
 
 		switch (filters.order) {
 		case 1:
@@ -97,7 +97,7 @@
 		var results = _.map(items, function (item) {
 			var img = item.malimg;
 			var type = (item.type === 'Movie') ? 'movie' : 'show';
-            var aired = (item.aired.indexOf(', ') !== -1) ? item.aired.split(', ')[1] : item.aired;
+			var aired = (item.aired.indexOf(', ') !== -1) ? item.aired.split(', ')[1] : item.aired;
 
 			var ret = {
 				images: {
