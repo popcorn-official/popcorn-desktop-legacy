@@ -159,7 +159,7 @@
             torrents[quality] = {
                 seeds: 0,
                 peers: 0,
-                url: item.magnet,
+                magnet: item.magnet,
                 health: 'good'
             };
         });
