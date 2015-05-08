@@ -63,7 +63,8 @@
     };
 
     // Single element query
-    var queryTorrent = function (torrent_id, old_data) {
+    var queryTorrent = function (torrent_id, old_data, debug) {
+        debug === undefined ? debug = true : '';
         return Q.Promise(function (resolve, reject) {
             var url = AdvSettings.get('tvshowAPI').url + 'show/' + torrent_id;
 
@@ -77,7 +78,7 @@
                 } else if (!data || (data.error && data.error !== 'No data returned')) {
 
                     var err = data ? data.error : 'No data returned';
-                    win.error('API error:', err);
+                    debug ? win.error('API error:', err) : '';
                     reject(err);
 
                 } else {
@@ -96,8 +97,8 @@
         return queryTorrents(filters);
     };
 
-    Eztv.prototype.detail = function (torrent_id, old_data) {
-        return queryTorrent(torrent_id, old_data);
+    Eztv.prototype.detail = function (torrent_id, old_data, debug) {
+        return queryTorrent(torrent_id, old_data, debug);
     };
 
     App.Providers.Eztv = Eztv;
