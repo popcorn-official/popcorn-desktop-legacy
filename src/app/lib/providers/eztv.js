@@ -75,9 +75,9 @@
             }, function (error, response, data) {
                 if (error || response.statusCode >= 400) {
                     reject(error);
-                } else if (!data || (data.error && data.error !== 'No data returned')) {
+                } else if (!data || (data.error && data.error !== 'No data returned') || data.episodes.length === 0) {
 
-                    var err = data ? data.error : 'No data returned';
+                    var err = (data && data.episodes.length !== 0) ? data.error : 'No data returned';
                     debug ? win.error('API error:', err) : '';
                     reject(err);
 
