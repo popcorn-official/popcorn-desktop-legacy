@@ -124,6 +124,30 @@
         return defer.promise;
     };
 
+    YTS.prototype.random = function () {
+        var defer = Q.defer();
+
+        request({
+            uri: 'http://cloudflare.com/api/v2/get_random_movie.json?' + Math.round((new Date()).valueOf() / 1000) + '&with_images=true',
+            headers: {
+                'Host': 'eqwww.image.yt'
+            },
+            strictSSL: false,
+            json: true,
+            timeout: 10000
+        }, function (err, res, data) {
+            if (err || res.statusCode >= 400) {
+                return defer.reject(err || 'Status Code is above 400');
+            } else if (!data || data.status === 'error') {
+                err = data ? data.status_message : 'No data returned';
+                return defer.reject(err);
+            } else {
+                return defer.resolve(data.data);
+            }
+        });
+        return defer.promise;
+    };
+
     YTS.prototype.detail = function (torrent_id, old_data) {
         return Q(old_data);
     };
