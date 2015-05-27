@@ -149,7 +149,30 @@
     };
 
     YTS.prototype.detail = function (torrent_id, old_data) {
-        return Q(old_data);
+        var defer = Q.defer();
+
+        App.Trakt.movie.summary(torrent_id)
+            .then(function (info) {
+                if (info) {
+                    _.extend(old_data, {
+                        synopsis: info.overview,
+                        certification: info.certification,
+                        runtime: info.runtime,
+                        backdrop: info.images.fanart.full,
+                        trailer: info.trailer,
+                        tagline: info.tagline,
+                        image: info.images.poster.full,
+                        yts_image: old_data.image
+                    });
+                }
+                defer.resolve(old_data);
+            })
+            .catch(function (error) {
+                win.warn('Unable to find %s on Trakt.tv', torrent_id);
+                defer.resolve(old_data);
+        });
+
+        return Q(defer.promise);
     };
 
     App.Providers.Yts = YTS;
