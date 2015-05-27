@@ -161,8 +161,7 @@
                         backdrop: info.images.fanart.full,
                         trailer: info.trailer,
                         tagline: info.tagline,
-                        image: info.images.poster.full,
-                        yts_image: old_data.image
+                        trakt_image: info.images.poster.full
                     });
                 }
                 defer.resolve(old_data);
