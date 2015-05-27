@@ -169,7 +169,7 @@
             .catch(function (error) {
                 win.warn('Unable to find %s on Trakt.tv', torrent_id);
                 defer.resolve(old_data);
-        });
+            });
 
         return Q(defer.promise);
     };
