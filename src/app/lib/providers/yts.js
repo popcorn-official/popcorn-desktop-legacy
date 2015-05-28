@@ -41,6 +41,7 @@
                 return {
                     type: 'movie',
                     imdb_id: movie.imdb_code,
+                    yts_id: movie.id,
                     title: movie.title,
                     year: movie.year,
                     genre: movie.genres,
@@ -151,7 +152,8 @@
     YTS.prototype.detail = function (torrent_id, old_data) {
         var defer = Q.defer();
 
-        App.Trakt.movie.summary(torrent_id)
+        // Use Trakt - slow
+        /* App.Trakt.movie.summary(torrent_id)
             .then(function (info) {
                 if (info) {
                     _.extend(old_data, {
@@ -169,7 +171,36 @@
             .catch(function (error) {
                 win.warn('Unable to find %s on Trakt.tv', torrent_id);
                 defer.resolve(old_data);
-            });
+            });*/
+
+        // Use YTS - faster
+        request({
+            uri: 'http://cloudflare.com/api/v2/movie_details.json?movie_id=' + torrent_id + '&with_images=true',
+            headers: {
+                'Host': 'eqwww.image.yt'
+            },
+            strictSSL: false,
+            json: true,
+            timeout: 10000
+        }, function (err, res, data) {
+            if (err || res.statusCode >= 400) {
+                defer.resolve(old_data);
+            } else if (!data || data.status === 'error') {
+                err = data ? data.status_message : 'No data returned';
+                defer.resolve(old_data);
+            } else {
+                _.extend(old_data, {
+                    synopsis: data.data.description_full || data.data.description_intro,
+                    certification: data.data.mpa_rating,
+                    runtime: data.data.runtime,
+                    //backdrop: data.data.images.background_image,
+                    backdrop: data.data.images['large_screenshot_image' + ((Math.random() * 3 | 0) + 1)],
+                    trailer: 'https://www.youtube.com/watch?v=' + data.data.yt_trailer_code,
+                    image: data.data.images.large_cover_image
+                });
+                defer.resolve(old_data);
+            }
+        });
 
         return Q(defer.promise);
     };
