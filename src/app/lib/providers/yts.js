@@ -175,7 +175,7 @@
 
         // Use YTS - faster
         request({
-            uri: 'http://cloudflare.com/api/v2/movie_details.json?movie_id=' + torrent_id + '&with_images=true',
+            uri: 'http://cloudflare.com/api/v2/movie_details.json?movie_id=' + old_data.yts_id + '&with_images=true',
             headers: {
                 'Host': 'eqwww.image.yt'
             },
