@@ -229,6 +229,7 @@
 
         if (type === 'movie') {
             ret = _.extend(ret, {
+                cover: img,
                 rating: item.score,
                 subtitle: undefined,
                 torrents: movieTorrents(item.id, item.episodes),

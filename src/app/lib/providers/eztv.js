@@ -82,8 +82,28 @@
                     reject(err);
 
                 } else {
-                    // we cache our new element
-                    resolve(data);
+                    // we cache our new element or translate synopsis
+
+                    if (Settings.translateSynopsis) {
+                        var reqTimeout = setTimeout(function () {
+                            resolve(data);
+                        }, 2000);
+                        App.Trakt.show.translations(data.imdb_id, Settings.language)
+                            .then(function (localization) {
+                                if (localization && localization.length !== 0) {
+                                    _.extend(data, {
+                                        synopsis: localization[0].overview
+                                    });
+                                    clearTimeout(reqTimeout);
+                                    resolve(data);
+                                }
+                            })
+                            .catch(function (error) {
+                                resolve(data);
+                            });
+                    } else {
+                        resolve(data);
+                    }
                 }
             });
         });

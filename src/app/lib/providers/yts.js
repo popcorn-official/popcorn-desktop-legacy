@@ -18,18 +18,6 @@
         return _.pluck(items.results, 'imdb_id');
     };
 
-    /*var format = function (data) {
-		return {
-			hasMore: data.movie_count > data.page_number * data.limit,
-			results: _.filter(data.movies, function(movie) {
-				// Filter any 3D only movies
-				return _.any(movie.torrents, function(torrent) {
-					return torrent.quality !== '3D';
-				});
-			})
-		};
-	};*/
-
     var format = function (data) {
         var results = _.chain(data.movies)
             .filter(function (movie) {
@@ -41,12 +29,17 @@
                 return {
                     type: 'movie',
                     imdb_id: movie.imdb_code,
-                    yts_id: movie.id,
-                    title: movie.title,
+                    title: movie.title_english,
                     year: movie.year,
                     genre: movie.genres,
                     rating: movie.rating,
+                    runtime: movie.runtime,
                     image: movie.medium_cover_image,
+                    cover: movie.large_cover_image,
+                    backdrop: movie.background_image,
+                    synopsis: movie.description_full,
+                    trailer: 'https://www.youtube.com/watch?v=' + movie.yt_trailer_code || false,
+                    certification: movie.mpa_rating,
                     torrents: _.reduce(movie.torrents, function (torrents, torrent) {
                         if (torrent.quality !== '3D') {
                             torrents[torrent.quality] = {
@@ -100,10 +93,14 @@
             params.quality = Settings.movies_quality;
         }
 
+        if (Settings.translateSynopsis) {
+            params.lang = Settings.language;
+        }
+
         var defer = Q.defer();
 
         request({
-            uri: 'http://cloudflare.com/api/v2/list_movies.json',
+            uri: 'http://cloudflare.com/api/v2/list_movies_pct.json',
             qs: params,
             headers: {
                 'Host': 'eqwww.image.yt'
@@ -150,59 +147,7 @@
     };
 
     YTS.prototype.detail = function (torrent_id, old_data) {
-        var defer = Q.defer();
-
-        // Use Trakt - slow
-        /* App.Trakt.movie.summary(torrent_id)
-            .then(function (info) {
-                if (info) {
-                    _.extend(old_data, {
-                        synopsis: info.overview,
-                        certification: info.certification,
-                        runtime: info.runtime,
-                        backdrop: info.images.fanart.full,
-                        trailer: info.trailer,
-                        tagline: info.tagline,
-                        trakt_image: info.images.poster.full
-                    });
-                }
-                defer.resolve(old_data);
-            })
-            .catch(function (error) {
-                win.warn('Unable to find %s on Trakt.tv', torrent_id);
-                defer.resolve(old_data);
-            });*/
-
-        // Use YTS - faster
-        request({
-            uri: 'http://cloudflare.com/api/v2/movie_details.json?movie_id=' + old_data.yts_id + '&with_images=true',
-            headers: {
-                'Host': 'eqwww.image.yt'
-            },
-            strictSSL: false,
-            json: true,
-            timeout: 10000
-        }, function (err, res, data) {
-            if (err || res.statusCode >= 400) {
-                defer.resolve(old_data);
-            } else if (!data || data.status === 'error') {
-                err = data ? data.status_message : 'No data returned';
-                defer.resolve(old_data);
-            } else {
-                _.extend(old_data, {
-                    synopsis: data.data.description_full || data.data.description_intro,
-                    certification: data.data.mpa_rating,
-                    runtime: data.data.runtime,
-                    //backdrop: data.data.images.background_image,
-                    backdrop: data.data.images['large_screenshot_image' + ((Math.random() * 3 | 0) + 1)],
-                    trailer: 'https://www.youtube.com/watch?v=' + data.data.yt_trailer_code,
-                    image: data.data.images.large_cover_image
-                });
-                defer.resolve(old_data);
-            }
-        });
-
-        return Q(defer.promise);
+        return Q(old_data);
     };
 
     App.Providers.Yts = YTS;
