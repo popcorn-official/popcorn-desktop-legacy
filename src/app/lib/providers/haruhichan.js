@@ -135,11 +135,18 @@
                 url: url,
                 json: true
             }, function (error, response, data) {
+                var err;
                 if (error || response.statusCode >= 400) {
                     reject(error);
                 } else if (!data || (data.error && data.error !== 'No data returned')) {
 
-                    var err = data ? data.error : 'No data returned';
+                    err = data ? data.error : 'No data returned';
+                    win.error('API error:', err);
+                    reject(err);
+
+                } else if (data.episodes.length === 0) {
+
+                    err = 'No torrents returned';
                     win.error('API error:', err);
                     reject(err);
 
@@ -155,7 +162,14 @@
     var movieTorrents = function (id, dl) {
         var torrents = {};
         _.each(dl, function (item) {
-            var quality = item.quality.match(/[0-9]+p/)[0];
+            var qualityMatch = item.quality.match(/[0-9]+p/);
+            var quality = qualityMatch ? qualityMatch[0] : null;
+            var qualityNumber = quality.replace('p', '');
+            if (qualityNumber > 480 && qualityNumber < 1000) {
+                quality = '720p';
+            } else if (qualityNumber >= 1000 && qualityNumber < 1800) {
+                quality = '1080p';
+            }
             torrents[quality] = {
                 seeds: 0,
                 peers: 0,
