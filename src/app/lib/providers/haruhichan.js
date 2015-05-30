@@ -183,15 +183,39 @@
 
     var showTorrents = function (id, dl) {
         var torrents = {};
+        var episodeNb = null;
         _.each(dl, function (item) {
-            var quality = item.quality.match(/[0-9]+p/)[0];
+            var qualityMatch = item.quality.match(/[0-9]+p/);
+            var quality = qualityMatch ? qualityMatch[0] : null;
+            var qualityNumber = quality.replace('p', '');
+            if (qualityNumber > 200 && qualityNumber < 600) {
+                quality = '480p';
+            } else if (qualityNumber >= 600 && qualityNumber < 1000) {
+                quality = '720p';
+            } else if (qualityNumber >= 1000 && qualityNumber < 1800) {
+                quality = '1080p';
+            }
+            var episode, tryName;
             var match = item.name.match(/[\s_]([0-9]+(-[0-9]+)?|CM|OVA)[\s_]/);
             if (!match) {
-                return;
+                tryName = item.name.split(/:?(\(|\[)/);
+                if (tryName.length === 1) {
+                    return;
+                }
+                if (torrents[episodeNb] && torrents[episodeNb].title === tryName[0]) {
+                    episode = episodeNb;
+                } else {
+                    episodeNb++;
+                    episode = episodeNb;
+                }
+            } else {
+                episode = match[1];
             }
-            var episode = match[1];
             if (!torrents[episode]) {
-                torrents[episode] = {};
+                torrents[episode] = {
+                    title: match ? item.name : tryName[0],
+                    ordered: match ? true : false
+                };
             }
             torrents[episode][quality] = {
                 seeds: 0,
@@ -202,7 +226,7 @@
         });
         return _.map(torrents, function (torrents, s) {
             return {
-                title: 'Episode ' + s,
+                title: torrents.ordered ? 'Episode ' + s : torrents.title,
                 torrents: torrents,
                 season: 1,
                 episode: Number(s.split('-')[0]),
