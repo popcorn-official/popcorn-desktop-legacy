@@ -36,7 +36,7 @@
                     runtime: movie.runtime,
                     image: movie.medium_cover_image,
                     cover: movie.large_cover_image,
-                    backdrop: movie.background_image,
+                    backdrop: movie.background_image_original,
                     synopsis: movie.description_full,
                     trailer: 'https://www.youtube.com/watch?v=' + movie.yt_trailer_code || false,
                     certification: movie.mpa_rating,
