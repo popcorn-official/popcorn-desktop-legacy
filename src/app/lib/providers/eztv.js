@@ -88,7 +88,7 @@
                         var reqTimeout = setTimeout(function () {
                             resolve(data);
                         }, 2000);
-                        App.Trakt.show.translations(data.imdb_id, Settings.language)
+                        App.Trakt.shows.translations(data.imdb_id, Settings.language)
                             .then(function (localization) {
                                 if (localization && localization.length !== 0) {
                                     _.extend(data, {
