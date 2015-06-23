@@ -126,7 +126,7 @@
         var defer = Q.defer();
 
         request({
-            uri: 'http://cloudflare.com/api/v2/get_random_movie.json?' + Math.round((new Date()).valueOf() / 1000) + '&with_images=true',
+            uri: 'http://cloudflare.com/api/v2/get_random_movie.json?' + Math.round((new Date()).valueOf() / 1000),
             headers: {
                 'Host': 'eqwww.image.yt'
             },
