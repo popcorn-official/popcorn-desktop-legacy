@@ -88,15 +88,24 @@
                         var reqTimeout = setTimeout(function () {
                             resolve(data);
                         }, 2000);
-                        App.Trakt.shows.translations(data.imdb_id, Settings.language)
+
+                        var Client = require('node-tvdb');
+                        var tvdb = new Client('7B95D15E1BE1D75A', Settings.language);
+                        tvdb.getSeriesAllById(old_data.tvdb_id)
                             .then(function (localization) {
-                                if (localization && localization.length !== 0) {
-                                    _.extend(data, {
-                                        synopsis: localization[0].overview
-                                    });
-                                    clearTimeout(reqTimeout);
-                                    resolve(data);
+                                clearTimeout(reqTimeout);
+                                _.extend(data, {
+                                    synopsis: localization.Overview
+                                });
+                                for (var i = 0; i < localization.Episodes.length; i++) {
+                                    for (var j = 0; j < data.episodes.length; j++) {
+                                        if (localization.Episodes[i].id.toString() === data.episodes[j].tvdb_id.toString()) {
+                                            data.episodes[j].overview = localization.Episodes[i].Overview;
+                                            break;
+                                        }
+                                    }
                                 }
+                                resolve(data);
                             })
                             .catch(function (error) {
                                 resolve(data);
