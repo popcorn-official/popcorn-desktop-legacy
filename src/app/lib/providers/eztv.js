@@ -7,6 +7,12 @@
 
     var URL = false;
     var Eztv = function () {
+        var Client = require('node-tvdb');
+        var tvdb = new Client('7B95D15E1BE1D75A');
+        tvdb.getLanguages()
+            .then(function (langlist) {
+                AdvSettings.set('tvdbLangs', langlist);
+        });
         Eztv.super_.call(this);
     };
 
@@ -84,13 +90,23 @@
                 } else {
                     // we cache our new element or translate synopsis
 
-                    if (Settings.translateSynopsis) {
+                    if (Settings.translateSynopsis && Settings.language !== 'en') {
+                        var langAvailable;
+                        for (var x = 0; x < Settings.tvdbLangs.length; x++) {
+                            if (Settings.tvdbLangs[x].abbreviation.indexOf(Settings.language) > -1) {
+                                langAvailable = true;
+                                break;
+                            }
+                        }
+                        if (!langAvailable) resolve(data);
+
                         var reqTimeout = setTimeout(function () {
                             resolve(data);
                         }, 2000);
 
                         var Client = require('node-tvdb');
                         var tvdb = new Client('7B95D15E1BE1D75A', Settings.language);
+                        win.info('Request to TVDB API: \'%s\' - %s', old_data.title, App.Localization.langcodes[Settings.language].name);
                         tvdb.getSeriesAllById(old_data.tvdb_id)
                             .then(function (localization) {
                                 clearTimeout(reqTimeout);
