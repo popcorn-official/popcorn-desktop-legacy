@@ -12,7 +12,7 @@
         tvdb.getLanguages()
             .then(function (langlist) {
                 AdvSettings.set('tvdbLangs', langlist);
-        });
+            });
         Eztv.super_.call(this);
     };
 
@@ -98,7 +98,9 @@
                                 break;
                             }
                         }
-                        if (!langAvailable) resolve(data);
+                        if (!langAvailable) {
+                            resolve(data);
+                        }
 
                         var reqTimeout = setTimeout(function () {
                             resolve(data);
