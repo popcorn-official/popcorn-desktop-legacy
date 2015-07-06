@@ -6,17 +6,17 @@
     var inherits = require('util').inherits;
 
     var URL = false;
-    var Eztv = function () {
+    var TVApi = function () {
         var Client = require('node-tvdb');
         var tvdb = new Client('7B95D15E1BE1D75A');
         tvdb.getLanguages()
             .then(function (langlist) {
                 AdvSettings.set('tvdbLangs', langlist);
             });
-        Eztv.super_.call(this);
+        TVApi.super_.call(this);
     };
 
-    inherits(Eztv, App.Providers.Generic);
+    inherits(TVApi, App.Providers.Generic);
 
     var queryTorrents = function (filters) {
 
@@ -43,7 +43,7 @@
         }
 
         var url = AdvSettings.get('tvshowAPI').url + 'shows/' + filters.page + '?' + querystring.stringify(params).replace(/%25%20/g, '%20');
-        win.info('Request to EZTV API', url);
+        win.info('Request to TVApi', url);
         request({
             url: url,
             json: true
@@ -74,7 +74,7 @@
         return Q.Promise(function (resolve, reject) {
             var url = AdvSettings.get('tvshowAPI').url + 'show/' + torrent_id;
 
-            win.info('Request to EZTV API', url);
+            win.info('Request to TVApi', url);
             request({
                 url: url,
                 json: true
@@ -136,18 +136,18 @@
         });
     };
 
-    Eztv.prototype.extractIds = function (items) {
+    TVApi.prototype.extractIds = function (items) {
         return _.pluck(items.results, 'imdb_id');
     };
 
-    Eztv.prototype.fetch = function (filters) {
+    TVApi.prototype.fetch = function (filters) {
         return queryTorrents(filters);
     };
 
-    Eztv.prototype.detail = function (torrent_id, old_data, debug) {
+    TVApi.prototype.detail = function (torrent_id, old_data, debug) {
         return queryTorrent(torrent_id, old_data, debug);
     };
 
-    App.Providers.Eztv = Eztv;
+    App.Providers.TVApi = TVApi;
 
 })(window.App);
