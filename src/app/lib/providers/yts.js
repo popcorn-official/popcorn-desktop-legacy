@@ -112,7 +112,8 @@
             uri: 'http://cloudflare.com/api/v2/list_movies_pct.json',
             qs: params,
             headers: {
-                'Host': 'eqwww.image.yt'
+                'Host': 'xor.image.yt',
+                'User-Agent': 'Mozilla/5.0 (Linux) AppleWebkit/534.30 (KHTML, like Gecko) PT/3.8.0'
             },
             strictSSL: false,
             json: true,
@@ -137,7 +138,8 @@
         request({
             uri: 'http://cloudflare.com/api/v2/get_random_movie.json?' + Math.round((new Date()).valueOf() / 1000),
             headers: {
-                'Host': 'eqwww.image.yt'
+                'Host': 'xor.image.yt',
+                'User-Agent': 'Mozilla/5.0 (Linux) AppleWebkit/534.30 (KHTML, like Gecko) PT/3.8.0'
             },
             strictSSL: false,
             json: true,
