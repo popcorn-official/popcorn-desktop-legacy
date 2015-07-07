@@ -86,7 +86,16 @@
         }
 
         if (filters.sorter && filters.sorter !== 'popularity') {
-            params.sort_by = filters.sorter;
+            switch (filters.sorter) {
+                case 'last added':
+                    params.sort_by = 'date_added';
+                    break;
+                case 'trending':
+                    params.sort_by = 'trending_score';
+                    break;
+                default:
+                    params.sort_by = filters.sorter;
+            }
         }
 
         if (Settings.movies_quality !== 'all') {
