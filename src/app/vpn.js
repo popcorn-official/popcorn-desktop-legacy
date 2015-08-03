@@ -43,7 +43,6 @@ var request = require('request');
             focus: true,
             toolbar: false,
             resizable: false,
-            show_in_taskbar: false,
             width: 500,
             height: 500
         });
