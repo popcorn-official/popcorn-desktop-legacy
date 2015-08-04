@@ -4,7 +4,6 @@
     var Q = require('q');
     var request = require('request');
     var inherits = require('util').inherits;
-    var sanitizer = require('sanitizer');
 
     function YTS() {
         if (!(this instanceof YTS)) {
@@ -27,39 +26,34 @@
                     return torrent.quality !== '3D';
                 });
             }).map(function (movie) {
-                console.log(movie);
-                var movie_data = {
+                return {
                     type: 'movie',
-                    imdb_id: sanitizer.sanitize(movie.imdb_code),
-                    title: sanitizer.sanitize(movie.title_english),
-                    year: sanitizer.sanitize(movie.year),
-                    genre: _.map(movie.genres, function (val, key) {
-                        return sanitizer.sanitize(val);
-                    }),
-                    rating: sanitizer.sanitize(movie.rating),
-                    runtime: sanitizer.sanitize(movie.runtime),
-                    image: sanitizer.sanitize(movie.medium_cover_image),
-                    cover: sanitizer.sanitize(movie.large_cover_image),
-                    backdrop: sanitizer.sanitize(movie.background_image_original),
-                    synopsis: sanitizer.sanitize(movie.description_full),
-                    trailer: 'https://www.youtube.com/watch?v=' + sanitizer.sanitize(movie.yt_trailer_code) || false,
-                    certification: sanitizer.sanitize(movie.mpa_rating),
+                    imdb_id: movie.imdb_code,
+                    title: movie.title_english,
+                    year: movie.year,
+                    genre: movie.genres,
+                    rating: movie.rating,
+                    runtime: movie.runtime,
+                    image: movie.medium_cover_image,
+                    cover: movie.large_cover_image,
+                    backdrop: movie.background_image_original,
+                    synopsis: movie.description_full,
+                    trailer: 'https://www.youtube.com/watch?v=' + movie.yt_trailer_code || false,
+                    certification: movie.mpa_rating,
                     torrents: _.reduce(movie.torrents, function (torrents, torrent) {
                         if (torrent.quality !== '3D') {
                             torrents[torrent.quality] = {
-                                url: sanitizer.sanitize(torrent.url),
+                                url: torrent.url,
                                 magnet: 'magnet:?xt=urn:btih:' + torrent.hash + '&tr=udp://open.demonii.com:1337&tr=udp://tracker.coppersurfer.tk:6969',
-                                size: sanitizer.sanitize(torrent.size_bytes),
-                                filesize: sanitizer.sanitize(torrent.size),
-                                seed: sanitizer.sanitize(torrent.seeds),
-                                peer: sanitizer.sanitize(torrent.peers)
+                                size: torrent.size_bytes,
+                                filesize: torrent.size,
+                                seed: torrent.seeds,
+                                peer: torrent.peers
                             };
                         }
                         return torrents;
                     }, {})
                 };
-                console.log(movie_data);
-                return movie_data;
             }).value();
 
         return {

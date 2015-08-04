@@ -4,7 +4,7 @@
     var request = require('request');
     var Q = require('q');
     var inherits = require('util').inherits;
-    var sanitizer = require('sanitizer');
+
 
     var statusMap = {
         0: 'Not Airing Yet',
@@ -95,11 +95,9 @@
 
     var formatForPopcorn = function (items) {
         var results = _.map(items, function (item) {
-            var img = sanitizer.sanitize(item.malimg);
+            var img = item.malimg;
             var type = (item.type === 'Movie') ? 'movie' : 'show';
-            var aired = sanitizer.sanitize((item.aired.indexOf(', ') !== -1) ? item.aired.split(', ')[1] : item.aired);
-
-            item.id = sanitizer.sanitize(item.id);
+            var aired = (item.aired.indexOf(', ') !== -1) ? item.aired.split(', ')[1] : item.aired;
 
             var ret = {
                 images: {
@@ -107,15 +105,15 @@
                     fanart: img,
                     banner: img
                 },
-                mal_id: sanitizer.sanitize(item.MAL),
+                mal_id: item.MAL,
                 haru_id: item.id,
                 tvdb_id: 'mal-' + item.id,
                 imdb_id: 'mal-' + item.id,
-                slug: sanitizer.sanitize(item.name.toLowerCase().replace(/\s/g, '-')),
-                title: sanitizer.sanitize(item.name),
+                slug: item.name.toLowerCase().replace(/\s/g, '-'),
+                title: item.name,
                 year: aired.replace(/ to.*/, ''),
                 type: type,
-                item_data: sanitizer.sanitize(item.type)
+                item_data: item.type
             };
             return ret;
         });
