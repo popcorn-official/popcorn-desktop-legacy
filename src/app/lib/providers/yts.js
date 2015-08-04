@@ -57,7 +57,7 @@
             }).value();
 
         return {
-            results: results,
+            results: Common.sanitize(results),
             hasMore: data.movie_count > data.page_number * data.limit
         };
     };
@@ -161,7 +161,7 @@
                     err = data ? data.status_message : 'No data returned';
                     return defer.reject(err);
                 } else {
-                    return defer.resolve(data.data);
+                    return defer.resolve(Common.sanitize(data.data));
                 }
             });
         }
