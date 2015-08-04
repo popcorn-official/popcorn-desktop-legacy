@@ -117,7 +117,7 @@
             }
             var req = jQuery.extend(true, {}, Settings.ytsAPI[index], options);
             request(req, function (err, res, data) {
-                if (err || res.statusCode >= 400) {
+                if (err || res.statusCode >= 400 || (data && !data.data)) {
                     win.warn('YTS API endpoint \'%s\' failed.', Settings.ytsAPI[index].uri);
                     if (index + 1 >= Settings.ytsAPI.length) {
                         return defer.reject(err || 'Status Code is above 400');
@@ -129,7 +129,6 @@
                     err = data ? data.status_message : 'No data returned';
                     return defer.reject(err);
                 } else {
-                    win.warn('YTS API endpoint \'%s\' works.', Settings.ytsAPI[index].uri);
                     return defer.resolve(format(data.data));
                 }
             });
@@ -142,25 +141,32 @@
     YTS.prototype.random = function () {
         var defer = Q.defer();
 
-        request({
-            uri: 'http://cloudflare.com/api/v2/get_random_movie.json?' + Math.round((new Date()).valueOf() / 1000),
-            headers: {
-                'Host': 'xor.image.yt',
-                'User-Agent': 'Mozilla/5.0 (Linux) AppleWebkit/534.30 (KHTML, like Gecko) PT/3.8.0'
-            },
-            strictSSL: false,
-            json: true,
-            timeout: 10000
-        }, function (err, res, data) {
-            if (err || res.statusCode >= 400) {
-                return defer.reject(err || 'Status Code is above 400');
-            } else if (!data || data.status === 'error') {
-                err = data ? data.status_message : 'No data returned';
-                return defer.reject(err);
-            } else {
-                return defer.resolve(data.data);
+        function get (index) {
+            var options = {
+                uri: Settings.ytsAPI[index].uri + 'api/v2/get_random_movie.json?' + Math.round((new Date()).valueOf() / 1000),
+                json: true,
+                timeout: 10000
             }
-        });
+            var req = jQuery.extend(true, {}, Settings.ytsAPI[index], options);
+            request(req, function (err, res, data) {
+                if (err || res.statusCode >= 400 || (data && !data.data)) {
+                    win.warn('YTS API endpoint \'%s\' failed.', Settings.ytsAPI[index].uri);
+                    if (index + 1 >= Settings.ytsAPI.length) {
+                        return defer.reject(err || 'Status Code is above 400');
+                    } else {
+                        get(index+1);
+                    }
+                    return;
+                } else if (!data || data.status === 'error') {
+                    err = data ? data.status_message : 'No data returned';
+                    return defer.reject(err);
+                } else {
+                    return defer.resolve(data.data);
+                }
+            });
+        }
+        get(0);
+
         return defer.promise;
     };
 
