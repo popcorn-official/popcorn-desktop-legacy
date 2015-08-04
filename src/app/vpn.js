@@ -89,7 +89,7 @@ var request = require('request');
                 callback(false);
             } else if (response.statusCode === 200) {
                 body = JSON.parse(body);
-                return callback(Common.sanitize(body.connected));
+                return callback(body.connected);
             } else {
                 return callback(false);
             }
