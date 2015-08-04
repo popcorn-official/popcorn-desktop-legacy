@@ -62,7 +62,7 @@
                 'client_id': API_CLIENT_ID
             })
             .then(function (data) {
-                data = JSON.parse(data);
+                data = Common.sanitize(JSON.parse(data));
                 if (data.result === 'OK') {
                     var activateUri = data.verification_url + '?user_code=' + data.user_code;
                     self.oauthAuthorizing = setInterval(function () {
