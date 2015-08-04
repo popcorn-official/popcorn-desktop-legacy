@@ -119,7 +119,7 @@
         });
 
         return {
-            results: results,
+            results: Common.sanitize(results),
             hasMore: true
         };
     };
@@ -278,7 +278,7 @@
             });
         }
 
-        return ret;
+        return Common.sanitize(ret);
     };
 
     Haruhichan.prototype.extractIds = function (items) {
