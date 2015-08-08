@@ -108,13 +108,13 @@
 
         var defer = Q.defer();
 
-        function get (index) {
+        function get(index) {
             var options = {
                 uri: Settings.ytsAPI[index].uri + 'api/v2/list_movies_pct.json',
                 qs: params,
                 json: true,
                 timeout: 10000
-            }
+            };
             var req = jQuery.extend(true, {}, Settings.ytsAPI[index], options);
             request(req, function (err, res, data) {
                 if (err || res.statusCode >= 400 || (data && !data.data)) {
@@ -122,7 +122,7 @@
                     if (index + 1 >= Settings.ytsAPI.length) {
                         return defer.reject(err || 'Status Code is above 400');
                     } else {
-                        get(index+1);
+                        get(index + 1);
                     }
                     return;
                 } else if (!data || data.status === 'error') {
@@ -141,12 +141,12 @@
     YTS.prototype.random = function () {
         var defer = Q.defer();
 
-        function get (index) {
+        function get(index) {
             var options = {
                 uri: Settings.ytsAPI[index].uri + 'api/v2/get_random_movie.json?' + Math.round((new Date()).valueOf() / 1000),
                 json: true,
                 timeout: 10000
-            }
+            };
             var req = jQuery.extend(true, {}, Settings.ytsAPI[index], options);
             request(req, function (err, res, data) {
                 if (err || res.statusCode >= 400 || (data && !data.data)) {
@@ -154,7 +154,7 @@
                     if (index + 1 >= Settings.ytsAPI.length) {
                         return defer.reject(err || 'Status Code is above 400');
                     } else {
-                        get(index+1);
+                        get(index + 1);
                     }
                     return;
                 } else if (!data || data.status === 'error') {
