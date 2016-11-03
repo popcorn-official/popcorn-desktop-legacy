@@ -1,8 +1,7 @@
 (function (App) {
     'use strict';
 
-    var inherits = require('util').inherits,
-        chromecast = require('chromecast-js'),
+    var chromecasts = require('chromecasts')(),
         collection = App.Device.Collection;
 
     var Chromecast = App.Device.Generic.extend({
@@ -12,13 +11,13 @@
         },
 
         _makeID: function (baseID) {
-            return 'chromecast-' + baseID.replace(' ', '-');
+            return 'chromecast-' + Common.md5(baseID);
         },
 
         initialize: function (attrs) {
             this.device = attrs.device;
-            this.attributes.id = this._makeID(this.device.config.name);
-            this.attributes.name = this.device.config.name;
+            this.attributes.id = this._makeID(this.device.name);
+            this.attributes.name = this.device.name;
             this.attributes.address = this.device.host;
         },
 
@@ -27,22 +26,17 @@
             var subtitle = streamModel.get('subFile');
             var cover = streamModel.get('cover');
             var url = streamModel.get('src');
+            var attr = streamModel.attributes;
             this.attributes.url = url;
             var media;
 
             if (subtitle) {
                 media = {
-                    url: url,
-                    subtitles: [{
-                        url: 'http:' + url.split(':')[1] + ':9999/subtitle.vtt',
-                        name: 'Subtitles',
-                        language: 'en-US'
-                    }],
-                    cover: {
-                        title: streamModel.get('title'),
-                        url: streamModel.get('cover')
-                    },
-                    subtitles_style: {
+                    title: streamModel.get('title').substring(0, 50),
+                    images: streamModel.get('cover'),
+                    subtitles: ['http:' + url.split(':')[1] + ':9999/subtitle.vtt'],
+
+                    textTrackStyle: {
                         backgroundColor: AdvSettings.get('subtitle_decoration') === 'Opaque Background' ? '#000000FF' : '#00000000', // color of background - see http://dev.w3.org/csswg/css-color/#hex-notation
                         foregroundColor: AdvSettings.get('subtitle_color') + 'ff', // color of text - see http://dev.w3.org/csswg/css-color/#hex-notation
                         edgeType: AdvSettings.get('subtitle_decoration') === 'Outline' ? 'OUTLINE' : 'NONE', // border of text - can be: "NONE", "OUTLINE", "DROP_SHADOW", "RAISED", "DEPRESSED"
@@ -58,17 +52,14 @@
                 };
             } else {
                 media = {
-                    url: url,
-                    cover: {
-                        title: streamModel.get('title'),
-                        url: streamModel.get('cover')
-                    }
+                    images: cover,
+                    title: streamModel.get('title').substring(0, 50)
                 };
             }
             win.info('Chromecast: play ' + url + ' on \'' + this.get('name') + '\'');
             win.info('Chromecast: connecting to ' + this.device.host);
 
-            this.device.play(media, 0, function (err, status) {
+            self.device.play(url, media, function (err, status) {
                 if (err) {
                     win.error('chromecast.play error: ', err);
                 } else {
@@ -86,6 +77,10 @@
         },
 
         stop: function () {
+            win.info('Closing Chromecast Casting');
+            App.vent.trigger('stream:stop');
+            App.vent.trigger('player:close');
+            App.vent.trigger('torrentcache:stop');
             var device = this.get('device');
             // Also stops player and closes connection.
             device.stop(function () {
@@ -105,7 +100,7 @@
 
         seekTo: function (newCurrentTime) {
             win.info('Chromecast: seek to %ss', newCurrentTime);
-            this.get('device').seekTo(newCurrentTime, function (err, status) {
+            this.get('device').seek(newCurrentTime, function (err, status) {
                 if (err) {
                     win.error('Chromecast.seekTo:Error', err);
                 }
@@ -127,13 +122,12 @@
         },
 
         unpause: function () {
-            this.get('device').unpause(function () {});
+            this.get('device').resume(function () {});
         },
 
         updateStatus: function () {
             var self = this;
-
-            this.get('device').getStatus(function (err, status) {
+            this.get('device').status(function (err, status) {
                 if (err) {
                     return win.info('Chromecast.updateStatus:Error', err);
                 }
@@ -147,16 +141,18 @@
             }
             // If this is the active device, propagate the status event.
             if (collection.selected.id === this.id) {
+
                 App.vent.trigger('device:status', status);
             }
         }
     });
 
-    var browser = new chromecast.Browser();
-
-    browser.on('deviceOn', function (device) {
+    win.info('Scanning: Local Network for Chromecast devices');
+    chromecasts.update();
+    chromecasts.on('update', function (player) {
+        win.info('Found Chromecast Device Device: %s at %s', player.name, player.host);
         collection.add(new Chromecast({
-            device: device
+            device: player
         }));
     });
 
