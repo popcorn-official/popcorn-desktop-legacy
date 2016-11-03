@@ -4,10 +4,10 @@
   "installIcon": "./src/app/images/popcorntime.ico",
   "unInstallIcon": "./src/app/images/butter_uninstall.ico",
   "homepage": "http://popcorntime.sh/",
-  "bugs": "https://github.com/popcorn-official/popcorn-desktop/issues",
+  "bugs": "https://github.com/popcorn-official/popcorn-desktop-legacy/issues",
   "repository": {
       "type": "git",
-      "url": "https://github.com/popcorn-official/popcorn-desktop.git"
+      "url": "https://github.com/popcorn-official/popcorn-desktop-legacy.git"
   },
   "license": "GPL-3.0",
   "main": "src/app/index.html",

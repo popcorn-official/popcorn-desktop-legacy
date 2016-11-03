@@ -8,7 +8,7 @@
         <div class="title-version">
             <a data-toggle="tooltip" data-placement="top" title=<%= i18n.__("Changelog") %> id='changelog'><%= App.settings.version %> "<%= App.settings.releaseName %>" Beta </a>
             <% if(App.git) { %>
-                - <small><i><%= App.git.branch %> (<a class="links" href="https://git.popcorntime.io/popcorntime/desktop/commit/<%= App.git.commit %>"><%= App.git.commit.slice(0,8) %></a>)</i></small>
+                - <small><i><%= App.git.branch %> (<a class="links" href="https://github.com/popcorn-official/popcorn-desktop-legacy/commit/<%= App.git.commit %>"><%= App.git.commit.slice(0,8) %></a>)</i></small>
             <% } %>
         </div>
 
@@ -24,13 +24,13 @@
         </div>
 
         <div class="icons_social">
-            <a href='http://popcorntime.io' data-toggle="tooltip" data-placement="top" title="popcorntime.io" class='links site_icon'></span></a>
+            <a href='http://popcorntime.sh' data-toggle="tooltip" data-placement="top" title="popcorntime.sh" class='links site_icon'></span></a>
             <a href='http://twitter.com/PopcornTimeTV' data-toggle="tooltip" data-placement="top" title="twitter.com/PopcornTimeTV" class='links twitter_icon'></span></a>
-            <a href='http://www.fb.com/PopcornTimeTV' data-toggle="tooltip" data-placement="top" title="fb.com/PopcornTimeTV" class='links facebook_icon'></span></a>
+            <a href='https://www.facebook.com/PopcornTimedotsh' data-toggle="tooltip" data-placement="top" title="facebook.com/PopcornTimedotsh" class='links facebook_icon'></span></a>
             <a href='http://plus.google.com/+PopcorntimeIo/posts' data-toggle="tooltip" data-placement="top" title="plus.google.com/+PopcorntimeIo" class='links google_icon'></span></a>
-            <a href='http://git.popcorntime.io'data-toggle="tooltip" data-placement="top" title="git.popcorntime.io" class='links gitlab_icon'></span></a>
-            <a href='http://blog.popcorntime.io' data-toggle="tooltip" data-placement="top" title="blog.popcorntime.io" class='links blog_icon'></span></a>
-            <a href='http://discuss.popcorntime.io' data-toggle="tooltip" data-placement="top" title="discuss.popcorntime.io" class='links forum_icon'></span></a>
+            <a href='http://github.com/popcorn-official/'data-toggle="tooltip" data-placement="top" title="github.com/popcorn-official" class='links gitlab_icon'></span></a>
+            <a href='http://blog.popcorntime.sh' data-toggle="tooltip" data-placement="top" title="blog.popcorntime.sh" class='links blog_icon'></span></a>
+            <a href='http://reddit.com/r/popcorntime' data-toggle="tooltip" data-placement="top" title="reddit.com/r/popcorntime" class='links forum_icon'></span></a>
         </div>
 
         <div class="last-line">
@@ -40,6 +40,6 @@
     </div>
     <div class="changelog-overlay">
         <div class="title"><%=i18n.__("Changelog")%></div>
-        <div class="changelog-text"></div>    
+        <div class="changelog-text"></div>
     </div>
 </div>

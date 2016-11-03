@@ -1,8 +1,8 @@
-# [Popcorn Time](https://github.com/popcorn-official/popcorn-desktop)
+# [Popcorn Time](https://github.com/popcorn-official/popcorn-desktop-legacy)
 
-[![Build Status](https://travis-ci.org/popcorn-official/popcorn-desktop.svg?branch=master)](https://travis-ci.org/popcorn-official/popcorn-desktop)
-[![Dependency Status](https://david-dm.org/popcorn-official/popcorn-desktop.svg)](https://david-dm.org/popcorn-official/popcorn-desktop)
-[![devDependency Status](https://david-dm.org/popcorn-official/popcorn-desktop/dev-status.svg)](https://david-dm.org/popcorn-official/popcorn-desktop#info=devDependencies)
+[![Build Status](https://travis-ci.org/popcorn-official/popcorn-desktop-legacy.svg?branch=master)](https://travis-ci.org/popcorn-official/popcorn-desktop-legacy)
+[![Dependency Status](https://david-dm.org/popcorn-official/popcorn-desktop-legacy.svg)](https://david-dm.org/popcorn-official/popcorn-desktop-legacy)
+[![devDependency Status](https://david-dm.org/popcorn-official/popcorn-desktop-legacy/dev-status.svg)](https://david-dm.org/popcorn-official/popcorn-desktop-legacy#info=devDependencies)
 
 Allow any user to easily watch movies through torrent streaming, without any prerequisites.
 
@@ -20,7 +20,7 @@ If you're comfortable getting up and running from a `git clone`, this method is 
 
 If you clone the GitHub repository, you will need to build a number of assets using grunt.
 
-The [master](https://github.com/popcorn-official/popcorn-desktop) branch which contains the latest release.
+The [master](https://github.com/popcorn-official/popcorn-desktop-legacy) branch which contains the latest release.
 
 #### Quickstart:
 

@@ -2,7 +2,7 @@
     'use strict';
 
     var PT_id = 13, //ID of project (got with gitlab.projects.all). 13 is for 'popcorntime/desktop'
-        PT_url = 'https://git.popcorntime.io/popcorntime/desktop/issues/', //Url of 'issues' of the above project
+        PT_url = 'https://github.com/popcorn-official/popcorn-desktop-legacy/issues/', //Url of 'issues' of the above project
         token;
 
     var Issue = Backbone.Marionette.ItemView.extend({
@@ -56,7 +56,7 @@
         searchGitLab: function (keyword) {
 
             var gitlab = require('gitlab')({
-                url: 'https://git.popcorntime.io/',
+                url: 'https://github.com/popcorn-official/popcorn-desktop-legacy/',
                 token: 'sb1SeWoyoAWrGPTuQcNE' //public reporter token
             });
             var issue_desc,
@@ -146,7 +146,7 @@
             this.isReporting = true;
 
             var gitlab = require('gitlab')({
-                url: 'https://git.popcorntime.io/',
+                url: 'https://github.com/popcorn-official/popcorn-desktop-legacy/',
                 token: token //Private token
             });
             var issue_id = false;
@@ -203,7 +203,7 @@
                 password = $('#issue-pw').val();
 
             var gitlab = require('gitlab')({
-                url: 'https://git.popcorntime.io/',
+                url: 'https://github.com/popcorn-official/popcorn-desktop-legacy/',
                 token: 'sb1SeWoyoAWrGPTuQcNE' //public reporter token
             });
 
