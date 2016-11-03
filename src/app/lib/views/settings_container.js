@@ -36,6 +36,8 @@
             'click #unauthTrakt': 'disconnectTrakt',
             'click #connect-with-tvst': 'connectWithTvst',
             'click #disconnect-tvst': 'disconnectTvst',
+            'click .reset-animeAPI': 'resetAnimeAPI',
+            'click .reset-movieAPI': 'resetMovieAPI',
             'click .reset-tvAPI': 'resetTVShowAPI',
             'change #tmpLocation': 'updateCacheDirectory',
             'click #syncTrakt': 'syncTrakt',
@@ -126,16 +128,53 @@
             App.vent.trigger('settings:close');
         },
 
+        resetAnimeAPI: function () {
+            var value = [{
+                url: 'http://anime.api-fetch.website/',
+                strictSSL: true
+            }, {
+                url: 'cloudflare+http://anime.api-fetch.website/',
+                strictSSL: true
+            }];
+            App.settings['animeAPI'] = value;
+            //save to db
+            App.db.writeSetting({
+                key: 'animeAPI',
+                value: value
+            }).then(function () {
+                that.ui.success_alert.show().delay(3000).fadeOut(400);
+            });
+
+            that.syncSetting('animeAPI', value);
+        },
+
+        resetMovieAPI: function () {
+            var value = [{
+                url: 'http://movies-v2.api-fetch.website/',
+                strictSSL: true
+            }, {
+                url: 'cloudflare+http://movies-v2.api-fetch.website/',
+                strictSSL: true
+            }];
+            App.settings['movieAPI'] = value;
+            //save to db
+            App.db.writeSetting({
+                key: 'movieAPI',
+                value: value
+            }).then(function () {
+                that.ui.success_alert.show().delay(3000).fadeOut(400);
+            });
+
+            that.syncSetting('movieAPI', value);
+        },
+
         resetTVShowAPI: function () {
             var value = [{
-                url: 'https://eztvapi.re/',
+                url: 'http://tv-v2.api-fetch.website/',
                 strictSSL: true
             }, {
-                url: 'https://api.popcorntime.io/',
+                url: 'cloudflare+http://tv-v2.api-fetch.website/',
                 strictSSL: true
-            }, {
-                url: 'http://tv.ytspt.re/',
-                strictSSL: false
             }];
             App.settings['tvAPI'] = value;
             //save to db

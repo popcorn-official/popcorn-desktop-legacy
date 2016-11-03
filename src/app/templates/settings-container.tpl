@@ -412,6 +412,20 @@
         <div class="title"><%= i18n.__("Connection") %></div>
         <div class="content">
             <span>
+                <p><%= i18n.__("Anime API Endpoint") %></p>
+                    <input id="animeAPI" type="text" size="50" name="animeAPI" value="<%=Settings.animeAPI[0].url%>">
+                    <% if (Settings.animeAPI.length <= 1) { %>
+                    &nbsp;&nbsp;<i class="reset-animeAPI fa fa-undo tooltipped" data-toggle="tooltip" data-placement="auto" title="<%= i18n.__('Reset to Default Settings') %>"></i>
+                    <% } %>
+            </span>
+            <span>
+                <p><%= i18n.__("Movie API Endpoint") %></p>
+                    <input id="movieAPI" type="text" size="50" name="movieAPI" value="<%=Settings.movieAPI[0].url%>">
+                    <% if (Settings.movieAPI.length <= 1) { %>
+                    &nbsp;&nbsp;<i class="reset-movieAPI fa fa-undo tooltipped" data-toggle="tooltip" data-placement="auto" title="<%= i18n.__('Reset to Default Settings') %>"></i>
+                    <% } %>
+            </span>
+            <span>
                 <p><%= i18n.__("TV Show API Endpoint") %></p>
                     <input id="tvAPI" type="text" size="50" name="tvAPI" value="<%=Settings.tvAPI[0].url%>">
                     <% if (Settings.tvAPI.length <= 1) { %>

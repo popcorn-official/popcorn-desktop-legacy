@@ -96,15 +96,24 @@ Settings.vpnPassword = '';
 Settings.tvAPI = [{
     url: 'http://tv-v2.api-fetch.website/',
     strictSSL: true
+}, {
+    url: 'cloudflare+http://tv-v2.api-fetch.website/',
+    strictSSL: true
 }];
 
 Settings.movieAPI = [{
     url: 'http://movies-v2.api-fetch.website/',
     strictSSL: true
+}, {
+    url: 'cloudflare+http://movies-v2.api-fetch.website/',
+    strictSSL: true
 }];
 
 Settings.animeAPI = [{
     url: 'http://anime.api-fetch.website/',
+    strictSSL: true
+}, {
+    url: 'cloudflare+http://anime.api-fetch.website/',
     strictSSL: true
 }];
 
