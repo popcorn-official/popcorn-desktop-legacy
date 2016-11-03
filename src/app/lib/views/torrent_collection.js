@@ -104,49 +104,49 @@
 
             if (this.searchEngine === 'KAT') {
 
-                var kat = require('kat-api');
-                kat.search({
-                    query: input,
-                    min_seeds: 5,
-                    category: category
-                }).then(function (data) {
-                    win.debug('KAT search: %s results', data.results.length);
-                    data.results.forEach(function (item) {
-                        var itemModel = {
-                            title: item.title,
-                            magnet: item.magnet,
-                            seeds: item.seeds,
-                            peers: item.peers,
-                            size: Common.fileSize(parseInt(item.size))
-                        };
-
-                        that.onlineAddItem(itemModel);
-                    });
-
-                    that.$('.tooltipped').tooltip({
-                        html: true,
-                        delay: {
-                            'show': 50,
-                            'hide': 50
-                        }
-                    });
-                    $('.notorrents-info,.torrents-info').hide();
-                    $('.online-search').removeClass('fa-spin fa-spinner').addClass('fa-search');
-                    $('.onlinesearch-info').show();
-                }).catch(function (err) {
-                    win.debug('KAT search failed:', err.message);
-                    var error;
-                    if (err.message === 'No results') {
-                        error = 'No results found';
-                    } else {
-                        error = 'Failed!';
-                    }
-                    $('.onlinesearch-info>ul.file-list').html('<br><br><div style="text-align:center;font-size:30px">' + i18n.__(error) + '</div>');
-
-                    $('.online-search').removeClass('fa-spin fa-spinner').addClass('fa-search');
-                    $('.notorrents-info,.torrents-info').hide();
-                    $('.onlinesearch-info').show();
-                });
+                // var kat = require('kat-api');
+                // kat.search({
+                //     query: input,
+                //     min_seeds: 5,
+                //     category: category
+                // }).then(function (data) {
+                //     win.debug('KAT search: %s results', data.results.length);
+                //     data.results.forEach(function (item) {
+                //         var itemModel = {
+                //             title: item.title,
+                //             magnet: item.magnet,
+                //             seeds: item.seeds,
+                //             peers: item.peers,
+                //             size: Common.fileSize(parseInt(item.size))
+                //         };
+                //
+                //         that.onlineAddItem(itemModel);
+                //     });
+                //
+                //     that.$('.tooltipped').tooltip({
+                //         html: true,
+                //         delay: {
+                //             'show': 50,
+                //             'hide': 50
+                //         }
+                //     });
+                //     $('.notorrents-info,.torrents-info').hide();
+                //     $('.online-search').removeClass('fa-spin fa-spinner').addClass('fa-search');
+                //     $('.onlinesearch-info').show();
+                // }).catch(function (err) {
+                //     win.debug('KAT search failed:', err.message);
+                //     var error;
+                //     if (err.message === 'No results') {
+                //         error = 'No results found';
+                //     } else {
+                //         error = 'Failed!';
+                //     }
+                //     $('.onlinesearch-info>ul.file-list').html('<br><br><div style="text-align:center;font-size:30px">' + i18n.__(error) + '</div>');
+                //
+                //     $('.online-search').removeClass('fa-spin fa-spinner').addClass('fa-search');
+                //     $('.notorrents-info,.torrents-info').hide();
+                //     $('.onlinesearch-info').show();
+                // });
 
             } else {
 

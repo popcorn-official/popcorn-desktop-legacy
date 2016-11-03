@@ -146,14 +146,12 @@
         },
 
         providers: {
-            movie: ['Yts'],
+            movie: ['MovieApi'],
             tvshow: ['TVApi'],
-            anime: ['Haruhichan'],
-            subtitle: 'YSubs',
+            anime: ['AnimeApi'],
+            subtitle: 'OpenSubtitles',
             metadata: 'Trakttv',
             tvst: 'TVShowTime',
-
-            tvshowsubtitle: 'OpenSubtitles',
             torrentCache: 'TorrentCache'
         },
 

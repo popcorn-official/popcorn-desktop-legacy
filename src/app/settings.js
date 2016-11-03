@@ -94,51 +94,29 @@ Settings.vpnUsername = '';
 Settings.vpnPassword = '';
 
 Settings.tvAPI = [{
-    url: 'https://eztvapi.re/',
+    url: 'http://tv-v2.api-fetch.website/',
     strictSSL: true
-}, {
-    url: 'https://api.popcorntime.io/',
-    strictSSL: true
-}, {
-    url: 'http://tv.ytspt.re/',
-    strictSSL: false
 }];
 
-Settings.ytsAPI = [{
-    uri: 'https://yts.to/',
+Settings.movieAPI = [{
+    url: 'http://movies-v2.api-fetch.website/',
     strictSSL: true
-}, {
-    uri: 'https://cloudflare.com/',
-    headers: {
-        'Host': 'xor.image.yt',
-        'User-Agent': 'Mozilla/5.0 (Linux) AppleWebkit/534.30 (KHTML, like Gecko) PT/3.8.0'
-    },
+}];
+
+Settings.animeAPI = [{
+    url: 'http://anime.api-fetch.website/',
     strictSSL: true
-}, {
-    uri: 'http://cloudflare.com/',
-    headers: {
-        'Host': 'xor.image.yt',
-        'User-Agent': 'Mozilla/5.0 (Linux) AppleWebkit/534.30 (KHTML, like Gecko) PT/3.8.0'
-    },
-    strictSSL: false
 }];
 
 Settings.updateEndpoint = {
-    url: 'https://popcorntime.re/',
+    url: 'https://butterproject.org/',
     index: 0,
     proxies: [{
-        url: 'https://popcorntime.re/',
-        fingerprint: '30:A6:BA:6C:19:A4:D5:C3:5A:E8:F1:56:C6:B4:E1:DC:EF:DD:EC:8C',
+        url: 'https://butterproject.org/',
+        fingerprint: '',
     }, {
-        url: 'https://popcorntime.io/',
-        fingerprint: '30:A6:BA:6C:19:A4:D5:C3:5A:E8:F1:56:C6:B4:E1:DC:EF:DD:EC:8C'
-    }, {
-        url: 'https://popcorntime.cc/',
-        fingerprint: '30:A6:BA:6C:19:A4:D5:C3:5A:E8:F1:56:C6:B4:E1:DC:EF:DD:EC:8C'
-    }, {
-        url: 'https://its.pt/',
-        ssl: false,
-        fingerprint: /301/
+        url: 'https://butterproject.github.io/',
+        fingerprint: ''
     }]
 };
 

@@ -10,7 +10,6 @@
         getProviders: function () {
             return {
                 torrents: App.Config.getProvider('movie'),
-                subtitle: App.Config.getProvider('subtitle')
             };
         }
     });
