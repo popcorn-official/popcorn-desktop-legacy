@@ -79,7 +79,7 @@
             json: true
         };
 
-        var req = _.extend({}, Settings.animeAPI[index].url, options);
+        var req = processCloudFlareHack(options, Settings.animeAPI[index].url);
         console.info('Request to AnimeAPI', req.url);
         request(req, function (err, res, data) {
             if (err || res.statusCode >= 400) {
@@ -100,6 +100,22 @@
 
         return deferred.promise;
     };
+
+    var processCloudFlareHack = function (options, url) {
+        var req = options;
+        var match = url.match(/^cloudflare\+(.*):\/\/(.*)/);
+        if (match) {
+            req = _.extend(req, {
+                uri: match[1] + '://cloudflare.com/',
+                headers: {
+                    'Host': match[2],
+                    'User-Agent': 'Mozilla/5.0 (Linux) AppleWebkit/534.30 (KHTML, like Gecko) PT/3.8.0'
+                }
+            });
+        }
+        return req;
+    };
+
 
     AnimeApi.prototype.extractIds = function (items) {
         return _.pluck(items.results, 'mal_id');
