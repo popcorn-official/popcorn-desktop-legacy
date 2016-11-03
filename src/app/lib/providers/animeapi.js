@@ -79,7 +79,7 @@
             json: true
         };
 
-        var req = _.extend({}, Settings.animeAPI[index], options);
+        var req = _.extend({}, Settings.animeAPI[index].url, options);
         console.info('Request to AnimeAPI', req.url);
         request(req, function (err, res, data) {
             if (err || res.statusCode >= 400) {
@@ -129,7 +129,7 @@
         }
 
         var index = 0;
-        var url = Settings.animeAPI[index] + 'animes/' + filters.page + '?' + querystring.stringify(params).replace(/%25%20/g, '%20');
+        var url = Settings.animeAPI[index].url + 'animes/' + filters.page + '?' + querystring.stringify(params).replace(/%25%20/g, '%20');
         return get(index, url, that).then(formatFetch);
     };
 

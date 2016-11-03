@@ -433,9 +433,6 @@ var Database = {
                     .catch(function (err) {
                         win.error('updater.update()', err);
                     });
-
-                // we look if VPN is connected
-                App.VPNClient.isRunning();
             })
             .catch(function (err) {
                 win.error('Error starting up', err);

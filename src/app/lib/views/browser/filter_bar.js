@@ -170,9 +170,6 @@
                     'hide': 50
                 }
             });
-
-            // update VPN icon with cached status
-            App.VPNClient.setVPNStatusCached();
         },
 
         focusSearch: function () {
