@@ -388,27 +388,17 @@
             var that = this;
             $('.spinner').show();
 
-            App.Providers.get('MovieApi').random()
+            var provider = App.Providers.get('MovieApi');
+            provider.random()
                 .then(function (data) {
-                  console.log(data);
-                    if (App.watchedMovies.indexOf(data.imdb_id) !== -1) {
-                        that.randomMovie();
-                        return;
-                    }
-                    that.model.set({
-                        isRandom: true,
-                        keywords: data.title,
-                        genre: ''
-                    });
-                    App.vent.trigger('movie:closeDetail');
-                    App.vent.on('list:loaded', function () {
-                        if (that.model.get('isRandom')) {
-                            $('.main-browser .items .cover')[0].click();
-                            that.model.set('isRandom', false);
-                        }
-                    });
-                })
-                .catch(function (err) {
+                    console.log(data, 'Movie');
+                    data.provider = provider.name;
+                    $('.spinner').hide();
+                    var model = new App.Model.Movie(data);
+                    model.set('health', false);
+                    App.vent.trigger('movie:showDetail', model);
+                }).catch(function (err) {
+                    console.error(err);
                     $('.spinner').hide();
                     $('.notification_alert').text(i18n.__('Error loading data, try again later...')).fadeIn('fast').delay(2500).fadeOut('fast');
                 });

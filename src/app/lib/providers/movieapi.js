@@ -7,28 +7,32 @@
 
     inherits(MovieApi, App.Providers.Generic);
 
+    function formatMovie(movie) {
+        return {
+            type: 'movie',
+            imdb_id: movie.imdb_id,
+            title: movie.title,
+            year: movie.year,
+            genre: movie.genres,
+            rating: parseInt(movie.rating.percentage, 10) / 10,
+            runtime: movie.runtime,
+            images: movie.images,
+            cover: movie.images.poster,
+            backdrop: movie.images.fanart,
+            synopsis: movie.synopsis,
+            trailer: movie.trailer !== null ? movie.trailer : false,
+            certification: movie.certification,
+            torrents: movie.torrents['en'] !== null ? movie.torrents['en'] : movie.torrents[Object.keys(movie.torrents)[0]],
+            langs: movie.torrents
+        };
+    }
+
     function formatForPopcorn(movies) {
         var results = [];
 
         movies.forEach(function (movie) {
-        if (movie.torrents) {
-            results.push({
-                    type: 'movie',
-                    imdb_id: movie.imdb_id,
-                    title: movie.title,
-                    year: movie.year,
-                    genre: movie.genres,
-                    rating: parseInt(movie.rating.percentage, 10) / 10,
-                    runtime: movie.runtime,
-                    images: movie.images,
-                    cover: movie.images.poster,
-                    backdrop: movie.images.fanart,
-                    synopsis: movie.synopsis,
-                    trailer: movie.trailer !== null ? movie.trailer : false,
-                    certification: movie.certification,
-                    torrents: movie.torrents['en'] !== null ? movie.torrents['en'] : movie.torrents[Object.keys(movie.torrents)[0]],
-                    langs: movie.torrents
-                });
+            if (movie.torrents) {
+                results.push(formatMovie(movie));
             }
         });
 
@@ -126,7 +130,7 @@
         var that = this;
         var index = 0;
         var url = Settings.movieAPI[index].url + 'random/movie';
-        return get(index, url, that);
+        return get(index, url, that).then(formatMovie);
     };
 
     App.Providers.MovieApi = MovieApi;
