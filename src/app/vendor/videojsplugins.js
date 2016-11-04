@@ -1,9 +1,9 @@
 // VideoJS Plugins
-
-videojs.BiggerSubtitleButton = videojs.Button.extend({
+var VjsButton = videojs.getComponent('Button');
+videojs.BiggerSubtitleButton = videojs.extend(VjsButton, {
     /** @constructor */
-    init: function (player, options) {
-        videojs.Button.call(this, player, options);
+    constructor: function (player, options) {
+        VjsButton.call(this, player, options);
         this.on('click', this.onClick);
     }
 });
@@ -35,10 +35,10 @@ videojs.plugin('biggerSubtitle', function () {
     this.controlBar.el().appendChild(biggerSubtitle.el());
 });
 
-videojs.SmallerSubtitleButton = videojs.Button.extend({
+videojs.SmallerSubtitleButton = videojs.extend(VjsButton, {
     /** @constructor */
-    init: function (player, options) {
-        videojs.Button.call(this, player, options);
+    constructor: function (player, options) {
+        VjsButton.call(this, player, options);
         this.on('click', this.onClick);
     }
 });
