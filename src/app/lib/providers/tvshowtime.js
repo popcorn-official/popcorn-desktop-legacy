@@ -1,12 +1,6 @@
 (function (App) {
     'use strict';
 
-    var request = require('request'),
-        URI = require('urijs'),
-        Q = require('q'),
-        _ = require('underscore'),
-        inherits = require('util').inherits,
-
         PT_VERSION = AdvSettings.get('version'),
 
         API_ENDPOINT = URI('https://api.tvshowtime.com/v1'),

@@ -1,9 +1,6 @@
 (function (App) {
     'use strict';
-    var querystring = require('querystring');
-    var request = require('request');
-    var Q = require('q');
-    var inherits = require('util').inherits;
+
     var Client = require('node-tvdb');
 
     var TVApi = function () {

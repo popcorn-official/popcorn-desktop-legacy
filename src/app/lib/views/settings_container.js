@@ -1,7 +1,6 @@
 (function (App) {
     'use strict';
     var clipboard = nw.Clipboard.get(),
-        AdmZip = require('adm-zip'),
         fdialogs = require('node-webkit-fdialogs'),
         waitComplete,
         oldTmpLocation,
@@ -736,7 +735,7 @@
 
         getIPAddress: function () {
             var ip, alias = 0;
-            var ifaces = require('os').networkInterfaces();
+            var ifaces = os.networkInterfaces();
             for (var dev in ifaces) {
                 ifaces[dev].forEach(function (details) {
                     if (details.family === 'IPv4') {

@@ -1,5 +1,3 @@
-var os = require('os');
-
 (function (App) {
     'use strict';
 

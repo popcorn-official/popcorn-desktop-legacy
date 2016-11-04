@@ -1,12 +1,8 @@
 (function (App) {
     'use strict';
 
-    var path = require('path');
-    var fs = require('fs');
     var readdirp = require('readdirp');
-    var async = require('async');
     var collection = App.Device.Collection;
-    var child = require('child_process');
 
     var ExtPlayer = App.Device.Generic.extend({
         defaults: {

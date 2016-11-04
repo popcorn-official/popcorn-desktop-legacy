@@ -5,9 +5,6 @@
     var BUFFERING_SIZE = 10 * 1024 * 1024;
 
     var readTorrent = require('read-torrent');
-    var peerflix = require('peerflix');
-    var path = require('path');
-    var crypto = require('crypto');
 
     var engine = null;
     var preload_engine = null;
@@ -73,7 +70,7 @@
         var tmpFile = path.join(App.settings.tmpLocation, tmpFilename);
         subtitles = torrent.subtitle;
 
-        var version = require('semver').parse(App.settings.version);
+        var version = semver.parse(App.settings.version);
         var torrentVersion = '';
         torrentVersion += version.major;
         torrentVersion += version.minor;
@@ -214,7 +211,7 @@
                 var tmpFile = path.join(App.settings.tmpLocation, tmpFilename);
                 subtitles = torrent.subtitle;
 
-                var version = require('semver').parse(App.settings.version);
+                var version = semver.parse(App.settings.version);
                 var torrentVersion = '';
                 torrentVersion += version.major;
                 torrentVersion += version.minor;

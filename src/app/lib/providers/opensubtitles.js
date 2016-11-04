@@ -1,7 +1,6 @@
 (function (App) {
     'use strict';
     var openSRT = require('opensubtitles-api');
-    var Q = require('q');
     var userAgent = 'Popcorn Time v1';
 
     var OpenSubtitles = function () {};

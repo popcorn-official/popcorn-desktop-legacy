@@ -228,10 +228,6 @@ var AdvSettings = {
     },
 
     checkApiEndpoint: function (endpoint, defer) {
-        var tls = require('tls'),
-            http = require('http'),
-            uri = require('url');
-
         defer = defer || Q.defer();
 
         endpoint.ssl = undefined;

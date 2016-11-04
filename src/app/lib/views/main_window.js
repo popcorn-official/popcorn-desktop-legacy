@@ -173,7 +173,7 @@
                     }
 
                     try {
-                        require('fs').statSync('src/app/themes/' + Settings.theme + '.css');
+                        fs.statSync('src/app/themes/' + Settings.theme + '.css');
                     } catch (e) {
                         Settings.theme = 'Official_-_Dark_theme';
                         AdvSettings.set('theme', 'Official_-_Dark_theme');
@@ -532,12 +532,11 @@
         },
 
         restartPopcornTime: function () {
-            var spawn = require('child_process').spawn,
-                argv = nw.App.fullArgv,
+            var argv = nw.App.fullArgv,
                 CWD = process.cwd();
 
             argv.push(CWD);
-            spawn(process.execPath, argv, {
+            child.spawn(process.execPath, argv, {
                 cwd: CWD,
                 detached: true,
                 stdio: ['ignore', 'ignore', 'ignore']
