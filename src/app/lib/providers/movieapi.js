@@ -125,7 +125,7 @@
     MovieApi.prototype.random = function () {
         var that = this;
         var index = 0;
-        var url = Settings.movieAPI[index].url + '/random/movie';
+        var url = Settings.movieAPI[index].url + 'random/movie';
         return get(index, url, that);
     };
 
