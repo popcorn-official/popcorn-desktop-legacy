@@ -228,13 +228,13 @@ var AdvSettings = {
     },
 
     checkApiEndpoint: function (endpoint, defer) {
-        var uri = require('url');
+   
         defer = defer || Q.defer();
 
         endpoint.ssl = undefined;
         _.extend(endpoint, endpoint.proxies[endpoint.index]);
 
-        var url = uri.parse(endpoint.url);
+        var url = URI.parse(endpoint.url);
         win.debug('Checking %s endpoint', url.hostname);
 
         if (endpoint.ssl === false) {
