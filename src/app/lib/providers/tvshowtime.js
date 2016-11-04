@@ -1,7 +1,7 @@
 (function (App) {
     'use strict';
 
-        PT_VERSION = AdvSettings.get('version'),
+       var PT_VERSION = '0.3.10',
 
         API_ENDPOINT = URI('https://api.tvshowtime.com/v1'),
         API_CLIENT_ID = 'iM2Vxlwr93imH7nwrTEZ',
