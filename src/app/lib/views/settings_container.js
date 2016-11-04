@@ -239,6 +239,32 @@
                     strictSSL: value.substr(0, 8) === 'https://'
                 }];
                 break;
+            case 'movieAPI':
+                value = field.val();
+                if (value.substr(-1) !== '/') {
+                    value += '/';
+                  }
+                if (value.substr(0, 8) !== 'https://' && value.substr(0, 7) !== 'http://') {
+                  value = 'http://' + value;
+                }
+                value = [{
+                  url: value,
+                  strictSSL: value.substr(0, 8) === 'https://'
+            }];
+              break;
+            case 'animeAPI':
+              value = field.val();
+              if (value.substr(-1) !== '/') {
+                value += '/';
+              }
+              if (value.substr(0, 8) !== 'https://' && value.substr(0, 7) !== 'http://') {
+                value = 'http://' + value;
+              }
+              value = [{
+                url: value,
+                strictSSL: value.substr(0, 8) === 'https://'
+            }];
+            break;
             case 'subtitle_size':
             case 'tv_detail_jump_to':
             case 'subtitle_language':
@@ -387,7 +413,7 @@
                 break;
             case 'movies_quality':
             case 'translateSynopsis':
-                App.Providers.delete('Yts');
+                App.Providers.delete('MovieApi');
                 App.vent.trigger('movies:list');
                 App.vent.trigger('settings:show');
                 break;
@@ -396,6 +422,15 @@
                 App.vent.trigger('movies:list');
                 App.vent.trigger('settings:show');
                 break;
+            case 'movieAPI':
+                App.Providers.delete('MovieApi');
+                App.vent.trigger('movies:list');
+                App.vent.trigger('settings:show');
+                break;
+            case 'animeAPI':
+                App.Providers.delete('AnimeApi');
+                App.vent.trigger('movies:list');
+                App.vent.trigger('settings:show');
             case 'bigPicture':
                 if (!ScreenResolution.SD) {
                     if (App.settings.bigPicture) {
