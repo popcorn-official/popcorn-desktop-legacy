@@ -1,7 +1,11 @@
 (function (App) {
     'use strict';
 
-    var client = new WebTorrent(),
+    var client = new WebTorrent({
+      dht: true,
+      maxConns: '5',  
+    }
+    ),
         CHANNELS = ['stable', 'beta', 'nightly'],
         FILENAME = 'package.nw.new',
         VERIFY_PUBKEY =
