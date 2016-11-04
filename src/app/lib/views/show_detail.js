@@ -15,75 +15,45 @@
             q1080p: '#q1080',
             q720p: '#q720',
             q480p: '#q480',
-            bookmarkIcon: '.favourites-toggle'
+            bookmarkIcon: '.sha-bookmark',
+            seasonTab: '.sd-seasons'
         },
 
         events: {
-            'click .favourites-toggle': 'toggleFavorite',
-            'click .show-watched-toggle': 'markShowAsWatched',
+            'click .sha-bookmark': 'toggleFavorite',
+            'click .sha-watched': 'markShowAsWatched',
             'click .watched': 'toggleWatched',
             'click #watch-now': 'startStreaming',
             'click .close-icon': 'closeDetails',
             'click .tab-season': 'clickSeason',
             'click .tab-episode': 'clickEpisode',
-            'click .show-imdb-link': 'openIMDb',
-            'mousedown .show-magnet-link': 'openMagnet',
+            'click .shmi-imdb': 'openIMDb',
+            'mousedown .magnet-icon': 'openMagnet',
             'dblclick .tab-episode': 'dblclickEpisode',
             'click .q1080': 'toggleShowQuality',
             'click .q720': 'toggleShowQuality',
             'click .q480': 'toggleShowQuality',
             'click .playerchoicemenu li a': 'selectPlayer',
-            'click .rating-container-tv': 'switchRating',
+            'click .shmi-rating': 'switchRating',
             'click .health-icon': 'resetHealth'
         },
 
         toggleFavorite: function (e) {
-
             if (e.type) {
                 e.preventDefault();
                 e.stopPropagation();
             }
             var that = this;
-
             if (bookmarked !== true) {
                 bookmarked = true;
-
-                var provider = App.Providers.get(this.model.get('provider'));
-                var data = provider.detail(this.model.get('imdb_id'), this.model.attributes)
-                    .then(function (data) {
-                            data.provider = that.model.get('provider');
-                            Database.addTVShow(data)
-                                .then(function (idata) {
-                                    return Database.addBookmark(that.model.get('imdb_id'), 'tvshow');
-                                })
-                                .then(function () {
-                                    win.info('Bookmark added (' + that.model.get('imdb_id') + ')');
-                                    that.model.set('bookmarked', true);
-                                    that.ui.bookmarkIcon.addClass('selected').text(i18n.__('Remove from bookmarks'));
-                                    App.userBookmarks.push(that.model.get('imdb_id'));
-                                });
-                        },
-                        function (err) {
-                            $('.notification_alert').text(i18n.__('Error loading data, try again later...')).fadeIn('fast').delay(2500).fadeOut('fast');
-                        });
-
+                that.model.set('bookmarked', true);
+                that.ui.bookmarkIcon.addClass('selected').text(i18n.__('Remove from bookmarks'));
             } else {
-                that.ui.bookmarkIcon.removeClass('selected').text(i18n.__('Add to bookmarks'));
                 bookmarked = false;
-
-                Database.deleteBookmark(this.model.get('imdb_id'))
-                    .then(function () {
-                        win.info('Bookmark deleted (' + that.model.get('imdb_id') + ')');
-                        that.model.set('bookmarked', false);
-                        App.userBookmarks.splice(App.userBookmarks.indexOf(that.model.get('imdb_id')), 1);
-
-                        // we'll make sure we dont have a cached show
-                        Database.deleteTVShow(that.model.get('imdb_id'));
-                        if (App.currentview === 'Favorites') {
-                            App.vent.trigger('favorites:render');
-                        }
-                    });
+                that.ui.bookmarkIcon.removeClass('selected').text(i18n.__('Add to bookmarks'));
+                that.model.set('bookmarked', false);
             }
+            $('li[data-imdb-id="' + this.model.get('imdb_id') + '"] .actions-favorites').click();
         },
 
 
@@ -118,6 +88,15 @@
                 _this.initKeyboardShortcuts();
             });
 
+            var torrents = {};
+            _.each(this.model.get('episodes'), function (value, currentEpisode) {
+                if (!torrents[value.season]) {
+                    torrents[value.season] = {};
+                }
+                torrents[value.season][value.episode] = value;
+            });
+            this.model.set('torrents', torrents);
+            this.model.set('seasonCount', Object.keys(torrents).length);
         },
         renameUntitled: function () {
             var episodes = this.model.get('episodes');
@@ -143,21 +122,11 @@
             Mousetrap.bind(['ctrl+up', 'command+up'], _this.previousSeason);
             Mousetrap.bind(['ctrl+down', 'command+down'], _this.nextSeason);
             Mousetrap.bind('f', function () {
-                $('.favourites-toggle').click();
+                $('.sha-bookmark').click();
             });
         },
 
-        unbindKeyboardShortcuts: function () { // There should be a better way to do this
-            Mousetrap.unbind('w');
-            Mousetrap.unbind('f');
-            Mousetrap.unbind('q');
-            Mousetrap.unbind('up');
-            Mousetrap.unbind('down');
-            Mousetrap.unbind(['enter', 'space']);
-            Mousetrap.unbind(['esc', 'backspace']);
-            Mousetrap.unbind(['ctrl+up', 'command+up']);
-            Mousetrap.unbind(['ctrl+down', 'command+down']);
-        },
+        unbindKeyboardShortcuts: Mousetrap.reset,
 
         onShow: function () {
             bookmarked = App.userBookmarks.indexOf(this.model.get('imdb_id')) !== -1;
@@ -168,14 +137,14 @@
                 this.ui.bookmarkIcon.removeClass('selected');
             }
 
-            $('.star-container-tv,.show-imdb-link,.show-magnet-link').tooltip();
+            $('.star-container-tv,.shmi-imdb,.magnet-icon').tooltip();
 
-            var cbackground = $('.tv-cover').attr('data-bgr');
+            var cbackground = $('.shp-img').attr('data-bgr');
             var coverCache = new Image();
             coverCache.src = cbackground;
             coverCache.onload = function () {
                 try {
-                    $('.tv-cover')
+                    $('.shp-img')
                         .css('background-image', 'url(' + cbackground + ')')
                         .addClass('fadein');
                 } catch (e) {}
@@ -183,19 +152,19 @@
             };
             coverCache.onerror = function () {
                 try {
-                    $('.tv-cover')
+                    $('.shp-img')
                         .css('background-image', 'url("images/posterholder.png")')
                         .addClass('fadein');
                 } catch (e) {}
                 coverCache = null;
             };
 
-            var background = $('.tv-poster-background').attr('data-bgr');
+            var background = $('.shc-img').attr('data-bgr');
             var bgCache = new Image();
             bgCache.src = background;
             bgCache.onload = function () {
                 try {
-                    $('.tv-poster-background')
+                    $('.shc-img')
                         .css('background-image', 'url(' + background + ')')
                         .addClass('fadein');
                 } catch (e) {}
@@ -203,7 +172,7 @@
             };
             bgCache.onerror = function () {
                 try {
-                    $('.tv-poster-background')
+                    $('.shc-img')
                         .css('background-image', 'url("images/bg-header.jpg")')
                         .addClass('fadein');
                 } catch (e) {}
@@ -217,6 +186,10 @@
             if (AdvSettings.get('ratingStars') === false) {
                 $('.star-container-tv').addClass('hidden');
                 $('.number-container-tv').removeClass('hidden');
+            }
+
+            if (AdvSettings.get('hideSeasons') && this.model.get('seasonCount') < 2) {
+                this.ui.seasonTab.hide();
             }
 
             this.isShowWatched();
@@ -313,30 +286,24 @@
         },
 
         openIMDb: function () {
-            gui.Shell.openExternal('http://www.imdb.com/title/' + this.model.get('imdb_id'));
+            nw.Shell.openExternal('http://www.imdb.com/title/' + this.model.get('imdb_id'));
         },
 
         openMagnet: function (e) {
             var torrentUrl = $('.startStreaming').attr('data-torrent');
             if (e.button === 2) { //if right click on magnet link
-                var clipboard = gui.Clipboard.get();
+                var clipboard = nw.Clipboard.get();
                 clipboard.set(torrentUrl, 'text'); //copy link to clipboard
                 $('.notification_alert').text(i18n.__('The magnet link was copied to the clipboard')).fadeIn('fast').delay(2500).fadeOut('fast');
             } else {
-                gui.Shell.openExternal(torrentUrl);
+                nw.Shell.openExternal(torrentUrl);
             }
         },
 
         switchRating: function () {
-            if ($('.number-container-tv').hasClass('hidden')) {
-                $('.number-container-tv').removeClass('hidden');
-                $('.star-container-tv').addClass('hidden');
-                AdvSettings.set('ratingStars', false);
-            } else {
-                $('.number-container-tv').addClass('hidden');
-                $('.star-container-tv').removeClass('hidden');
-                AdvSettings.set('ratingStars', true);
-            }
+            $('.number-container-tv').toggleClass('hidden');
+            $('.star-container-tv').toggleClass('hidden');
+            AdvSettings.set('ratingStars', $('.number-container-tv').hasClass('hidden'));
         },
 
         toggleWatched: function (e) {
@@ -378,14 +345,14 @@
                 Database.checkEpisodeWatched(value)
                     .then(function (watched) {
                         if (!watched) {
-                            $('.show-watched-toggle').show();
+                            $('.sha-watched').show();
                         }
                     });
             });
         },
 
         markShowAsWatched: function () {
-            $('.show-watched-toggle').addClass('selected');
+            $('.sha-watched').addClass('selected');
 
             var tvdb_id = _this.model.get('tvdb_id');
             var imdb_id = _this.model.get('imdb_id');
@@ -404,7 +371,7 @@
                     .then(function (watched) {
                         if (!watched) {
                             App.vent.trigger('show:watched', value, 'seen');
-                            $('.show-watched-toggle').hide();
+                            $('.sha-watched').hide();
                         }
                     });
             });
@@ -425,8 +392,6 @@
             // we should never get any shows that aren't us, but you know, just in case.
             if (value.tvdb_id === _this.model.get('tvdb_id')) {
                 $('#watched-' + value.season + '-' + value.episode).toggleClass('true', state);
-            } else {
-                win.error('something fishy happened with the watched signal', this.model, value);
             }
         },
 
@@ -643,13 +608,13 @@
 
             $('.tab-episode.active').removeClass('active');
             $elem.addClass('active');
-            $('.episode-info-number').text(i18n.__('Season %s', $('.template-' + tvdbid + ' .season').html()) + ', ' + i18n.__('Episode %s', $('.template-' + tvdbid + ' .episode').html()));
-            $('.episode-info-title').text($('.template-' + tvdbid + ' .title').text());
-            $('.episode-info-date').text(i18n.__('Aired Date') + ': ' + $('.template-' + tvdbid + ' .date').html());
-            $('.episode-info-description').text($('.template-' + tvdbid + ' .overview').text());
+            $('.sdoi-number').text(i18n.__('Season %s', $('.template-' + tvdbid + ' .season').html()) + ', ' + i18n.__('Episode %s', $('.template-' + tvdbid + ' .episode').html()));
+            $('.sdoi-title').text($('.template-' + tvdbid + ' .title').text());
+            $('.sdoi-date').text(i18n.__('Aired Date') + ': ' + $('.template-' + tvdbid + ' .date').html());
+            $('.sdoi-synopsis').text($('.template-' + tvdbid + ' .overview').text());
 
             //pull the scroll always to top
-            $('.episode-info-description').scrollTop(0);
+            $('.sdoi-synopsis').scrollTop(0);
 
             $('.startStreaming').attr('data-torrent', torrents.def);
             $('.startStreaming').attr('data-quality', torrents.quality);
@@ -682,29 +647,17 @@
             AdvSettings.set('shows_default_quality', quality.text());
             _this.resetHealth();
         },
-        toggleQuality: function (e) {
-            var qualities = {
-                q480p: {
-                    active: _this.ui.q480p.hasClass('active'),
-                    next: 'q720p'
-                },
-                q720p: {
-                    active: _this.ui.q720p.hasClass('active'),
-                    next: 'q1080p'
-                },
-                q1080p: {
-                    active: _this.ui.q1080p.hasClass('active'),
-                    next: 'q480p'
-                },
-            };
 
-            for (var q in qualities) {
-                if (qualities[q].active) {
-                    var fake_e = {};
-                    fake_e.currentTarget = $(_this.ui[qualities[q].next]);
-                    _this.toggleShowQuality(fake_e);
-                }
+        toggleQuality: function (e) {
+            var qualitySelector = _this.ui.q480p.parent();
+            var eligible = qualitySelector.children(':not(.active):not(.disabled)');
+            if (!eligible.length) {
+                return;
             }
+            var nextEligible = qualitySelector.children('.active ~ :not(.disabled)');
+            _this.toggleShowQuality({
+                currentTarget: (nextEligible.length ? nextEligible : eligible).first()
+            });
         },
 
         nextEpisode: function (e) {
@@ -830,14 +783,12 @@
             };
 
             if (torrent.substring(0, 8) === 'magnet:?') {
-                // if 'magnet:?' is because TVApi sends back links, not magnets
-
-                torrent = torrent.split('&tr')[0] + '&tr=udp://tracker.openbittorrent.com:80/announce' + '&tr=udp://open.demonii.com:1337/announce' + '&tr=udp://tracker.coppersurfer.tk:6969';
-
+                // if 'magnet:?' is because api sometimes sends back links, not magnets
                 torrentHealth(torrent, {
-                    timeout: 1000
+                    timeout: 1000,
+                    blacklist: Settings.trackers.blacklisted,
+                    force: Settings.trackers.forced
                 }).then(function (res) {
-
                     if (cancelled) {
                         return;
                     }

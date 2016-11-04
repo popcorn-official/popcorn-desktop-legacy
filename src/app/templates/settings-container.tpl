@@ -66,7 +66,7 @@
                 <div class="dropdown start-screen">
                     <p><%= i18n.__("Start Screen") %></p>
                         <%
-                            var arr_screens = ["Movies","TV Series","Favorites","Anime", "Watchlist", "Last Open"];
+                            var arr_screens = ["Movies","TV Series","Anime","Indie","Favorites", "Watchlist", "Last Open"];
 
                             var selct_start_screen = "";
                             for(var key in arr_screens) {
@@ -90,6 +90,11 @@
             <span class="advanced">
                 <input class="settings-checkbox" name="alwaysOnTop" id="cb4" type="checkbox" <%=(Settings.alwaysOnTop? "checked='checked'":"")%>>
                 <label class="settings-label" for="cb4"><%= i18n.__("Always On Top") %></label>
+            </span>
+
+            <span class="advanced">
+                <input class="settings-checkbox" name="rememberFilters" id="cb7" type="checkbox" <%=(Settings.rememberFilters? "checked='checked'":"")%>>
+                <label class="settings-label" for="cb7"><%= i18n.__("Remember Filters") %></label>
             </span>
 
             <span class="advanced">
@@ -209,7 +214,7 @@
                 <div class="dropdown subtitles-decoration">
                     <p><%= i18n.__("Decoration") %></p>
                     <%
-                        var arr_deco = ["None", "Outline", "Opaque Background"];
+                        var arr_deco = ["None", "Outline", "Opaque Background", "See-through Background"];
 
                         var sub_deco = "";
                         for(var key in arr_deco) {
@@ -251,6 +256,10 @@
                         </datalist>
                 </div>
             </span>
+            <span class="advanced">
+                <input class="settings-checkbox" name="subtitles_bold" id="subsbold" type="checkbox" <%=(Settings.subtitles_bold? "checked='checked'":"")%>>
+                <label class="settings-label" for="subsbold"><%= i18n.__("Bold") %></label>
+            </span>
 
         </div>
     </section>
@@ -289,8 +298,9 @@
         </div>
     </section>
 
+    <% if(App.Trakt) { %>
     <section id="trakt-tv">
-        <div class="title"><%= i18n.__("Trakt.tv") %></div>
+        <div class="title">Trakt.tv</div>
         <div class="content">
             <div class="trakt-options<%= App.Trakt.authenticated ? " authenticated" : "" %>">
                 <% if(App.Trakt.authenticated) { %>
@@ -314,20 +324,22 @@
                     </span>
                 <% } else { %>
                     <span>
-                        <%= i18n.__("Connect to %s to automatically 'scrobble' episodes you watch in %s", "Trakt.tv", "Popcorn Time") %>
+                        <%= i18n.__("Connect to %s to automatically 'scrobble' episodes you watch in %s", "Trakt.tv", Settings.projectName) %>
                     </span>
                     <span>
                         <div class="btn-settings syncTrakt" id="authTrakt">
                             <i class="fa fa-user-plus">&nbsp;&nbsp;</i>
                             <%= i18n.__("Connect To %s", "Trakt") %>
                         </div>
-                        <div class="loading-spinner" style="display: none"></div>
+                        <div class="trakt-loading-spinner" style="display: none"></div>
                     </span>
                 <% } %>
             </div>
         </div>
     </section>
+    <% } %>
 
+    <% if(App.TVShowTime) { %>
 	<section id="tvshowtime">
 		<div class="title">TVShow Time</div>
 		<div class="content">
@@ -349,6 +361,46 @@
 			</div>
 		</div>
 	</section>
+    <% } %>
+
+    <section id="opensubtitles">
+        <div class="title">OpenSubtitles</div>
+        <div class="content">
+            <div class="opensubtitles-options">
+                <% if(Settings.opensubtitlesAuthenticated) { %>
+                    <span>
+                        <%= i18n.__("You are currently connected to %s", "OpenSubtitles") %>.
+                        <a id="unauthOpensubtitles" class="unauthtext" href="#"><%= i18n.__("Disconnect account") %></a>
+                    </span>
+                <% } else { %>
+					<span>
+						<p><%= i18n.__("Username") %></p>
+						<input type="text" size="50" id="opensubtitlesUsername" name="opensubtitlesUsername">
+                        <div class="loading-spinner" style="display: none"></div>
+                        <div class="valid-tick" style="display: none"></div>
+                        <div class="invalid-cross" style="display: none"></div>
+					</span>
+					<span>
+						<p><%= i18n.__("Password") %></p>
+						<input type="password" size="50" id="opensubtitlesPassword" name="opensubtitlesPassword">
+					</span>
+                    <span>
+                        <div class="btn-settings" id="authOpensubtitles">
+                            <i class="fa fa-user-plus">&nbsp;&nbsp;</i>
+                            <%= i18n.__("Connect To %s", "OpenSubtitles") %>
+                        </div>
+                    </span>
+					<span>
+						<em><%= i18n.__("%s stores an encrypted hash of your password in your local database", Settings.projectName) %></em>
+					</span>
+                <% } %>
+                <span class="advanced">
+                    <input class="settings-checkbox" name="opensubtitlesAutoUpload" id="opensubtitlesAutoUpload" type="checkbox" <%=(Settings.opensubtitlesAutoUpload? "checked='checked'":"")%>>
+                    <label class="settings-label" for="opensubtitlesAutoUpload"><%= i18n.__("Automatic Subtitle Uploading") %></label>
+                </span>
+            </div>
+        </div>
+    </section>
 
     <section id="features">
         <div class="title"><%= i18n.__("Features") %></div>
@@ -360,10 +412,6 @@
             <span>
                 <input class="settings-checkbox" name="activateWatchlist" id="activateWatchlist" type="checkbox" <%=(Settings.activateWatchlist? "checked='checked'":"")%>>
                 <label class="settings-label" for="activateWatchlist"><%= i18n.__("Watchlist") %></label>
-            </span>
-            <span>
-                <input class="settings-checkbox" name="activateVpn" id="activateVpn" type="checkbox" <%=(Settings.activateVpn? "checked='checked'":"")%>>
-                <label class="settings-label" for="activateVpn"><%= i18n.__("VPN") %></label>
             </span>
             <span>
                 <input class="settings-checkbox" name="activateRandomize" id="activateRandomize" type="checkbox" <%=(Settings.activateRandomize? "checked='checked'":"")%>>
@@ -411,13 +459,33 @@
     <section id="connection" class="advanced">
         <div class="title"><%= i18n.__("Connection") %></div>
         <div class="content">
-            <span>
-                <p><%= i18n.__("TV Show API Endpoint") %></p>
+            <% if(Settings.tvAPI) { %>
+                <span>
+                    <p><%= i18n.__("Anime API Endpoint") %></p>
+                    <input id="tvAPI" type="text" size="50" name="animeAPI" value="<%=Settings.animeAPI[0].url%>">
+                    <% if (Settings.animeAPI.length <= 1) { %>
+                        &nbsp;&nbsp;<i class="reset-animeAPI fa fa-undo tooltipped" data-toggle="tooltip" data-placement="auto" title="<%= i18n.__('Reset to Default Settings') %>"></i>
+                    <% } %>
+                </span>
+            <% } %>
+            <% if(Settings.movieAPI) { %>
+                <span>
+                    <p><%= i18n.__("Movie API Endpoint") %></p>
+                    <input id="movieAPI" type="text" size="50" name="movieAPI" value="<%=Settings.movieAPI[0].url%>">
+                    <% if (Settings.movieAPI.length <= 1) { %>
+                        &nbsp;&nbsp;<i class="reset-movieAPI fa fa-undo tooltipped" data-toggle="tooltip" data-placement="auto" title="<%= i18n.__('Reset to Default Settings') %>"></i>
+                    <% } %>
+                </span>
+            <% } %>
+            <% if(Settings.tvAPI) { %>
+                <span>
+                    <p><%= i18n.__("TV Show API Endpoint") %></p>
                     <input id="tvAPI" type="text" size="50" name="tvAPI" value="<%=Settings.tvAPI[0].url%>">
                     <% if (Settings.tvAPI.length <= 1) { %>
-                    &nbsp;&nbsp;<i class="reset-tvAPI fa fa-undo tooltipped" data-toggle="tooltip" data-placement="auto" title="<%= i18n.__('Reset to Default Settings') %>"></i>
+                        &nbsp;&nbsp;<i class="reset-tvAPI fa fa-undo tooltipped" data-toggle="tooltip" data-placement="auto" title="<%= i18n.__('Reset to Default Settings') %>"></i>
                     <% } %>
-            </span>
+                </span>
+            <% } %>
             <span>
                 <p><%= i18n.__("Connection Limit") %></p>
                 <input id="connectionLimit" type="text" size="20" name="connectionLimit" value="<%=Settings.connectionLimit%>"/>
@@ -506,8 +574,12 @@
                 <label class="settings-label" for="cb5"><%= i18n.__("Activate automatic updating") %></label>
             </span>
             <span>
-                <input class="settings-checkbox" name="events" id="cb6" type="checkbox" <%=(Settings.events? "checked='checked'":"")%>>
-                <label class="settings-label" for="cb6"><%= i18n.__("Celebrate various events") %></label>
+                <input class="settings-checkbox" name="UpdateSeed" id="cb6" type="checkbox" <%=(Settings.UpdateSeed? "checked='checked'":"")%>>
+                <label class="settings-label" for="cb6"><%= i18n.__("Activate Update Seeding") %></label>
+            </span>
+            <span>
+                <input class="settings-checkbox" name="events" id="cb7" type="checkbox" <%=(Settings.events? "checked='checked'":"")%>>
+                <label class="settings-label" for="cb7"><%= i18n.__("Celebrate various events") %></label>
             </span>
             <span>
                 <input class="settings-checkbox" name="minimizeToTray" id="minimizeToTray" type="checkbox" <%=(Settings.minimizeToTray? "checked='checked'":"")%>>

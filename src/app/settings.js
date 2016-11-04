@@ -1,11 +1,43 @@
-var Q = require('q'),
-    os = require('os'),
-    path = require('path'),
-    _ = require('underscore'),
-    data_path = require('nw.gui').App.dataPath;
-
 /** Default settings **/
-var Settings = {};
+var Settings = {
+    projectName: 'Popcorn Time',
+    projectUrl: 'https://popcorntime.sh',
+    projectTwitter: 'popcorntimetv',
+    projectFacebook: 'PopcornTimedotSh',
+    projectGooglePlus: 'popcorntimeshplus',
+    projectBlog: 'https://blog.popcorntime.sh/',
+    projectForum: 'https://www.reddit.com/r/PopcornTime',
+
+    statusUrl: 'http://status.popcorntime.sh',
+    changelogUrl: 'https://github.com/popcorn-official/popcorn-desktop-legacy/commits/master',
+    issuesUrl: 'https://github.com/popcorn-official/popcorn-desktop-legacy/issues',
+    sourceUrl: 'https://github.com/popcorn-official/popcorn-desktop-legacy/',
+    commitUrl: 'https://github.com/popcorn-official/popcorn-desktop-legacy/commit',
+    updateKey: '-----BEGIN PUBLIC KEY-----\n' +
+        'MIIBtjCCASsGByqGSM44BAEwggEeAoGBAPNM5SX+yR8MJNrX9uCQIiy0t3IsyNHs\n' +
+        'HWA180wDDd3S+DzQgIzDXBqlYVmcovclX+1wafshVDw3xFTJGuKuva7JS3yKnjds\n' +
+        'NXbvM9CrJ2Jngfd0yQPmSh41qmJXHHSwZfPZBxQnspKjbcC5qypM5DqX9oDSJm2l\n' +
+        'fM/weiUGnIf7AhUAgokTdF7G0USfpkUUOaBOmzx2RRkCgYAyy5WJDESLoU8vHbQc\n' +
+        'rAMnPZrImUwjFD6Pa3CxhkZrulsAOUb/gmc7B0K9I6p+UlJoAvVPXOBMVG/MYeBJ\n' +
+        '19/BH5UNeI1sGT5/Kg2k2rHVpuqzcvlS/qctIENgCNMo49l3LrkHbJPXKJ6bf+T2\n' +
+        '8lFWRP2kVlrx/cHdqSi6aHoGTAOBhAACgYBTNeXBHbWDOxzSJcD6q4UDGTnHaHHP\n' +
+        'JgeCrPkH6GBa9azUsZ+3MA98b46yhWO2QuRwmFQwPiME+Brim3tHlSuXbL1e5qKf\n' +
+        'GOm3OxA3zKXG4cjy6TyEKajYlT45Q+tgt1L1HuGAJjWFRSA0PP9ctC6nH+2N3HmW\n' +
+        'RTcms0CPio56gg==\n' +
+        '-----END PUBLIC KEY-----\n'
+};
+
+Settings.trackers = {
+    blacklisted: [
+        'demonii'
+    ],
+    forced: [
+        'udp://tracker.coppersurfer.tk:6969/announce',
+        'udp://glotorrents.pw:6969/announce',
+        'udp://exodus.desync.com:6969/announce',
+        'udp://tracker.opentrackr.org:1337/announce'
+    ]
+};
 
 // User interface
 Settings.language = '';
@@ -70,9 +102,10 @@ Settings.connectionLimit = 100;
 Settings.dhtLimit = 500;
 Settings.streamPort = 0; // 0 = Random
 Settings.tmpLocation = path.join(os.tmpDir(), 'Popcorn-Time');
-Settings.databaseLocation = path.join(data_path, 'data');
+Settings.databaseLocation = path.join(nw.App.dataPath, 'data');
 Settings.deleteTmpOnClose = true;
 Settings.automaticUpdating = true;
+Settings.UpdateSeed = true;
 Settings.events = true;
 Settings.minimizeToTray = false;
 Settings.bigPicture = false;
@@ -80,9 +113,9 @@ Settings.bigPicture = false;
 // Features
 Settings.activateTorrentCollection = true;
 Settings.activateWatchlist = true;
-Settings.activateVpn = true;
+Settings.activateVpn = false;
 Settings.activateRandomize = true;
-Settings.onlineSearchEngine = 'KAT';
+Settings.onlineSearchEngine = 'ExtraTorrent';
 
 // Ratio
 Settings.totalDownloaded = 0;
@@ -94,53 +127,36 @@ Settings.vpnUsername = '';
 Settings.vpnPassword = '';
 
 Settings.tvAPI = [{
-    url: 'https://eztvapi.re/',
+    url: 'http://tv-v2.api-fetch.website/',
     strictSSL: true
 }, {
-    url: 'https://api.popcorntime.io/',
+    url: 'cloudflare+http://tv-v2.api-fetch.website/',
     strictSSL: true
-}, {
-    url: 'http://tv.ytspt.re/',
-    strictSSL: false
 }];
 
-Settings.ytsAPI = [{
-    uri: 'https://yts.to/',
+Settings.movieAPI = [{
+    url: 'http://movies-v2.api-fetch.website/',
     strictSSL: true
 }, {
-    uri: 'https://cloudflare.com/',
-    headers: {
-        'Host': 'xor.image.yt',
-        'User-Agent': 'Mozilla/5.0 (Linux) AppleWebkit/534.30 (KHTML, like Gecko) PT/3.8.0'
-    },
+    url: 'cloudflare+http://movies-v2.api-fetch.website/',
+    strictSSL: true
+}];
+
+Settings.animeAPI = [{
+    url: 'http://anime.api-fetch.website/',
     strictSSL: true
 }, {
-    uri: 'http://cloudflare.com/',
-    headers: {
-        'Host': 'xor.image.yt',
-        'User-Agent': 'Mozilla/5.0 (Linux) AppleWebkit/534.30 (KHTML, like Gecko) PT/3.8.0'
-    },
-    strictSSL: false
+    url: 'cloudflare+http://anime.api-fetch.website/',
+    strictSSL: true
 }];
 
 Settings.updateEndpoint = {
-    url: 'https://popcorntime.re/',
-    index: 0,
-    proxies: [{
-        url: 'https://popcorntime.re/',
-        fingerprint: '30:A6:BA:6C:19:A4:D5:C3:5A:E8:F1:56:C6:B4:E1:DC:EF:DD:EC:8C',
-    }, {
-        url: 'https://popcorntime.io/',
-        fingerprint: '30:A6:BA:6C:19:A4:D5:C3:5A:E8:F1:56:C6:B4:E1:DC:EF:DD:EC:8C'
-    }, {
-        url: 'https://popcorntime.cc/',
-        fingerprint: '30:A6:BA:6C:19:A4:D5:C3:5A:E8:F1:56:C6:B4:E1:DC:EF:DD:EC:8C'
-    }, {
-        url: 'https://its.pt/',
-        ssl: false,
-        fingerprint: /301/
-    }]
-};
+        url: 'https://popcorntime.sh/',
+        index: 0,
+        proxies: [{
+            url: 'https://popcorntime.sh/'
+        }]
+}
 
 // App Settings
 Settings.version = false;
@@ -247,16 +263,13 @@ var AdvSettings = {
     },
 
     checkApiEndpoint: function (endpoint, defer) {
-        var tls = require('tls'),
-            http = require('http'),
-            uri = require('url');
 
         defer = defer || Q.defer();
 
         endpoint.ssl = undefined;
         _.extend(endpoint, endpoint.proxies[endpoint.index]);
 
-        var url = uri.parse(endpoint.url);
+        var url = URI.parse(endpoint.url);
         win.debug('Checking %s endpoint', url.hostname);
 
         if (endpoint.ssl === false) {
@@ -348,8 +361,7 @@ var AdvSettings = {
 
     performUpgrade: function () {
         // This gives the official version (the package.json one)
-        gui = require('nw.gui');
-        var currentVersion = gui.App.manifest.version;
+        var currentVersion = nw.App.manifest.version;
 
         if (currentVersion !== AdvSettings.get('version')) {
             // Nuke the DB if there's a newer version
@@ -365,6 +377,6 @@ var AdvSettings = {
             window.__isUpgradeInstall = true;
         }
         AdvSettings.set('version', currentVersion);
-        AdvSettings.set('releaseName', gui.App.manifest.releaseName);
+        AdvSettings.set('releaseName', nw.App.manifest.releaseName);
     },
 };

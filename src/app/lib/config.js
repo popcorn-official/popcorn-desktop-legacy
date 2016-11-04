@@ -32,8 +32,8 @@
         ],
 
         sorters: [
-            'popularity',
             'trending',
+            'popularity',
             'last added',
             'year',
             'title',
@@ -41,12 +41,25 @@
         ],
 
         sorters_tv: [
-            'popularity',
             'trending',
+            'popularity',
             'updated',
             'year',
             'name',
             'rating'
+        ],
+
+        sorters_fav: [
+           'watched items',
+           'year',
+           'title',
+           'rating'
+        ],
+
+        sorters_anime: [
+            'popularity',
+            'name',
+            'year'
         ],
 
         types_anime: [
@@ -55,6 +68,13 @@
             'TV',
             'OVA',
             'ONA'
+        ],
+
+        types_fav: [
+            'All',
+            'Movies',
+            'TV',
+            'Anime'
         ],
 
         genres_anime: [
@@ -146,14 +166,12 @@
         },
 
         providers: {
-            movie: ['Yts'],
+            movie: ['MovieApi'],
             tvshow: ['TVApi'],
-            anime: ['Haruhichan'],
-            subtitle: 'YSubs',
+            anime: ['AnimeApi'],
+            subtitle: 'OpenSubtitles',
             metadata: 'Trakttv',
             tvst: 'TVShowTime',
-
-            tvshowsubtitle: 'OpenSubtitles',
             torrentCache: 'TorrentCache'
         },
 

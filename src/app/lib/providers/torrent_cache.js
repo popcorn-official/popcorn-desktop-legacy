@@ -1,16 +1,7 @@
 (function (App) {
     'use strict';
-    var peerflix = require('peerflix'),
-        Q = require('q'),
-        path = require('path'),
-        mkdirp = require('mkdirp'),
-        rimraf = require('rimraf'),
-        fs = require('fs'),
-        request = require('request'),
-        zlib = require('zlib'),
-        safeMagetTID = null,
+    var safeMagetTID = null,
         stateModel = null;
-
 
     /**
      * takes care that magnet and .torr urls always return actual torrent file
@@ -18,10 +9,117 @@
     var tpmDir = path.join(App.settings.tmpLocation, 'TorrentCache'),
         MAGNET_RESOLVE_TIMEOUT = 60 * 1000; // let's give max a minute to resolve a magnet uri
 
+    var handlers = {
+        handletorrent: function (filePath, torrent) {
+            // just copy the torrent file
+            var deferred = Q.defer();
+            Common.copyFile(torrent, filePath, function (err) {
+                if (err) {
+                    return handlers.handleError('TorrentCache.handletorrent() error: ' + err, torrent);
+                }
+                deferred.resolve(filePath);
+            });
+            return deferred.promise;
+        },
+        handletorrenturl: function (filePath, torrent) {
+            // try to download the file
+            var deferred = Q.defer(),
+                safeTimeoutID = null,
+                doneReached = false;
+            var done = function (error) {
+                clearTimeout(safeTimeoutID);
+                if (doneReached) {
+                    return;
+                }
+                doneReached = true;
+                if (error) {
+                    // try unlinking the file in case it was created
+                    try {
+                        fs.unlink(filePath);
+                    } catch (e) {}
+                    return handlers.handleError('TorrentCache.handletorrenturl() error: ' + error, torrent);
+                }
+                deferred.resolve(filePath);
+            };
+            try { // in case somehow invaid link hase made it through to here
+                var ws = fs.createWriteStream(filePath),
+                    params = {
+                        url: torrent,
+                        headers: {
+                            'accept-charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+                            'accept-language': 'en-US,en;q=0.8',
+                            'accept-encoding': 'gzip,deflate',
+                            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.143 Safari/537.36'
+                        }
+                    },
+                    req = request(params)
+                    .on('response', function (resp) {
+                        if (resp.statusCode >= 400) {
+                            return done('Invalid status: ' + resp.statusCode);
+                        }
+                        switch (resp.headers['content-encoding']) {
+                        case 'gzip':
+                            resp.pipe(zlib.createGunzip()).pipe(ws);
+                            break;
+                        case 'deflate':
+                            resp.pipe(zlib.createInflate()).pipe(ws);
+                            break;
+                        default:
+                            resp.pipe(ws);
+                            break;
+                        }
+                        ws
+                            .on('error', done)
+                            .on('close', done);
+                    })
+                    .on('error', done)
+                    .on('end', function () {
+                        // just to be on the safe side here, set 'huge' amount of time, close event should be triggered on ws long before this one if all goes good.
+                        safeTimeoutID = setTimeout(function () {
+                            done('Waiting for stream to end error: timed out.');
+                        }, 5 * 1000);
+                    });
+            } catch (e) {
+                done(e);
+            }
+            return deferred.promise;
+        },
+        handlemagnet: function (filePath, torrent) {
+            var deferred = Q.defer();
+            deferred.resolve(torrent);
+            return deferred.promise;
+        },
+        handleSuccess: function (filePath) {
+            win.debug('TorrentCache.handleSuccess() ' + filePath + ' stopped: ' + !stateModel);
+            if (!stateModel) {
+                return;
+            }
+            var torrentStart = new Backbone.Model({
+                torrent: filePath,
+                is_file: true
+            });
+            App.vent.trigger('stream:start', torrentStart);
+        },
+        handleError: function (err, torrent) {
+            win.error('TorrentCache.handleError(): ' + err, torrent);
+            handlers.updateState('Error resolving torrent.');
+        },
+        updateState: function (state) {
+            if (stateModel) {
+                stateModel.set('state', state);
+            }
+        }
+    };
+
     var mod = function () {
             this._checkTmpDir();
         },
         pmod = mod.prototype;
+
+    pmod.config = {
+        name: 'TorrentCache'
+    };
 
     pmod.getTmpDir = function () {
         return tpmDir;
@@ -129,158 +227,6 @@
     pmod.stop = function () {
         stateModel = null;
     };
-
-    var handlers = {
-        handletorrent: function (filePath, torrent) {
-            // just copy the torrent file
-            var deferred = Q.defer();
-            Common.copyFile(torrent, filePath, function (err) {
-                if (err) {
-                    return handlers.handleError('TorrentCache.handletorrent() error: ' + err, torrent);
-                }
-                deferred.resolve(filePath);
-            });
-            return deferred.promise;
-        },
-        handletorrenturl: function (filePath, torrent) {
-            // try to download the file
-            var deferred = Q.defer(),
-                safeTimeoutID = null,
-                doneReached = false;
-            var done = function (error) {
-                clearTimeout(safeTimeoutID);
-                if (doneReached) {
-                    return;
-                }
-                doneReached = true;
-                if (error) {
-                    // try unlinking the file in case it was created
-                    try {
-                        fs.unlink(filePath);
-                    } catch (e) {}
-                    return handlers.handleError('TorrentCache.handletorrenturl() error: ' + error, torrent);
-                }
-                deferred.resolve(filePath);
-            };
-            try { // in case somehow invaid link hase made it through to here
-                var ws = fs.createWriteStream(filePath),
-                    params = {
-                        url: torrent,
-                        headers: {
-                            'accept-charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-                            'accept-language': 'en-US,en;q=0.8',
-                            'accept-encoding': 'gzip,deflate',
-                            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.143 Safari/537.36'
-                        }
-                    },
-                    req = request(params)
-                    .on('response', function (resp) {
-                        if (resp.statusCode >= 400) {
-                            return done('Invalid status: ' + resp.statusCode);
-                        }
-                        switch (resp.headers['content-encoding']) {
-                        case 'gzip':
-                            resp.pipe(zlib.createGunzip()).pipe(ws);
-                            break;
-                        case 'deflate':
-                            resp.pipe(zlib.createInflate()).pipe(ws);
-                            break;
-                        default:
-                            resp.pipe(ws);
-                            break;
-                        }
-                        ws
-                            .on('error', done)
-                            .on('close', done);
-                    })
-                    .on('error', done)
-                    .on('end', function () {
-                        // just to be on the safe side here, set 'huge' amount of time, close event should be triggered on ws long before this one if all goes good.
-                        safeTimeoutID = setTimeout(function () {
-                            done('Waiting for stream to end error: timed out.');
-                        }, 5 * 1000);
-                    });
-            } catch (e) {
-                done(e);
-            }
-            return deferred.promise;
-        },
-        handlemagnet: function (filePath, torrent) {
-            clearTimeout(safeMagetTID);
-
-            var deferred = Q.defer(),
-                error = false,
-                engine = peerflix(torrent, {
-                    list: true
-                }); // just list files, this won't start the torrent server
-
-            // lets wait max a minute
-            // because engine does not report any error on wrong magnet links
-            /*jshint -W120 */
-            var currentTID = safeMagetTID = setTimeout(function () {
-                engine.destroy();
-                handlers.handleError('TorrentCache.handlemagnet() error: timed out', torrent);
-            }, MAGNET_RESOLVE_TIMEOUT);
-
-
-            var resolve = function () {
-                // maybe somehow new magnet was pasted in while loading this one
-                if (currentTID !== safeMagetTID) {
-                    return;
-                }
-                if (error) {
-                    return handlers.handleError('TorrentCache.handlemagnet() error: ' + error, torrent);
-                }
-                deferred.resolve(filePath);
-            };
-            var destroyEngine = function () {
-                engine.destroy();
-                engine = null;
-            };
-
-            engine.on('ready', function () {
-                var resolvedTorrentPath = engine.path;
-                clearTimeout(currentTID);
-                if (resolvedTorrentPath) {
-                    // copy resolved path to cache so it will be awailable next time
-                    Common.copyFile(resolvedTorrentPath + '.torrent', filePath, function (err) {
-                        if (err) {
-                            error = err;
-                        }
-                        resolve();
-                        destroyEngine();
-                    });
-                } else {
-                    error = 'TorrentCache.handlemagnet() engine returned no file';
-                    destroyEngine();
-                }
-            });
-
-            return deferred.promise;
-        },
-        handleSuccess: function (filePath) {
-            win.debug('TorrentCache.handleSuccess() ' + filePath + ' stopped: ' + !stateModel);
-            if (!stateModel) {
-                return;
-            }
-            var torrentStart = new Backbone.Model({
-                torrent: filePath,
-                is_file: true
-            });
-            App.vent.trigger('stream:start', torrentStart);
-        },
-        handleError: function (err, torrent) {
-            win.error(err, torrent);
-            handlers.updateState('Error resolving torrent.');
-        },
-        updateState: function (state) {
-            if (stateModel) {
-                stateModel.set('state', state);
-            }
-        }
-    };
-
 
     var singleton = new mod();
 

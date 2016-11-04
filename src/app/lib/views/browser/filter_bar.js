@@ -1,6 +1,6 @@
 (function (App) {
     'use strict';
-    var clipboard = gui.Clipboard.get();
+    var clipboard = nw.Clipboard.get();
 
     App.View.FilterBar = Backbone.Marionette.ItemView.extend({
         className: 'filter-bar',
@@ -87,24 +87,23 @@
         },
 
         context_Menu: function (cutLabel, copyLabel, pasteLabel) {
-            var gui = require('nw.gui'),
-                menu = new gui.Menu(),
+            var menu = new nw.Menu(),
 
-                cut = new gui.MenuItem({
+                cut = new nw.MenuItem({
                     label: cutLabel || 'Cut',
                     click: function () {
                         document.execCommand('cut');
                     }
                 }),
 
-                copy = new gui.MenuItem({
+                copy = new nw.MenuItem({
                     label: copyLabel || 'Copy',
                     click: function () {
                         document.execCommand('copy');
                     }
                 }),
 
-                paste = new gui.MenuItem({
+                paste = new nw.MenuItem({
                     label: pasteLabel || 'Paste',
                     click: function () {
                         var text = clipboard.get('text');
@@ -170,9 +169,6 @@
                     'hide': 50
                 }
             });
-
-            // update VPN icon with cached status
-            App.VPNClient.setVPNStatusCached();
         },
 
         focusSearch: function () {
@@ -392,26 +388,17 @@
             var that = this;
             $('.spinner').show();
 
-            App.Providers.get('Yts').random()
+            var provider = App.Providers.get('MovieApi');
+            provider.random()
                 .then(function (data) {
-                    if (App.watchedMovies.indexOf(data.imdb_code) !== -1) {
-                        that.randomMovie();
-                        return;
-                    }
-                    that.model.set({
-                        isRandom: true,
-                        keywords: data.imdb_code,
-                        genre: ''
-                    });
-                    App.vent.trigger('movie:closeDetail');
-                    App.vent.on('list:loaded', function () {
-                        if (that.model.get('isRandom')) {
-                            $('.main-browser .items .cover')[0].click();
-                            that.model.set('isRandom', false);
-                        }
-                    });
-                })
-                .catch(function (err) {
+                    console.log(data, 'Movie');
+                    data.provider = provider.name;
+                    $('.spinner').hide();
+                    var model = new App.Model.Movie(data);
+                    model.set('health', false);
+                    App.vent.trigger('movie:showDetail', model);
+                }).catch(function (err) {
+                    console.error(err);
                     $('.spinner').hide();
                     $('.notification_alert').text(i18n.__('Error loading data, try again later...')).fadeIn('fast').delay(2500).fadeOut('fast');
                 });

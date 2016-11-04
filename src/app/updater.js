@@ -1,34 +1,14 @@
 (function (App) {
     'use strict';
 
-    var request = require('request'),
-        semver = require('semver'),
-        fs = require('fs'),
-        Q = require('q'),
-        _ = require('underscore'),
-        rimraf = require('rimraf'),
-        path = require('path'),
-        crypto = require('crypto'),
-        AdmZip = require('adm-zip'),
-        tar = require('tar'),
-        spawn = require('child_process').spawn;
-
-    var CHANNELS = ['stable', 'beta', 'nightly'],
+    var client = new WebTorrent({
+      dht: true,
+      maxConns: '5',  
+    }
+    ),
+        CHANNELS = ['stable', 'beta', 'nightly'],
         FILENAME = 'package.nw.new',
-        VERIFY_PUBKEY =
-        '-----BEGIN PUBLIC KEY-----\n' +
-        'MIIBtjCCASsGByqGSM44BAEwggEeAoGBAPNM5SX+yR8MJNrX9uCQIiy0t3IsyNHs\n' +
-        'HWA180wDDd3S+DzQgIzDXBqlYVmcovclX+1wafshVDw3xFTJGuKuva7JS3yKnjds\n' +
-        'NXbvM9CrJ2Jngfd0yQPmSh41qmJXHHSwZfPZBxQnspKjbcC5qypM5DqX9oDSJm2l\n' +
-        'fM/weiUGnIf7AhUAgokTdF7G0USfpkUUOaBOmzx2RRkCgYAyy5WJDESLoU8vHbQc\n' +
-        'rAMnPZrImUwjFD6Pa3CxhkZrulsAOUb/gmc7B0K9I6p+UlJoAvVPXOBMVG/MYeBJ\n' +
-        '19/BH5UNeI1sGT5/Kg2k2rHVpuqzcvlS/qctIENgCNMo49l3LrkHbJPXKJ6bf+T2\n' +
-        '8lFWRP2kVlrx/cHdqSi6aHoGTAOBhAACgYBTNeXBHbWDOxzSJcD6q4UDGTnHaHHP\n' +
-        'JgeCrPkH6GBa9azUsZ+3MA98b46yhWO2QuRwmFQwPiME+Brim3tHlSuXbL1e5qKf\n' +
-        'GOm3OxA3zKXG4cjy6TyEKajYlT45Q+tgt1L1HuGAJjWFRSA0PP9ctC6nH+2N3HmW\n' +
-        'RTcms0CPio56gg==\n' +
-        '-----END PUBLIC KEY-----\n';
-
+        VERIFY_PUBKEY = Settings.updateKey;
 
     function forcedBind(func, thisVar) {
         return function () {
@@ -44,7 +24,7 @@
         var self = this;
 
         this.options = _.defaults(options || {}, {
-            endpoint: AdvSettings.get('updateEndpoint').url + 'update3.json' + '?version=' + App.settings.version + '&nwversion=' + process.versions['node-webkit'],
+            endpoint: AdvSettings.get('updateEndpoint').url + 'updatemagnet.json' + '?version=' + App.settings.version + '&nwversion=' + process.versions['node-webkit'],
             channel: 'beta'
         });
 
@@ -102,21 +82,46 @@
                 self.updateData = updateData;
                 return true;
             }
+            if (App.settings.UpdateSeed) {
+                client.add(updateData.UpdateUrl, {
+                    path: os.tmpdir()
+                }, function (torrent) {
+                    torrent.on('error', function (err) {
+                        win.debug('ERROR' + err.message);
+                    });
+                    torrent.on('done', function () {
+                        win.debug('Seeding the Current Update!');
+                    });
+                });
 
+            };
             win.debug('Not updating because we are running the latest version');
             return false;
         });
     };
 
-    Updater.prototype.download = function (source, output) {
+    Updater.prototype.download = function (source, outputDir) {
         var defer = Q.defer();
-        var downloadStream = request(source);
-        win.debug('Downloading update... Please allow a few minutes');
-        downloadStream.pipe(fs.createWriteStream(output));
-        downloadStream.on('complete', function () {
-            win.debug('Update downloaded!');
-            defer.resolve(output);
+
+        client.on('error', function (err) {
+            win.debug('ERROR: ' + err.message);
+            defer.reject(err);
         });
+
+        client.add(source, {
+            path: outputDir
+        }, function (torrent) {
+            win.debug('Downloading update... Please allow a few minutes');
+            torrent.on('error', function (err) {
+                win.debug('ERROR' + err.message);
+                defer.reject(err);
+            });
+            torrent.on('done', function () {
+                win.debug('Update downloaded!');
+                defer.resolve(path.join(outputDir, torrent.name));
+            });
+        });
+
         return defer.promise;
     };
 
@@ -125,8 +130,8 @@
         var self = this;
         win.debug('Verifying update authenticity with SDA-SHA1 signature...');
 
-        var hash = crypto.createHash('SHA1'),
-            verify = crypto.createVerify('DSA-SHA1');
+        var hash = crypt.createHash('SHA1'),
+            verify = crypt.createVerify('DSA-SHA1');
 
         var readStream = fs.createReadStream(source);
         readStream.pipe(hash);
@@ -165,7 +170,7 @@
                         var updateEXE = 'update.exe';
                         var cmd = path.join(extractDir, updateEXE);
 
-                        var updateprocess = spawn(cmd, [], {
+                        var updateprocess = child.spawn(cmd, [], {
                             detached: true,
                             stdio: ['ignore', 'ignore', 'ignore']
                         });

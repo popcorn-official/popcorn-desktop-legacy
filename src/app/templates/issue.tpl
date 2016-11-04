@@ -6,11 +6,11 @@
         <hr>
 
         <div class="issue-outer">
-            
+
             <div id="issue-auth">
                 <div class="report-info">
                     <%= i18n.__("Log in into your GitLab account") %>
-                    <a class="links" href="https://git.popcorntime.io/users/sign_in"><%= i18n.__("Create Account") %></a>
+                    <a class="links" href="<%= Settings.issuesUrl %>"><%= i18n.__("Create Account") %></a>
                 </div>
                 <input id="issue-email" type="text" name="gitusername" placeholder="<%= i18n.__('Email') %>">
                 <br>

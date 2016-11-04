@@ -1,10 +1,10 @@
-Popcorn time JSON-RPC 2 Api
+Butter JSON-RPC 2 Api
 =========================
 
-The JSON-RPC api built into the popcorn time app is an interface other programs can use to communicate with popcorn time.
+The JSON-RPC api built into the Butter app is an interface other programs can use to communicate with Butter.
 It uses basic http authentication and opens an endpoint port, both of which that you can set up in popocorn time's settings view.
 
-Every response is an object containing the version of Popcorn Time in the key 'popcornVersion'.
+Every response is an object containing the version of Butter in the key 'butterVersion'.
 
 Here are the currently supported procedures, the arguments they require, and the response they send:
 
@@ -70,6 +70,9 @@ Here are the currently supported procedures, the arguments they require, and the
 `gettypes()`
  * Gets the available sorters for the current tab. Responds with the array of sorters with the key 'types' in the main object.
 
+`getloading()`
+ * Gets information about the current loading video. Responds with the main object which contains the current buffer state, download speed, upload speed, active peers and title.
+
 `getplaying()`
  * Gets information about the current playing video. Responds with the main object which contains the current playing state, download speed, upload speed, active peers, volume, title, quality, current time, duration, movie (true/false), imdb id (if movie = true), tvdb id (if movie = false), season (if movie = false) and episode (if movie = false).
 
@@ -106,8 +109,9 @@ Here are the currently supported procedures, the arguments they require, and the
 `clearsearch()`
  * Clear the search field.
 
-`startstream(string imdb_id, string torrent_url, string backdrop, [subtitles], string selected_subtitle, string title == undefined, string quality, string type)`
+`startstream(string imdb_id, string torrent_url, string backdrop, [subtitles], string selected_subtitle, string title == undefined, string quality, string type, string tvdb_id == undefined, number season == undefined, number episode == undefined, string episode_id == undefined, object epInfo == undefined)`
  * Start the torrent stream with the given values.
+ * Parameter epInfo is used to fetch subtitles from various providers and should be defined as { type: string (eg. 'tvshow'), imdbid: string, tvdbid: string, episode_id: string (usually equals tvdbid), season: number, episode: number }
 
 `seek(double amount)`
  * Seek through the video by the given time amount in seconds.

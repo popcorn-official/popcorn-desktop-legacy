@@ -1,7 +1,5 @@
 var Common = {};
-var crypt = require('crypto');
-var fs = require('fs');
-var Q = require('q');
+
 Common.healthMap = {
     0: 'bad',
     1: 'medium',

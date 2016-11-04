@@ -1,101 +1,8 @@
 (function (App) {
     'use strict';
 
-    var path = require('path');
-    var fs = require('fs');
     var readdirp = require('readdirp');
-    var async = require('async');
     var collection = App.Device.Collection;
-    var child = require('child_process');
-
-    var ExtPlayer = App.Device.Generic.extend({
-        defaults: {
-            type: 'ext-app',
-            name: i18n.__('External Player'),
-        },
-
-        play: function (streamModel) {
-            // "" So it behaves when spaces in path
-            var url = streamModel.attributes.src;
-            var cmd = path.normalize('"' + this.get('path') + '" ') + getPlayerSwitches(this.get('id')) + ' ';
-            var subtitle = streamModel.attributes.subFile || '';
-            if (subtitle !== '') {
-
-                if ((this.get('id') === 'mplayer') || (this.get('id') === 'MPlayer OSX Extended')) {
-                    //detect charset
-                    var dataBuff = fs.readFileSync(subtitle);
-                    var charsetDetect = require('jschardet');
-                    //var targetEncodingCharset = 'utf8';
-                    var charset = charsetDetect.detect(dataBuff);
-                    var detectedEncoding = charset.encoding;
-                    win.debug('Subtitles charset detected: %s', detectedEncoding);
-                    if (detectedEncoding.toLowerCase() === 'utf-8') {
-                        cmd += '-utf8 ';
-                    }
-                }
-                cmd += getPlayerSubSwitch(this.get('id')) + '"' + subtitle + '" ';
-            }
-            if (getPlayerFS(this.get('id')) !== '') {
-                // Start player fullscreen if available and asked
-                if (Settings.alwaysFullscreen) {
-                    cmd += getPlayerFS(this.get('id')) + ' ';
-                }
-            }
-            if (getPlayerFilenameSwitch(this.get('id')) !== '') {
-                // The video file is the biggest file in the torrent
-                var videoFile = _.sortBy(streamModel.attributes.torrent.info.files, function (file) {
-                    return -file.length;
-                })[0];
-                cmd += videoFile ? (getPlayerFilenameSwitch(this.get('id')) + '"' + videoFile.name + '" ') : '';
-            }
-            cmd += url;
-            win.info('Launching External Player: ' + cmd);
-            child.exec(cmd, function (error, stdout, stderr) {
-                if (streamModel.attributes.device.id === 'Bomi') {
-                    // don't stop on exit, because Bomi could be already running in background and the command ends while the stream should continue
-                    return;
-                }
-                App.vent.trigger('player:close');
-                App.vent.trigger('stream:stop');
-                App.vent.trigger('preload:stop');
-            });
-        },
-
-        pause: function () {},
-
-        stop: function () {},
-
-        unpause: function () {}
-    });
-
-    function getPlayerName(loc) {
-        return path.basename(loc).replace(path.extname(loc), '');
-    }
-
-    function getPlayerSubSwitch(loc) {
-        var name = getPlayerName(loc);
-        return players[name].subswitch || '';
-    }
-
-    function getPlayerFilenameSwitch(loc) {
-        var name = getPlayerName(loc);
-        return players[name].filenameswitch || '';
-    }
-
-    function getPlayerCmd(loc) {
-        var name = getPlayerName(loc);
-        return players[name].cmd;
-    }
-
-    function getPlayerSwitches(loc) {
-        var name = getPlayerName(loc);
-        return players[name].switches || '';
-    }
-
-    function getPlayerFS(loc) {
-        var name = getPlayerName(loc);
-        return players[name].fs || '';
-    }
 
     var players = {
         'VLC': {
@@ -112,6 +19,14 @@
             cmd: '/Contents/MacOS/Fleex player',
             filenameswitch: '-file-name '
         },
+        'MPlayerX': {
+            type: 'mplayer',
+            cmd: '/Contents/MacOS/MPlayerX',
+            switches: '-font "/Library/Fonts/Arial Bold.ttf"',
+            urlswitch: '-url ',
+            subswitch: '-sub ',
+            fs: '-fs',
+        },
         'MPlayer OSX Extended': {
             type: 'mplayer',
             cmd: '/Contents/Resources/Binaries/mpextended.mpBinaries/Contents/MacOS/mplayer',
@@ -122,7 +37,7 @@
         'mplayer': {
             type: 'mplayer',
             cmd: 'mplayer',
-            switches: '-really-quiet',
+            switches: '--really-quiet',
             subswitch: '-sub ',
             fs: '-fs',
         },
@@ -171,6 +86,98 @@
             fs: '--action window/enter-fs'
         }
     };
+
+    function getPlayerName(loc) {
+        return path.basename(loc).replace(path.extname(loc), '');
+    }
+
+    function getPlayerSubSwitch(loc) {
+        var name = getPlayerName(loc);
+        return players[name].subswitch || '';
+    }
+
+    function getPlayerFilenameSwitch(loc) {
+        var name = getPlayerName(loc);
+        return players[name].filenameswitch || '';
+    }
+
+    function getPlayerUrlSwitch(loc) {
+        var name = getPlayerName(loc);
+        return players[name].urlswitch || '';
+    }
+
+    function getPlayerCmd(loc) {
+        var name = getPlayerName(loc);
+        return players[name].cmd;
+    }
+
+    function getPlayerSwitches(loc) {
+        var name = getPlayerName(loc);
+        return players[name].switches || '';
+    }
+
+    function getPlayerFS(loc) {
+        var name = getPlayerName(loc);
+        return players[name].fs || '';
+    }
+
+    var ExtPlayer = App.Device.Generic.extend({
+        defaults: {
+            type: 'ext-app',
+            name: i18n.__('External Player'),
+        },
+
+        play: function (streamModel) {
+            // "" So it behaves when spaces in path
+            var url = streamModel.attributes.src;
+            var cmd = path.normalize('"' + this.get('path') + '" ') + getPlayerSwitches(this.get('id')) + ' ';
+            var subtitle = streamModel.attributes.subFile || '';
+            if (subtitle !== '') {
+
+                if (this.get('id') === 'MPlayer OSX Extended') {
+                    //detect charset
+                    var dataBuff = fs.readFileSync(subtitle);
+                    //var targetEncodingCharset = 'utf8';
+                    var detectedEncoding = charsetDetect.detect(dataBuff).encoding;
+                    win.debug('Subtitles charset detected: %s', detectedEncoding);
+                    if (detectedEncoding.toLowerCase() === 'utf-8') {
+                        cmd += '-utf8 ';
+                    }
+                }
+                cmd += getPlayerSubSwitch(this.get('id')) + '"' + subtitle + '" ';
+            }
+            if (getPlayerFS(this.get('id')) !== '') {
+                // Start player fullscreen if available and asked
+                if (Settings.alwaysFullscreen) {
+                    cmd += getPlayerFS(this.get('id')) + ' ';
+                }
+            }
+            if (getPlayerFilenameSwitch(this.get('id')) !== '') {
+                // The video file is the biggest file in the torrent
+                var videoFile = _.sortBy(streamModel.attributes.torrent.info.files, function (file) {
+                    return -file.length;
+                })[0];
+                cmd += videoFile ? (getPlayerFilenameSwitch(this.get('id')) + '"' + videoFile.name + '" ') : '';
+            }
+            cmd += getPlayerUrlSwitch(this.get('id')) + url;
+            win.info('Launching External Player: ' + cmd);
+            child.exec(cmd, function (error, stdout, stderr) {
+                if (streamModel.attributes.device.id === 'Bomi') {
+                    // don't stop on exit, because Bomi could be already running in background and the command ends while the stream should continue
+                    return;
+                }
+                App.vent.trigger('player:close');
+                App.vent.trigger('stream:stop');
+                App.vent.trigger('preload:stop');
+            });
+        },
+
+        pause: function () {},
+
+        stop: function () {},
+
+        unpause: function () {}
+    });
 
     /* map name back into the object as we use it in match */
     _.each(players, function (v, k) {

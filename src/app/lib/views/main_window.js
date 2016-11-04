@@ -69,7 +69,7 @@
 
             });
 
-            this.nativeWindow = require('nw.gui').Window.get();
+            this.nativeWindow = nw.Window.get();
 
             // Application events
             App.vent.on('movies:list', _.bind(this.showMovies, this));
@@ -135,7 +135,7 @@
             App.vent.on('player:close', _.bind(this.showViews, this));
             App.vent.on('player:close', _.bind(this.Player.destroy, this.Player));
 
-            App.vent.on('vpn:connect', _.bind(this.connectVpn, this));
+            // App.vent.on('vpn:connect', _.bind(this.connectVpn, this));
             App.vent.on('restartPopcornTime', _.bind(this.restartPopcornTime, this));
 
             App.vent.on('updatePostersSizeStylesheet', _.bind(this.updatePostersSizeStylesheet, this));
@@ -173,7 +173,7 @@
                     }
 
                     try {
-                        require('fs').statSync('src/app/themes/' + Settings.theme + '.css');
+                        fs.statSync('src/app/themes/' + Settings.theme + '.css');
                     } catch (e) {
                         Settings.theme = 'Official_-_Dark_theme';
                         AdvSettings.set('theme', 'Official_-_Dark_theme');
@@ -264,10 +264,6 @@
                 that.nativeWindow.focus();
 
             });
-        },
-
-        connectVpn: function (e) {
-            App.VPNClient.launch();
         },
 
         // used in app to re-triger a api resync
@@ -532,21 +528,20 @@
 
         links: function (e) {
             e.preventDefault();
-            gui.Shell.openExternal($(e.currentTarget).attr('href'));
+            nw.Shell.openExternal($(e.currentTarget).attr('href'));
         },
 
         restartPopcornTime: function () {
-            var spawn = require('child_process').spawn,
-                argv = gui.App.fullArgv,
+            var argv = nw.App.fullArgv,
                 CWD = process.cwd();
 
             argv.push(CWD);
-            spawn(process.execPath, argv, {
+            child.spawn(process.execPath, argv, {
                 cwd: CWD,
                 detached: true,
                 stdio: ['ignore', 'ignore', 'ignore']
             }).unref();
-            gui.App.quit();
+            nw.App.quit();
         }
     });
 

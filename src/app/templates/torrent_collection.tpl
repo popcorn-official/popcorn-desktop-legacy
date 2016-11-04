@@ -4,8 +4,8 @@
 
         <div class="onlinesearch">
             <div class="engine-selector">
-                <div id="strike-icon" data-id="Strike" class="engine-icon"></div>
-                <div id="kat-icon" data-id="KAT" class="engine-icon"></div>
+                <div id="rarbg-icon" data-id="RARBG" class="engine-icon"></div>
+                <div id="extratorrent-icon" data-id="ExtraTorrent" class="engine-icon"></div>
             </div>
             <div class="dropdown online-categories">
                     <%
@@ -34,16 +34,14 @@
 
         <div class="torrents-info">
             <ul class="file-list">
-                <% _.each(fs.readdirSync(require('nw.gui').App.dataPath + '/TorrentCollection/'), function(file, index) { %>
+                <% _.each(fs.readdirSync(data_path + '/TorrentCollection/'), function(file, index) { %>
                     <li class="file-item" data-index="<%=file.index%>" data-file="<%=index%>">
                         <a><%=file%></a>
-
-                   <% if (file.indexOf('.torrent') !== -1) {
-                           var icon = "torrent-icon";
-                   } else {
-                           var icon = "magnet-icon";
-                   } %>
-                        <div class="item-icon <%=icon%>"></div>
+                   <% if (file.indexOf('.torrent') !== -1) { %>
+                        <div class="item-icon torrent-icon"></div>
+                   <% } else { %>
+                        <div class="item-icon magnet-icon tooltipped" data-toogle="tooltip" data-placement="right" title="<%=i18n.__("Magnet link") %>"></div>
+                    <% } %>
                         <i class="fa fa-trash-o item-delete tooltipped" data-toggle="tooltip" data-placement="left" title="<%= i18n.__("Remove this torrent") %>"></i>
                         <i class="fa fa-pencil item-rename tooltipped" data-toggle="tooltip" data-placement="left" title="<%= i18n.__("Rename this torrent") %>"></i>
                         </a>
