@@ -1,6 +1,5 @@
 var Datastore = require('nedb'),
     db = {},
-    data_path = nw.App.dataPath,
     TTL = 1000 * 60 * 60 * 24;
 
 var startupTime = window.performance.now();
@@ -139,6 +138,10 @@ var Database = {
         var offset = page * byPage;
         var query = {};
 
+        if (data.type) {
+            query.type = data.type;
+        }
+
         return promisifyDb(db.bookmarks.find(query).skip(offset).limit(byPage));
     },
 
@@ -261,7 +264,7 @@ var Database = {
                 episode: data.episode.toString()
             }))
             .then(function (data) {
-                return (data != null && data.length > 0);
+                return (data !== null && data.length > 0);
             });
     },
 
@@ -407,6 +410,9 @@ var Database = {
 
                 App.vent.trigger('initHttpApi');
 
+                return AdvSettings.checkApiEndpoints([
+                    Settings.updateEndpoint
+                ]);
             })
             .then(function () {
                 // set app language
@@ -428,5 +434,5 @@ var Database = {
             .catch(function (err) {
                 win.error('Error starting up', err);
             });
-    }
+        }
 };
