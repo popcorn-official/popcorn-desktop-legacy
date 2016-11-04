@@ -64,7 +64,7 @@
             // });
         }
 
-        return sanitize(result);
+        return Common.sanitize(result);
     };
 
     function get(index, url, that) {

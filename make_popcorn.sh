@@ -10,7 +10,7 @@
 ## If you use 'ssh' in the place of the optional [url] parameter, it will clone via ssh instead of http
 ##
 ## Optionally, you can also pass in a specific branch to build or clone, by making url contain a branch specifier
-## ./make_popcorn.sh '-b release/0.3.4 https://git.popcorntime.sh/popcorntime/desktop.git'
+## ./make_popcorn.sh '-b release/0.3.4 https://github.com/popcorn-official/popcorn-desktop-legacy.git'
 ##
 
 

@@ -107,7 +107,6 @@
         const index = 0;
         const url = Settings.tvAPI[index].url + 'show/' + torrent_id;
         return get(index, url).then(data => {
-            console.log(data._id);
             if (this.translate && this.language !== 'en') {
                 let langAvailable;
                 for (let x = 0; x < this.TVDBLangs.length; x++) {

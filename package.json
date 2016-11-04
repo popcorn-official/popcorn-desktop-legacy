@@ -2,7 +2,7 @@
   "name": "Popcorn-Time",
   "companyName": "Popcorn Time",
   "installIcon": "./src/app/images/popcorntime.ico",
-  "unInstallIcon": "./src/app/images/butter_uninstall.ico",
+  "unInstallIcon": "./src/app/images/popcorntime_uninstall.ico",
   "homepage": "http://popcorntime.sh/",
   "bugs": "https://github.com/popcorn-official/popcorn-desktop-legacy/issues",
   "repository": {
