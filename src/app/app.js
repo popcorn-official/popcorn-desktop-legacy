@@ -1,34 +1,9 @@
 var
-// Minimum percentage to open video
+    // Minimum percentage to open video
     MIN_PERCENTAGE_LOADED = 0.5,
 
     // Minimum bytes loaded to open video
-    MIN_SIZE_LOADED = 10 * 1024 * 1024,
-
-    // Load native UI library
-    gui = require('nw.gui'),
-
-    // browser window object
-    win = gui.Window.get(),
-
-    // os object
-    os = require('os'),
-
-    // path object
-    path = require('path'),
-
-    // fs object
-    fs = require('fs'),
-
-    // url object
-    url = require('url'),
-
-    // i18n module (translations)
-    i18n = require('i18n'),
-
-    moment = require('moment'),
-
-    Q = require('q');
+    MIN_SIZE_LOADED = 10 * 1024 * 1024;
 
 // Special Debug Console Calls!
 win.log = console.log.bind(console);
@@ -51,13 +26,13 @@ win.error = function () {
     var params = Array.prototype.slice.call(arguments, 1);
     params.unshift('%c[%cERROR%c] ' + arguments[0], 'color: black;', 'color: red;', 'color: black;');
     console.error.apply(console, params);
-    fs.appendFileSync(path.join(require('nw.gui').App.dataPath, 'logs.txt'), '\n\n' + (arguments[0].stack || arguments[0])); // log errors;
+    fs.appendFileSync(path.join(nw.App.dataPath, 'logs.txt'), '\n\n' + (arguments[0].stack || arguments[0])); // log errors;
 };
 
 
-if (gui.App.fullArgv.indexOf('--reset') !== -1) {
+if (nw.App.fullArgv.indexOf('--reset') !== -1) {
 
-    var data_path = require('nw.gui').App.dataPath;
+    var data_path = nw.App.dataPath;
 
     localStorage.clear();
 
@@ -121,7 +96,7 @@ App.addRegions({
 
 // Menu for mac
 if (os.platform() === 'darwin') {
-    var nativeMenuBar = new gui.Menu({
+    var nativeMenuBar = new nw.Menu({
         type: 'menubar'
     });
     nativeMenuBar.createMacBuiltin('Popcorn Time', {
@@ -242,7 +217,7 @@ var deleteFolder = function (path) {
 };
 
 var deleteCookies = function () {
-    var nwWin = gui.Window.get();
+    var nwWin = nw.Window.get();
     nwWin.cookies.getAll({}, function (cookies) {
         if (cookies.length > 0) {
             win.debug('Removing ' + cookies.length + ' cookies...');
@@ -299,8 +274,8 @@ win.on('close', function () {
     if (App.settings.deleteTmpOnClose) {
         deleteFolder(App.settings.tmpLocation);
     }
-    if (fs.existsSync(path.join(require('nw.gui').App.dataPath, 'logs.txt'))) {
-        fs.unlinkSync(path.join(require('nw.gui').App.dataPath, 'logs.txt'));
+    if (fs.existsSync(path.join(nw.App.dataPath, 'logs.txt'))) {
+        fs.unlinkSync(path.join(nw.App.dataPath, 'logs.txt'));
     }
     try {
         delCache();
@@ -328,7 +303,7 @@ Mousetrap.bind(['shift+f12', 'f12', 'command+0'], function (e) {
 });
 Mousetrap.bind(['shift+f10', 'f10', 'command+9'], function (e) {
     win.debug('Opening: ' + App.settings['tmpLocation']);
-    gui.Shell.openItem(App.settings['tmpLocation']);
+    nw.Shell.openItem(App.settings['tmpLocation']);
 });
 Mousetrap.bind('mod+,', function (e) {
     App.vent.trigger('about:close');
@@ -410,21 +385,21 @@ var minimizeToTray = function () {
         tray.remove();
     };
 
-    var tray = new gui.Tray({
+    var tray = new nw.Tray({
         title: 'Popcorn Time',
         icon: 'src/app/images/icon.png'
     });
     tray.tooltip = 'Popcorn Time';
 
-    var menu = new gui.Menu();
-    menu.append(new gui.MenuItem({
+    var menu = new nw.Menu();
+    menu.append(new nw.MenuItem({
         type: 'normal',
         label: i18n.__('Restore'),
         click: function () {
             openFromTray();
         }
     }));
-    menu.append(new gui.MenuItem({
+    menu.append(new nw.MenuItem({
         type: 'normal',
         label: i18n.__('Close'),
         click: function () {
@@ -438,7 +413,7 @@ var minimizeToTray = function () {
         openFromTray();
     });
 
-    require('nw.gui').App.on('open', function (cmd) {
+    nw.App.on('open', function (cmd) {
         openFromTray();
     });
 };
@@ -557,7 +532,7 @@ $(document).on('paste', function (e) {
 
 
 // Pass magnet link as last argument to start stream
-var last_arg = gui.App.argv.pop();
+var last_arg = nw.App.argv.pop();
 
 if (last_arg && (last_arg.substring(0, 8) === 'magnet:?' || last_arg.substring(0, 7) === 'http://' || last_arg.endsWith('.torrent'))) {
     App.vent.on('app:started', function () {
@@ -576,7 +551,7 @@ if (last_arg && (isVideo(last_arg))) {
     });
 }
 
-gui.App.on('open', function (cmd) {
+nw.App.on('open', function (cmd) {
     var file;
     if (os.platform() === 'win32') {
         file = cmd.split('"');
@@ -603,11 +578,11 @@ gui.App.on('open', function (cmd) {
 });
 
 // -f argument to open in fullscreen
-if (gui.App.fullArgv.indexOf('-f') !== -1) {
+if (nw.App.fullArgv.indexOf('-f') !== -1) {
     win.enterFullscreen();
 }
 // -m argument to open minimized to tray
-if (gui.App.fullArgv.indexOf('-m') !== -1) {
+if (nw.App.fullArgv.indexOf('-m') !== -1) {
     App.vent.on('app:started', function () {
         minimizeToTray();
     });

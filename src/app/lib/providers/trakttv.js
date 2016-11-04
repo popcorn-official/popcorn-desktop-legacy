@@ -431,9 +431,8 @@
             var API_URI = 'https://trakt.tv';
             var OAUTH_URI = API_URI + '/oauth/authorize?response_type=code&client_id=' + CLIENT_ID;
 
-            var gui = require('nw.gui');
-            gui.App.addOriginAccessWhitelistEntry(API_URI, 'app', 'host', true);
-            window.loginWindow = gui.Window.open(OAUTH_URI + '&redirect_uri=' + encodeURIComponent(REDIRECT_URI), {
+            nw.App.addOriginAccessWhitelistEntry(API_URI, 'app', 'host', true);
+            window.loginWindow = nw.Window.open(OAUTH_URI + '&redirect_uri=' + encodeURIComponent(REDIRECT_URI), {
                 position: 'center',
                 focus: true,
                 title: 'Trakt.tv',
@@ -452,7 +451,7 @@
                         url = url.split('/');
                         url = url[url.length - 1];
                     } else {
-                        gui.Shell.openExternal(url);
+                        nw.Shell.openExternal(url);
                     }
                     this.close(true);
                 } else {

@@ -69,7 +69,7 @@
 
             });
 
-            this.nativeWindow = require('nw.gui').Window.get();
+            this.nativeWindow = nw.Window.get();
 
             // Application events
             App.vent.on('movies:list', _.bind(this.showMovies, this));
@@ -528,12 +528,12 @@
 
         links: function (e) {
             e.preventDefault();
-            gui.Shell.openExternal($(e.currentTarget).attr('href'));
+            nw.Shell.openExternal($(e.currentTarget).attr('href'));
         },
 
         restartPopcornTime: function () {
             var spawn = require('child_process').spawn,
-                argv = gui.App.fullArgv,
+                argv = nw.App.fullArgv,
                 CWD = process.cwd();
 
             argv.push(CWD);
@@ -542,7 +542,7 @@
                 detached: true,
                 stdio: ['ignore', 'ignore', 'ignore']
             }).unref();
-            gui.App.quit();
+            nw.App.quit();
         }
     });
 

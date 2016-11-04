@@ -1,8 +1,8 @@
 (function (App) {
     'use strict';
 
-    var clipboard = gui.Clipboard.get(),
-        collection = path.join(require('nw.gui').App.dataPath + '/TorrentCollection/'),
+    var clipboard = nw.Clipboard.get(),
+        collection = path.join(nw.App.dataPath + '/TorrentCollection/'),
         files;
 
     var TorrentCollection = Backbone.Marionette.ItemView.extend({
@@ -218,24 +218,23 @@
         },
 
         context_Menu: function (cutLabel, copyLabel, pasteLabel) {
-            var gui = require('nw.gui'),
-                menu = new gui.Menu(),
+            var menu = new nw.Menu(),
 
-                cut = new gui.MenuItem({
+                cut = new nw.MenuItem({
                     label: cutLabel || 'Cut',
                     click: function () {
                         document.execCommand('cut');
                     }
                 }),
 
-                copy = new gui.MenuItem({
+                copy = new nw.MenuItem({
                     label: copyLabel || 'Copy',
                     click: function () {
                         document.execCommand('copy');
                     }
                 }),
 
-                paste = new gui.MenuItem({
+                paste = new nw.MenuItem({
                     label: pasteLabel || 'Paste',
                     click: function () {
                         var text = clipboard.get('text');
@@ -338,7 +337,7 @@
 
         openCollection: function () {
             win.debug('Opening: ' + collection);
-            gui.Shell.openItem(collection);
+            nw.Shell.openItem(collection);
         },
 
         importItem: function () {

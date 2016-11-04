@@ -1,9 +1,3 @@
-var Q = require('q'),
-    os = require('os'),
-    path = require('path'),
-    _ = require('underscore'),
-    data_path = require('nw.gui').App.dataPath;
-
 /** Default settings **/
 var Settings = {};
 
@@ -70,7 +64,7 @@ Settings.connectionLimit = 100;
 Settings.dhtLimit = 500;
 Settings.streamPort = 0; // 0 = Random
 Settings.tmpLocation = path.join(os.tmpDir(), 'Popcorn-Time');
-Settings.databaseLocation = path.join(data_path, 'data');
+Settings.databaseLocation = path.join(nw.App.dataPath, 'data');
 Settings.deleteTmpOnClose = true;
 Settings.automaticUpdating = true;
 Settings.events = true;
@@ -335,8 +329,7 @@ var AdvSettings = {
 
     performUpgrade: function () {
         // This gives the official version (the package.json one)
-        gui = require('nw.gui');
-        var currentVersion = gui.App.manifest.version;
+        var currentVersion = nw.App.manifest.version;
 
         if (currentVersion !== AdvSettings.get('version')) {
             // Nuke the DB if there's a newer version
@@ -352,6 +345,6 @@ var AdvSettings = {
             window.__isUpgradeInstall = true;
         }
         AdvSettings.set('version', currentVersion);
-        AdvSettings.set('releaseName', gui.App.manifest.releaseName);
+        AdvSettings.set('releaseName', nw.App.manifest.releaseName);
     },
 };

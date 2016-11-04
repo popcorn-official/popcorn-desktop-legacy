@@ -21,7 +21,7 @@ var os = require('os');
         },
 
         initialize: function () {
-            this.nativeWindow = require('nw.gui').Window.get();
+            this.nativeWindow = nw.Window.get();
         },
 
         templateHelpers: {

@@ -83,7 +83,7 @@
         },
 
         isTorrentStored: function () {
-            var target = require('nw.gui').App.dataPath + '/TorrentCollection/';
+            var target = nw.App.dataPath + '/TorrentCollection/';
 
             // bypass errors
             if (!Settings.droppedTorrent && !Settings.droppedMagnet) {
@@ -117,7 +117,7 @@
 
         storeTorrent: function () {
             var source = App.settings.tmpLocation + '/',
-                target = require('nw.gui').App.dataPath + '/TorrentCollection/',
+                target = nw.App.dataPath + '/TorrentCollection/',
                 file,
                 _file;
 
