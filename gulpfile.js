@@ -121,7 +121,7 @@ const nw = new nwBuilder({
     files: [],
     buildDir: releasesDir,
     zip: false,
-    macIcns: './src/app/images/butter.icns',
+    macIcns: './src/app/images/popcorntime.icns',
     version: nwVersion,
     downloadUrl: 'https://get.popcorntime.sh/repo/nw/',
     platforms: parsePlatforms()
