@@ -228,6 +228,7 @@ var AdvSettings = {
     },
 
     checkApiEndpoint: function (endpoint, defer) {
+        var uri = require('url');
         defer = defer || Q.defer();
 
         endpoint.ssl = undefined;
