@@ -1,8 +1,8 @@
 (function (App) {
     'use strict';
 
-    var PT_id = 13, //ID of project (got with gitlab.projects.all). 13 is for 'butterproject/butter'
-        PT_url = Settings.issuesUrl, //Url of 'issues' of the above project
+    var PT_id = 13,
+        PT_url = Settings.issuesUrl,
         token;
 
     var Issue = Backbone.Marionette.ItemView.extend({
