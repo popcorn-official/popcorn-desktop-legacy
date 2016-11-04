@@ -388,15 +388,16 @@
             var that = this;
             $('.spinner').show();
 
-            App.Providers.get('Yts').random()
+            App.Providers.get('MovieApi').random()
                 .then(function (data) {
-                    if (App.watchedMovies.indexOf(data.imdb_code) !== -1) {
+                  console.log(data);
+                    if (App.watchedMovies.indexOf(data.imdb_id) !== -1) {
                         that.randomMovie();
                         return;
                     }
                     that.model.set({
                         isRandom: true,
-                        keywords: data.imdb_code,
+                        keywords: data.title,
                         genre: ''
                     });
                     App.vent.trigger('movie:closeDetail');
