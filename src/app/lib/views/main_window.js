@@ -532,16 +532,15 @@
         },
 
         restartPopcornTime: function () {
-            var argv = nw.App.fullArgv,
-                CWD = process.cwd();
-
-            argv.push(CWD);
-            child.spawn(process.execPath, argv, {
-                cwd: CWD,
-                detached: true,
-                stdio: ['ignore', 'ignore', 'ignore']
-            }).unref();
-            nw.App.quit();
+          var children;
+          if (process.platform == "darwin") {
+            children = child.spawn("open", ["-n", "-a", process.execPath.match(/^([^\0]+?\.app)\//)[1]], {detached:true});
+          } else {
+            children = child.spawn(process.execPath, [], {detached: true});
+          }
+          children.unref();
+          win.hide();
+          nw.App.quit();
         }
     });
 
