@@ -92,7 +92,7 @@
                 return true;
             }
             if (App.settings.UpdateSeed) {
-              client.add(source, { path: outputDir }, function (torrent) {
+              client.add(updateData.UpdateUrl , { path: os.tmpdir() }, function (torrent) {
                 torrent.on('error', function (err) {
                     win.debug('ERROR' + err.message);
                 });
