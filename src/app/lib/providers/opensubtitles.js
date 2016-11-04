@@ -1,10 +1,20 @@
 (function (App) {
     'use strict';
-    var openSRT = require('opensubtitles-api');
-    var userAgent = 'Popcorn Time v1';
+    var OS = require('opensubtitles-api'),
+        openSRT;
 
-    var OpenSubtitles = function () {};
+    var OpenSubtitles = function () {
+        openSRT = new OS({
+            useragent: 'Popcorn Time NodeJS',
+            username: Settings.opensubtitlesUsername,
+            password: Settings.opensubtitlesPassword
+        });
+    };
+
     OpenSubtitles.prototype.constructor = OpenSubtitles;
+    OpenSubtitles.prototype.config = {
+        name: 'OpenSubtitles'
+    };
 
     var normalizeLangCodes = function (data) {
         if ('pb' in data) {
@@ -14,7 +24,7 @@
         return data;
     };
 
-    var formatForPopcorn = function (data) {
+    var formatForPopcornTime = function (data) {
         data = normalizeLangCodes(data);
         for (var lang in data) {
             data[lang] = data[lang].url;
@@ -23,16 +33,14 @@
     };
 
     OpenSubtitles.prototype.fetch = function (queryParams) {
-        return openSRT.searchEpisode(queryParams, userAgent)
-            .then(function (data) {
-                if (typeof data === 'object') {
-                    return formatForPopcorn(data);
-                } else {
-                    return null;
-                }
-            });
+        queryParams.extensions = ['srt'];
+        return openSRT.search(queryParams)
+            .then(formatForPopcornTime);
     };
 
+    OpenSubtitles.prototype.upload = function (queryParams) {
+        return openSRT.upload(queryParams);
+    };
 
     App.Providers.OpenSubtitles = OpenSubtitles;
 

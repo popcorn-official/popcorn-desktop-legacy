@@ -6,7 +6,7 @@
         oldTmpLocation,
         that;
 
-    var Settings = Backbone.Marionette.ItemView.extend({
+    var SettingsContainer = Backbone.Marionette.ItemView.extend({
         template: '#settings-container-tpl',
         className: 'settings-container-contain',
 
@@ -35,6 +35,8 @@
             'click #unauthTrakt': 'disconnectTrakt',
             'click #connect-with-tvst': 'connectWithTvst',
             'click #disconnect-tvst': 'disconnectTvst',
+            'click #authOpensubtitles': 'connectOpensubtitles',
+            'click #unauthOpensubtitles': 'disconnectOpensubtitles',
             'click .reset-animeAPI': 'resetAnimeAPI',
             'click .reset-movieAPI': 'resetMovieAPI',
             'click .reset-tvAPI': 'resetTVShowAPI',
@@ -273,6 +275,9 @@
             case 'activateTorrentCollection':
             case 'activateWatchlist':
             case 'activateRandomize':
+            case 'opensubtitlesAutoUpload':
+            case 'subtitles_bold':
+            case 'rememberFilters':
                 value = field.is(':checked');
                 break;
             case 'httpApiUsername':
@@ -288,12 +293,11 @@
                 break;
             case 'tmpLocation':
                 tmpLocationChanged = true;
-                value = path.join(field.val(), 'Popcorn-Time');
+                value = path.join(field.val(), Settings.projectName);
                 break;
-            case 'activateVpn':
-                $('.vpn-connect').toggle();
-                value = field.is(':checked');
-                break;
+            case 'opensubtitlesUsername':
+            case 'opensubtitlesPassword':
+                return;
             default:
                 win.warn('Setting not defined: ' + field.attr('name'));
             }
@@ -406,7 +410,13 @@
                     AdvSettings.set('bigPicture', false);
                     win.info('Setting changed: bigPicture - true');
                     $('input#bigPicture.settings-checkbox').attr('checked', false);
-                    $('.notification_alert').show().text(i18n.__('Big Picture Mode is unavailable on your current screen resolution')).delay(2500).fadeOut(400);
+                    App.vent.trigger('notification:show', new App.Model.Notification({
+                        title: i18n.__('Big Picture Mode'),
+                        body: i18n.__('Big Picture Mode is unavailable on your current screen resolution'),
+                        showRestart: false,
+                        type: 'error',
+                        autoclose: true
+                    }));
                 }
                 break;
             default:
@@ -419,21 +429,24 @@
             }
 
             $('#authTrakt > i').css('visibility', 'hidden');
-            $('.loading-spinner').show();
+            $('.trakt-loading-spinner').show();
+
+            // $('#authTrakt').hide();
+            // $('#authTraktCode').show();
 
             App.Trakt.oauth.authenticate()
                 .then(function (valid) {
                     if (valid) {
-                        $('.loading-spinner').hide();
+                        $('.trakt-loading-spinner').hide();
                         that.render();
                     } else {
-                        $('.loading-spinner').hide();
+                        $('.trakt-loading-spinner').hide();
                         $('#authTrakt > i').css('visibility', 'visible');
                     }
                 }).catch(function (err) {
                     win.debug('Trakt', err);
                     $('#authTrakt > i').css('visibility', 'visible');
-                    $('.loading-spinner').hide();
+                    $('.trakt-loading-spinner').hide();
                 });
         },
 
@@ -472,29 +485,29 @@
             $('#connect-with-tvst > i').css('visibility', 'hidden');
             $('.tvst-loading-spinner').show();
 
-            App.vent.on('system:tvstAuthenticated', function () {
-                window.loginWindow.close();
-                $('.tvst-loading-spinner').hide();
-                self.render();
-            });
+
             App.TVShowTime.authenticate(function (activateUri) {
                 nw.App.addOriginAccessWhitelistEntry(activateUri, 'app', 'host', true);
-                window.loginWindow = nw.Window.open(activateUri, {
+                nw.Window.open(activateUri, {
                     position: 'center',
                     focus: true,
                     title: 'TVShow Time',
                     icon: 'src/app/images/icon.png',
-                    toolbar: false,
                     resizable: false,
                     width: 600,
                     height: 600
-                });
+                }, function(loginWindow) {
+                  App.vent.on('system:tvstAuthenticated', function () {
+                      loginWindow.close();
+                      $('.tvst-loading-spinner').hide();
+                      self.render();
+                  });
 
-                window.loginWindow.on('closed', function () {
-                    $('.tvst-loading-spinner').hide();
-                    $('#connect-with-tvst > i').css('visibility', 'visible');
-                });
-
+                  loginWindow.on('closed', function () {
+                      $('.tvst-loading-spinner').hide();
+                      $('#connect-with-tvst > i').css('visibility', 'visible');
+                  });
+                }).focus();
             });
         },
 
@@ -503,6 +516,56 @@
             App.TVShowTime.disconnect(function () {
                 self.render();
             });
+        },
+
+        connectOpensubtitles: function (e) {
+            var self = this,
+                usn = $('#opensubtitlesUsername').val(),
+                pw = $('#opensubtitlesPassword').val(),
+                OS = require('opensubtitles-api');
+
+            $('.opensubtitles-options .invalid-cross').hide();
+
+            if (usn !== '' && pw !== '') {
+                $('.opensubtitles-options .loading-spinner').show();
+                var OpenSubtitles = new OS({
+                    useragent: 'Popcorn Time NodeJS',
+                    username: usn,
+                    password: Common.md5(pw)
+                });
+
+                OpenSubtitles.login()
+                    .then(function (obj) {
+                        if (obj.token) {
+                            AdvSettings.set('opensubtitlesUsername', usn);
+                            AdvSettings.set('opensubtitlesPassword', Common.md5(pw));
+                            AdvSettings.set('opensubtitlesAuthenticated', true);
+                            $('.opensubtitles-options .loading-spinner').hide();
+                            $('.opensubtitles-options .valid-tick').show();
+                            win.info('Setting changed: opensubtitlesAuthenticated - true');
+                            return;
+                        } else {
+                            throw new Error('no token returned by OpenSubtitles');
+                        }
+                    }).delay(1000).then(function () {
+                        self.render();
+                    }).catch(function (err) {
+                        win.error('OpenSubtitles.login()', err);
+                        $('.opensubtitles-options .loading-spinner').hide();
+                        $('.opensubtitles-options .invalid-cross').show();
+                    });
+            } else {
+                $('.opensubtitles-options .invalid-cross').show();
+            }
+
+        },
+
+        disconnectOpensubtitles: function (e) {
+            var self = this;
+            AdvSettings.set('opensubtitlesUsername', '');
+            AdvSettings.set('opensubtitlesPassword', '');
+            AdvSettings.set('opensubtitlesAuthenticated', false);
+            setTimeout(self.render, 200);
         },
 
         flushBookmarks: function (e) {
@@ -609,16 +672,27 @@
                 zip.addLocalFile(App.settings['databaseLocation'] + '/' + entry);
             });
 
-            fdialogs.saveFile(zip.toBuffer(), function (err, path) {
+            // https://github.com/exos/node-webkit-fdialogs/issues/9
+            var exportDialog = new fdialogs.FDialog({
+                type: 'save',
+                window: nw.Window.get().window
+            });
+
+            exportDialog.saveFile(zip.toBuffer(), function (err, path) {
                 that.alertMessageWait(i18n.__('Exporting Database...'));
                 win.info('Database exported to:', path);
                 that.alertMessageSuccess(false, btn, i18n.__('Export Database'), i18n.__('Database Successfully Exported'));
             });
-
         },
 
         importDatabase: function () {
-            fdialogs.readFile(function (err, content, path) {
+            // https://github.com/exos/node-webkit-fdialogs/issues/9
+            var importDialog = new fdialogs.FDialog({
+                type: 'open',
+                window: nw.Window.get().window
+            });
+
+            importDialog.readFile(function (err, content, path) {
                 that.alertMessageWait(i18n.__('Importing Database...'));
                 try {
                     var zip = new AdmZip(content);
@@ -665,11 +739,7 @@
                 notificationModel.set('showRestart', true);
                 notificationModel.set('body', i18n.__('Please restart your application'));
             } else {
-                // Hide notification after 3 seconds
-                setTimeout(function () {
-                    btn.text(btnText).removeClass('confirm warning disabled').prop('disabled', false);
-                    App.vent.trigger('notification:close');
-                }, 3000);
+                notificationModel.attributes.autoclose = 4000;
             }
 
             // Open the notification
@@ -680,13 +750,9 @@
             App.vent.trigger('notification:show', new App.Model.Notification({
                 title: i18n.__('Error'),
                 body: errorDesc + '.',
-                type: 'danger'
+                type: 'danger',
+                autoclose: true
             }));
-
-            // Hide notification after 5 seconds
-            setTimeout(function () {
-                App.vent.trigger('notification:close');
-            }, 5000);
         },
 
         syncTrakt: function () {
@@ -700,7 +766,7 @@
 
             App.Trakt.syncTrakt.all()
                 .then(function () {
-                    App.Providers.get('Watchlist').fetchWatchlist();
+                    App.Providers.get('Watchlist').fetch({force:true});
                 })
                 .then(function () {
                     $('#syncTrakt')
@@ -755,5 +821,5 @@
         }
     });
 
-    App.View.Settings = Settings;
+    App.View.Settings = SettingsContainer;
 })(window.App);

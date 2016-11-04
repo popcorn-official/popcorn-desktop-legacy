@@ -2,9 +2,17 @@
     'use strict';
 
     var API_ENDPOINT = URI('https://api-v2launch.trakt.tv'),
-        CLIENT_ID = 'c7e20abc718e46fc75399dd6688afca9ac83cd4519c9cb1fba862b37b8640e89',
-        CLIENT_SECRET = '476cf15ed52542c2c8dc502821280aa5f61a012db57f1ed1f479aaf88ab385cb',
+        CLIENT_ID = '647c69e4ed1ad13393bf6edd9d8f9fb6fe9faf405b44320a6b71ab960b4540a2',
+        CLIENT_SECRET = 'f55b0a53c63af683588b47f6de94226b7572a6f83f40bd44c58a7c83fe1f2cb1',
         REDIRECT_URI = 'urn:ietf:wg:oauth:2.0:oob';
+
+    var isValid = function (id) {
+        if (!id || id.toString().indexOf('mal') > -1 || id.toString().indexOf('-') > -1) {
+            return false;
+        } else {
+            return true;
+        }
+    };
 
     function TraktTv() {
         App.Providers.CacheProviderV2.call(this, 'metadata');
@@ -57,6 +65,10 @@
             return _.unique(_.flatten(results));
         });
     }
+
+    TraktTv.prototype.config = {
+        name: 'Trakttv'
+    };
 
     TraktTv.prototype.cache = function (key, ids, func) {
         var self = this;
@@ -138,6 +150,37 @@
         return defer.promise;
     };
 
+    TraktTv.prototype.delete = function (endpoint, getVariables) {
+        var defer = Q.defer();
+
+        getVariables = getVariables || {};
+
+
+        var requestUri = API_ENDPOINT.clone()
+            .segment(endpoint)
+            .addQuery(getVariables);
+
+        request({
+            method: 'DELETE',
+            url: requestUri.toString(),
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + Settings.traktToken,
+                'trakt-api-version': '2',
+                'trakt-api-key': CLIENT_ID
+            }
+        }, function (error, response, body) {
+            if (error) {
+                defer.reject(error);
+            } else {
+                defer.resolve({});
+            }
+        });
+
+
+        return defer.promise;
+    };
+
     TraktTv.prototype.calendars = {
         myShows: function (startDate, days) {
             var endpoint = 'calendars/my/shows';
@@ -186,23 +229,24 @@
 
     TraktTv.prototype.recommendations = {
         movies: function () {
-            return this.get('recommendations/movies')
-                .then(function (data) {
-                    return data;
-                });
+            return this.get('recommendations/movies', {
+                extended: 'full,images'
+            });
+        },
+        hideMovie: function (id) {
+            return this.delete('recommendations/movies/' + id);
         },
         shows: function () {
-            return this.get('recommendations/shows')
-                .then(function (data) {
-                    return data;
-                });
-        }
+            return this.get('recommendations/shows', {
+                extended: 'full,images'
+            });
+        },
+        hideShow: function (id) {
+            return this.delete('recommendations/shows/' + id);
+        },
     };
 
     TraktTv.prototype.scrobble = function (action, type, id, progress) {
-        if (!isValid(id)) {
-            return;
-        }
         if (type === 'movie') {
             return this.post('scrobble/' + action, {
                 movie: {
@@ -235,7 +279,9 @@
 
     TraktTv.prototype.shows = {
         summary: function (id) {
-            return this.get('shows/' + id);
+            return this.get('shows/' + id, {
+                extended: 'full,images'
+            });
         },
         aliases: function (id) {
             return this.get('shows/' + id + '/aliases');
@@ -250,10 +296,7 @@
             if (!id) {
                 return Q();
             }
-            return this.get('shows/' + id + '/progress/watched')
-                .then(function (data) {
-                    return data;
-                });
+            return this.get('shows/' + id + '/progress/watched');
         },
         updates: function (startDate) {
             return this.get('shows/updates/' + startDate)
@@ -331,9 +374,6 @@
             }
         },
         addToHistory: function (type, id) {
-            if (!isValid(id)) {
-                return;
-            }
             if (type === 'movie') {
                 return this.post('sync/history', {
                     movies: [{
@@ -354,9 +394,6 @@
             }
         },
         removeFromHistory: function (type, id) {
-            if (!isValid(id)) {
-                return;
-            }
             if (type === 'movie') {
                 return this.post('sync/history/remove', {
                     movies: [{
@@ -376,6 +413,18 @@
                 });
             }
         },
+        getWatchlist: function (type) {
+            return this.get('sync/watchlist/' + type);
+        }
+    };
+
+    TraktTv.prototype.users = {
+        hiddenItems: function (type) {
+            return this.get('users/hidden/' + type)
+                .then(function (data) {
+                    return data;
+                });
+        }
     };
 
     /*
@@ -399,6 +448,11 @@
                     }).then(function (data) {
                         if (data.access_token && data.expires_in && data.refresh_token) {
                             Settings.traktToken = data.access_token;
+                            trakt.import_token({
+                                expires: new Date().valueOf() + data.expires_in * 1000,
+                                access_token: data.access_token,
+                                refresh_token: data.refresh_token
+                            });
                             AdvSettings.set('traktToken', data.access_token);
                             AdvSettings.set('traktTokenRefresh', data.refresh_token);
                             AdvSettings.set('traktTokenTTL', new Date().valueOf() + data.expires_in * 1000);
@@ -426,42 +480,40 @@
             var OAUTH_URI = API_URI + '/oauth/authorize?response_type=code&client_id=' + CLIENT_ID;
 
             nw.App.addOriginAccessWhitelistEntry(API_URI, 'app', 'host', true);
-            window.loginWindow = nw.Window.open(OAUTH_URI + '&redirect_uri=' + encodeURIComponent(REDIRECT_URI), {
+            nw.Window.open(OAUTH_URI + '&redirect_uri=' + encodeURIComponent(REDIRECT_URI), {
                 position: 'center',
-                focus: true,
                 title: 'Trakt.tv',
                 icon: 'src/app/images/icon.png',
-                toolbar: false,
                 resizable: false,
-                width: 600,
-                height: 600
-            });
+                width: 580,
+                height: 640
+            }, function(loginWindow) {
+              loginWindow.on('loaded', function () {
+                  url = loginWindow.window.document.URL;
 
-            window.loginWindow.on('loaded', function () {
-                url = window.loginWindow.window.document.URL;
+                  if (url.indexOf('&') === -1 && url.indexOf('auth/signin') === -1) {
+                      if (url.indexOf('oauth/authorize/') !== -1) {
+                          url = url.split('/');
+                          url = url[url.length - 1];
+                      } else {
+                          nw.Shell.openExternal(url);
+                      }
+                      this.close(true);
+                  } else {
+                      url = false;
+                  }
+              });
 
-                if (url.indexOf('&') === -1 && url.indexOf('auth/signin') === -1) {
-                    if (url.indexOf('oauth/authorize/') !== -1) {
-                        url = url.split('/');
-                        url = url[url.length - 1];
-                    } else {
-                        nw.Shell.openExternal(url);
-                    }
-                    this.close(true);
-                } else {
-                    url = false;
-                }
-            });
-
-            window.loginWindow.on('closed', function () {
-                if (url) {
-                    defer.resolve(url);
-                } else {
-                    AdvSettings.set('traktToken', '');
-                    AdvSettings.set('traktTokenTTL', '');
-                    AdvSettings.set('traktTokenRefresh', '');
-                    defer.reject('Trakt window closed without exchange token');
-                }
+              loginWindow.on('closed', function () {
+                  if (url) {
+                      defer.resolve(url);
+                  } else {
+                      AdvSettings.set('traktToken', '');
+                      AdvSettings.set('traktTokenTTL', '');
+                      AdvSettings.set('traktTokenRefresh', '');
+                      defer.reject('Trakt window closed without exchange token');
+                  }
+              });
             });
 
             return defer.promise;
@@ -469,7 +521,7 @@
         checkToken: function () {
             var self = this;
             if (Settings.traktTokenTTL <= new Date().valueOf() && Settings.traktTokenRefresh !== '') {
-                win.info('Trakt: refreshing access token');
+                console.info('Trakt: refreshing access token');
                 this._authenticationPromise = self.post('oauth/token', {
                     refresh_token: Settings.traktTokenRefresh,
                     client_id: CLIENT_ID,
@@ -478,6 +530,11 @@
                 }).then(function (data) {
                     if (data.access_token && data.expires_in && data.refresh_token) {
                         Settings.traktToken = data.access_token;
+                        trakt.import_token({
+                            expires: new Date().valueOf() + data.expires_in * 1000,
+                            access_token: data.access_token,
+                            refresh_token: data.refresh_token
+                        });
                         AdvSettings.set('traktToken', data.access_token);
                         AdvSettings.set('traktTokenRefresh', data.refresh_token);
                         AdvSettings.set('traktTokenTTL', new Date().valueOf() + data.expires_in * 1000);
@@ -493,6 +550,11 @@
                 });
             } else if (Settings.traktToken !== '') {
                 this.authenticated = true;
+                trakt.import_token({
+                    expires: Settings.traktTokenTTL,
+                    access_token: Settings.traktToken,
+                    refresh_token: Settings.traktTokenRefresh
+                });
                 App.vent.trigger('system:traktAuthenticated');
             }
         }
@@ -523,7 +585,7 @@
                                     type: 'movie'
                                 });
                             } catch (e) {
-                                win.warn('Cannot sync a movie (' + data[m].movie.title + '), the problem is: ' + e.message + '. Continuing sync without this movie...');
+                                console.warn('Cannot sync a movie (' + data[m].movie.title + '), the problem is: ' + e.message + '. Continuing sync without this movie...');
                             }
                         }
                     }
@@ -531,7 +593,7 @@
                     return watched;
                 })
                 .then(function (traktWatched) {
-                    win.debug('Trakt: marked %s movie(s) as watched', traktWatched.length);
+                    console.debug('Trakt: marked %s movie(s) as watched', traktWatched.length);
                     return Database.markMoviesWatched(traktWatched);
                 });
         },
@@ -560,7 +622,7 @@
                                         });
                                     }
                                 } catch (e) {
-                                    win.warn('Cannot sync a show (' + show.show.title + '), the problem is: ' + e.message + '. Continuing sync without this show...');
+                                    console.warn('Cannot sync a show (' + show.show.title + '), the problem is: ' + e.message + '. Continuing sync without this show...');
                                     break;
                                 }
                             }
@@ -571,15 +633,15 @@
                 })
                 .then(function (traktWatched) {
                     // Insert them locally
-                    win.debug('Trakt: marked %s episode(s) as watched', traktWatched.length);
+                    console.debug('Trakt: marked %s episode(s) as watched', traktWatched.length);
                     return Database.markEpisodesWatched(traktWatched);
                 });
         }
     };
 
     TraktTv.prototype.resizeImage = function (imageUrl, size) {
-        if (imageUrl === undefined) {
-            return imageUrl;
+        if (imageUrl === undefined || imageUrl === null) {
+            return 'images/posterholder.png'.toString();
         }
 
         var uri = URI(imageUrl),
@@ -626,17 +688,21 @@
             }
         }
 
-        if (imageUrl === undefined) {
-            return 'images/posterholder.png'.toString();
-        } else {
-            return uri.filename(file + '.' + ext).toString();
-        }
+        return uri.filename(file + '.' + ext).toString();
     };
+
 
     function onShowWatched(show, channel) {
         win.debug('Mark Episode as watched on channel:', channel);
         switch (channel) {
         case 'database':
+            setTimeout(function () {
+                App.Providers.get('Watchlist').fetch({
+                    update: show.imdb_id
+                }).then(function () {
+                    App.vent.trigger('watchlist:list');
+                });
+            }, 2000);
             break;
         case 'seen':
             /* falls through */
@@ -663,17 +729,19 @@
         win.debug('Mark Movie as watched on channel:', channel);
         switch (channel) {
         case 'database':
-            switch (Settings.watchedCovers) {
-            case 'fade':
-                $('li[data-imdb-id="' + App.MovieDetailView.model.get('imdb_id') + '"] .actions-watched').addClass('selected');
-                $('li[data-imdb-id="' + App.MovieDetailView.model.get('imdb_id') + '"]').addClass('watched');
-                break;
-            case 'hide':
-                $('li[data-imdb-id="' + App.MovieDetailView.model.get('imdb_id') + '"]').remove();
-                break;
-            }
-            $('.watched-toggle').addClass('selected').text(i18n.__('Seen'));
-            App.MovieDetailView.model.set('watched', true);
+            try {
+                switch (Settings.watchedCovers) {
+                case 'fade':
+                    $('li[data-imdb-id="' + App.MovieDetailView.model.get('imdb_id') + '"] .actions-watched').addClass('selected');
+                    $('li[data-imdb-id="' + App.MovieDetailView.model.get('imdb_id') + '"]').addClass('watched');
+                    break;
+                case 'hide':
+                    $('li[data-imdb-id="' + App.MovieDetailView.model.get('imdb_id') + '"]').remove();
+                    break;
+                }
+                $('.watched-toggle').addClass('selected').text(i18n.__('Seen'));
+                App.MovieDetailView.model.set('watched', true);
+            } catch (e) {}
             break;
         case 'seen':
             /* falls through */
@@ -695,14 +763,6 @@
             break;
         }
     }
-
-    var isValid = function (id) {
-        if (!id || id.toString().indexOf('mal') > -1 || id.toString().indexOf('-') > -1) {
-            return false;
-        } else {
-            return true;
-        }
-    };
 
     App.vent.on('show:watched', onShowWatched);
     App.vent.on('show:unwatched', onShowUnWatched);

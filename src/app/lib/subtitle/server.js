@@ -4,7 +4,6 @@
     var PORT = 9999;
     var subtitlePath = {};
     var encoding = 'utf8';
-    var iconv = require('iconv-lite');
     var send = require('send');
 
     server = http.createServer(function (req, res) {
