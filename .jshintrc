@@ -78,7 +78,7 @@
         "request": true,
         "querystring": true,
         "URI": true,
-        "peerflix": true,
+        "webtorrent": true,
         "child": true,
         "trakt": true,
 

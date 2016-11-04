@@ -27,6 +27,18 @@ var Settings = {
         '-----END PUBLIC KEY-----\n'
 };
 
+Settings.trackers = {
+    blacklisted: [
+        'demonii'
+    ],
+    forced: [
+        'udp://tracker.coppersurfer.tk:6969/announce',
+        'udp://glotorrents.pw:6969/announce',
+        'udp://exodus.desync.com:6969/announce',
+        'udp://tracker.opentrackr.org:1337/announce'
+    ]
+};
+
 // User interface
 Settings.language = '';
 Settings.translateSynopsis = true;
