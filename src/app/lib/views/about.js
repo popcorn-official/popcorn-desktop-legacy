@@ -48,7 +48,7 @@
                     $('.changelog-text').html(contents.replace(/\n/g, '<br />'));
                     $('.changelog-overlay').show();
                 } else {
-                    nw.Shell.openExternal('https://github.com/popcorn-official/popcorn-desktop-legacy/blob/master/CHANGELOG.md');
+                    nw.Shell.openExternal(Settings.changelogUrl);
                 }
             });
         },

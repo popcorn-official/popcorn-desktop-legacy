@@ -37,7 +37,6 @@
                 <% _.each(fs.readdirSync(data_path + '/TorrentCollection/'), function(file, index) { %>
                     <li class="file-item" data-index="<%=file.index%>" data-file="<%=index%>">
                         <a><%=file%></a>
-
                    <% if (file.indexOf('.torrent') !== -1) { %>
                         <div class="item-icon torrent-icon"></div>
                    <% } else { %>

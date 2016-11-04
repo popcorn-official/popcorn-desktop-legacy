@@ -1,4 +1,4 @@
-.issue-container 
+.issue-container
     z-index 15
     height 100%
     width 100%
@@ -6,7 +6,7 @@
     -webkit-user-select none
     opacity 1
 
-    .overlay-content 
+    .overlay-content
         height 100%
         width 100%
         position absolute
@@ -14,17 +14,17 @@
         opacity 0.95
         z-index -1
 
-    h1 
+    h1
         font-family $AlternateFont
         font-weight bold
         font-size 20px
 
-        & + hr 
+        & + hr
             margin-top: 10px
             margin-bottom: 10px
 
 
-    .content 
+    .content
         height: 95%
         margin 0 auto
         margin-top 60px
@@ -47,15 +47,15 @@
                 a
                     font-size 11px
                     margin-left 6px
-    
+
             #issue-auth
                 display block
-    
+
                 input
                     margin-bottom 5px
                     padding-right 5px
                     line-height 16px
-    
+
                 p
                     font-size 13px
                     padding 5px
@@ -80,6 +80,23 @@
                     cursor pointer
 
                 #issue-results
+                    text-align left
+
+                    small
+                        font-size 85%
+                        opacity .6
+
+                    img
+                        width 100%
+
+                    ul, ol
+                        padding-left 20px
+                    li
+                        font-size inherit
+                        line-height initial
+                        list-style initial
+                        margin-bottom 6px
+
                     .issue-title
                         cursor pointer
 
@@ -94,10 +111,13 @@
                         p
                             font-size 12px
                             color rgba($Text1,.9);
-        
+
+                .button
+                    display none
+
             #issue-form
                 display none
-                
+
                 #issue-length
                     font-size .9em
                     margin-left 10px
@@ -147,7 +167,7 @@
 
             input[type="text"], input[type="password"]
                 height 30px
-    
+
             textarea
                 height 35vh
                 scrollable();

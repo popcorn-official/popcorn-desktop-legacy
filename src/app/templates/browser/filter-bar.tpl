@@ -1,14 +1,14 @@
 <ul class="nav nav-hor left">
-    <li class="source active showMovies providerinfo" data-toggle="tooltip" data-placement="top" title="MovieApi"><%= i18n.__("Movies") %></li>
-    <li class="source showShows providerinfo" data-toggle="tooltip" data-placement="top" title="TVApi"><%= i18n.__("TV Series") %></li>
-    <li class="source showAnime providerinfo" data-toggle="tooltip" data-placement="top" title="AnimeApi"><%= i18n.__("Anime") %></li>
+  <li class="source active showMovies providerinfo" data-toggle="tooltip" data-placement="top" title="YTS"><%= i18n.__("Movies") %></li>
+  <li class="source showShows providerinfo" data-toggle="tooltip" data-placement="top" title="TVApi"><%= i18n.__("TV Series") %></li>
+  <li class="source showAnime providerinfo" data-toggle="tooltip" data-placement="top" title="Haruhichan"><%= i18n.__("Anime") %></li>
 </ul>
 <ul id="nav-filters" class="nav nav-hor filters">
     <% if(typeof type !== 'undefined'){ %>
         <li class="dropdown filter types">
             <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                 <%= i18n.__("Type") %>
-                    <span class="value"><%= i18n.__(type.capitalizeEach()) %></span>
+                    <span class="value" data-value="<%= type %>"><%= i18n.__(type) %></span>
                     <span class="caret"></span>
             </a>
             <ul class="dropdown-menu">
@@ -22,7 +22,7 @@
         <li class="dropdown filter genres">
             <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                 <%= i18n.__("Genre") %>
-                    <span class="value"><%= i18n.__(genre.capitalizeEach()) %></span>
+                    <span data-value="<%= genre %>" class="value"><%= i18n.__(genre.capitalizeEach()) %></span>
                     <span class="caret"></span>
             </a>
             <ul class="dropdown-menu">
@@ -35,7 +35,7 @@
         <li class="dropdown filter sorters">
             <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                 <%= i18n.__("Sort by") %>
-                    <span class="value"><%= i18n.__(sorter.capitalizeEach()) %></span>
+                    <span data-value="<%= sorter %>" class="value"><%= i18n.__(sorter.capitalizeEach()) %></span>
                     <span class="caret"></span>
             </a>
             <ul class="dropdown-menu">

@@ -46,6 +46,10 @@
             App.Device.Collection.setDevice(Settings.chosenPlayer);
             App.Device.ChooserView('#player-chooser2').render();
             this.$('#watch-now').text('');
+
+            if (!$.trim($('.file-selector-container .file-list').html()).length) {
+                $('.file-selector-container .file-list').html('<li style="margin-top: 30px">' + i18n.__('No results found') + '</li>');
+            }
         },
 
         bitsnoopRequest: function (hash) {
@@ -78,12 +82,15 @@
                 file_index: actualIndex,
                 device: App.Device.Collection.selected
             });
+            try {
+                App.MovieDetailView.closeDetails();
+            } catch (e) {}
             App.vent.trigger('stream:start', torrentStart);
             App.vent.trigger('system:closeFileSelector');
         },
 
         isTorrentStored: function () {
-            var target = nw.App.dataPath + '/TorrentCollection/';
+            var target = data_path + '/TorrentCollection/';
 
             // bypass errors
             if (!Settings.droppedTorrent && !Settings.droppedMagnet) {
@@ -117,7 +124,7 @@
 
         storeTorrent: function () {
             var source = App.settings.tmpLocation + '/',
-                target = nw.App.dataPath + '/TorrentCollection/',
+                target = data_path + '/TorrentCollection/',
                 file,
                 _file;
 

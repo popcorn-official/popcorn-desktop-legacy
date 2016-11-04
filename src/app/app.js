@@ -1,10 +1,3 @@
-var
-    // Minimum percentage to open video
-    MIN_PERCENTAGE_LOADED = 0.5,
-
-    // Minimum bytes loaded to open video
-    MIN_SIZE_LOADED = 10 * 1024 * 1024;
-
 // Special Debug Console Calls!
 win.log = console.log.bind(console);
 win.debug = function () {

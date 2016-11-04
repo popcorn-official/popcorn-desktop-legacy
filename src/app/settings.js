@@ -1,5 +1,31 @@
 /** Default settings **/
-var Settings = {};
+var Settings = {
+    projectName: 'Popcorn Time',
+    projectUrl: 'https://popcorntime.sh',
+    projectTwitter: 'popcorntimetv',
+    projectFacebook: 'PopcornTimedotSh',
+    projectGooglePlus: 'popcorntimeshplus',
+    projectBlog: 'https://blog.popcorntime.sh/',
+    projectForum: 'https://www.reddit.com/r/PopcornTime',
+
+    statusUrl: 'http://status.popcorntime.sh',
+    changelogUrl: 'https://github.com/popcorn-official/popcorn-desktop-legacy/commits/master',
+    issuesUrl: 'https://github.com/popcorn-official/popcorn-desktop-legacy/issues',
+    sourceUrl: 'https://github.com/popcorn-official/popcorn-desktop-legacy/',
+    commitUrl: 'https://github.com/popcorn-official/popcorn-desktop-legacy/commit',
+    updateKey: '-----BEGIN PUBLIC KEY-----\n' +
+        'MIIBtjCCASsGByqGSM44BAEwggEeAoGBAPNM5SX+yR8MJNrX9uCQIiy0t3IsyNHs\n' +
+        'HWA180wDDd3S+DzQgIzDXBqlYVmcovclX+1wafshVDw3xFTJGuKuva7JS3yKnjds\n' +
+        'NXbvM9CrJ2Jngfd0yQPmSh41qmJXHHSwZfPZBxQnspKjbcC5qypM5DqX9oDSJm2l\n' +
+        'fM/weiUGnIf7AhUAgokTdF7G0USfpkUUOaBOmzx2RRkCgYAyy5WJDESLoU8vHbQc\n' +
+        'rAMnPZrImUwjFD6Pa3CxhkZrulsAOUb/gmc7B0K9I6p+UlJoAvVPXOBMVG/MYeBJ\n' +
+        '19/BH5UNeI1sGT5/Kg2k2rHVpuqzcvlS/qctIENgCNMo49l3LrkHbJPXKJ6bf+T2\n' +
+        '8lFWRP2kVlrx/cHdqSi6aHoGTAOBhAACgYBTNeXBHbWDOxzSJcD6q4UDGTnHaHHP\n' +
+        'JgeCrPkH6GBa9azUsZ+3MA98b46yhWO2QuRwmFQwPiME+Brim3tHlSuXbL1e5qKf\n' +
+        'GOm3OxA3zKXG4cjy6TyEKajYlT45Q+tgt1L1HuGAJjWFRSA0PP9ctC6nH+2N3HmW\n' +
+        'RTcms0CPio56gg==\n' +
+        '-----END PUBLIC KEY-----\n'
+};
 
 // User interface
 Settings.language = '';
@@ -74,9 +100,9 @@ Settings.bigPicture = false;
 // Features
 Settings.activateTorrentCollection = true;
 Settings.activateWatchlist = true;
-Settings.activateVpn = true;
+Settings.activateVpn = false;
 Settings.activateRandomize = true;
-Settings.onlineSearchEngine = 'KAT';
+Settings.onlineSearchEngine = 'ExtraTorrent';
 
 // Ratio
 Settings.totalDownloaded = 0;
@@ -112,16 +138,12 @@ Settings.animeAPI = [{
 }];
 
 Settings.updateEndpoint = {
-    url: 'https://butterproject.org/',
-    index: 0,
-    proxies: [{
-        url: 'https://butterproject.org/',
-        fingerprint: '',
-    }, {
-        url: 'https://butterproject.github.io/',
-        fingerprint: ''
-    }]
-};
+        url: 'https://popcorntime.sh/',
+        index: 0,
+        proxies: [{
+            url: 'https://popcorntime.sh/'
+        }]
+}
 
 // App Settings
 Settings.version = false;
@@ -228,7 +250,7 @@ var AdvSettings = {
     },
 
     checkApiEndpoint: function (endpoint, defer) {
-   
+
         defer = defer || Q.defer();
 
         endpoint.ssl = undefined;

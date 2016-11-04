@@ -83,6 +83,8 @@
             $('.filter-bar').hide();
             $('#header').addClass('header-shadow');
 
+            App.LoadingView = this;
+
             this.initKeyboardShortcuts();
         },
         onStateUpdate: function () {
@@ -102,7 +104,7 @@
             if (state === 'playingExternally') {
                 this.ui.stateTextDownload.hide();
                 this.ui.progressbar.hide();
-                if (streamInfo.get('player') && streamInfo.get('player').get('type') === 'chromecast') {
+                if (streamInfo.get('player') && streamInfo.get('player').get('type') === 'chromecast' | streamInfo.get('player').get('type') === 'dlna') {
                     this.ui.controls.css('visibility', 'visible');
                     this.ui.playingbarBox.css('visibility', 'visible');
                     this.ui.playingbar.css('width', '0%');
@@ -150,12 +152,22 @@
         },
 
         onDeviceStatus: function (status) {
-            if (status.media !== undefined && status.media.duration !== undefined) {
+          var streamInfo = this.model.get('streamInfo');
+            if (status.media !== undefined  && status.media.duration !== undefined && streamInfo.get('player').get('type') === 'chromecast' )
+            {
+               // Update playingbar width
+               var playedPercent = status.currentTime / status.media.duration * 100;
+               this.ui.playingbar.css('width', playedPercent.toFixed(1) + '%');
+               win.debug('ExternalStream: %s: %ss / %ss (%s%)', status.playerState,
+                   status.currentTime.toFixed(1), status.media.duration.toFixed(), playedPercent.toFixed(1));
+           }
+            if (status.playerState !== undefined  &&  status.duration !== undefined && streamInfo.get('player').get('type') === 'dlna')
+             {
                 // Update playingbar width
-                var playedPercent = status.currentTime / status.media.duration * 100;
-                this.ui.playingbar.css('width', playedPercent.toFixed(1) + '%');
+                var playedPercent2 = status.currentTime / status.duration * 100;
+                this.ui.playingbar.css('width', playedPercent2.toFixed(1) + '%');
                 win.debug('ExternalStream: %s: %ss / %ss (%s%)', status.playerState,
-                    status.currentTime.toFixed(1), status.media.duration.toFixed(), playedPercent.toFixed(1));
+                    status.currentTime.toFixed(1), status.duration.toFixed(), playedPercent2.toFixed(1));
             }
             if (!this.extPlayerStatusUpdater && status.playerState === 'PLAYING') {
                 // First PLAYING state. Start requesting device status update every 5 sec
@@ -233,7 +245,7 @@
 
                 cmd = 'dir /-C ' + drive;
 
-                exec(cmd, function (error, stdout, stderr) {
+                child.exec(cmd, function (error, stdout, stderr) {
                     if (error) {
                         return;
                     }
