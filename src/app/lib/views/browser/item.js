@@ -35,7 +35,7 @@
                 bookmarked = App.userBookmarks.indexOf(imdb) !== -1,
                 itemtype = this.model.get('type'),
                 images = this.model.get('images'),
-                img = (images) ? images.poster : this.model.get('image'),
+                img = (images && typeof images.poster !== 'object') ? images.poster : this.model.get('image'),
                 watched, cached, that = this;
 
             switch (itemtype) {
@@ -67,7 +67,7 @@
                     for (var i = 0; i < titleArray.length; i++) {
                         if (titleArray[i].length > 3 && !modified) {
                             if (Math.floor((Math.random() * 10) + 1) > 5) { //random
-                                titleArray[i] = 'Popcorn';
+                                titleArray[i] = Settings.projectName;
                                 modified = true;
                             }
                         }
@@ -103,6 +103,21 @@
         },
 
         showCover: function () {
+            var getBestImage = function (model) {
+                var images = model.get('images');
+                var image = model.get('image');
+                var cover = model.get('cover');
+                if (images && images.poster && images.poster.medium) {
+                    return images.poster.medium;
+                } else if (image && image instanceof String) {
+                    return image;
+                } else if (cover) {
+                    return cover;
+                }
+
+                return 'images/posterholder.png';
+            };
+
             var coverUrl;
             var itemtype = this.model.get('type');
             switch (itemtype) {
@@ -116,7 +131,7 @@
                         break;
                     }
                 }
-                coverUrl = this.model.get('image');
+                coverUrl = getBestImage(this.model);
                 this.ui.bookmarkIcon.addClass('selected');
                 break;
             case 'bookmarkedshow':
@@ -124,7 +139,7 @@
                 this.ui.bookmarkIcon.addClass('selected');
                 break;
             case 'movie':
-                coverUrl = this.model.get('image');
+                coverUrl = getBestImage(this.model);
 
                 if (this.model.get('watched')) {
                     this.ui.watchedIcon.addClass('selected');
@@ -162,24 +177,39 @@
                 title: this.ui.bookmarkIcon.hasClass('selected') ? i18n.__('Remove from bookmarks') : i18n.__('Add to bookmarks')
             });
 
-            var this_ = this;
+            // try to cache cover img
+            this.cacheCover(coverUrl);
+
+            this.ui.coverImage.remove();
+
+        },
+
+        cacheCover: function(coverUrl) {
+
+            var _this = this;
 
             var coverCache = new Image();
             coverCache.src = coverUrl;
             coverCache.onload = function () {
                 try {
-                    this_.ui.cover.css('background-image', 'url(' + coverUrl + ')').addClass('fadein');
+                    _this.ui.cover.css('background-image', 'url(' + coverUrl + ')').addClass('fadein');
                 } catch (e) {}
                 coverCache = null;
             };
             coverCache.onerror = function () {
+
+                var pattern = /^https:\/\//;
+
+                // if we got an error, try again without https
+                if (pattern.test(coverUrl)) {
+                    return _this.cacheCover(coverUrl.replace(pattern, 'http://'));
+                }
+
                 try {
-                    this_.ui.cover.css('background-image', 'url("images/posterholder.png")').addClass('fadein');
+                    _this.ui.cover.css('background-image', 'url("images/posterholder.png")').addClass('fadein');
                 } catch (e) {}
                 coverCache = null;
             };
-
-            this.ui.coverImage.remove();
 
         },
 
@@ -222,14 +252,15 @@
                 this.model.set('health', false);
                 $('.spinner').show();
                 data = provider.detail(this.model.get('imdb_id'), this.model.attributes)
-                    .catch(function () {
-                        $('.spinner').hide();
-                        $('.notification_alert').text(i18n.__('Error loading data, try again later...')).fadeIn('fast').delay(2500).fadeOut('fast');
-                    })
                     .then(function (data) {
+                        console.log(data, Type);
                         data.provider = provider.name;
                         $('.spinner').hide();
                         App.vent.trigger(type + ':showDetail', new App.Model[Type](data));
+                    }).catch(function (err) {
+                        console.error(err);
+                        $('.spinner').hide();
+                        $('.notification_alert').text(i18n.__('Error loading data, try again later...')).fadeIn('fast').delay(2500).fadeOut('fast');
                     });
                 break;
 
@@ -295,13 +326,13 @@
             case 'bookmarkedmovie':
                 Database.deleteBookmark(this.model.get('imdb_id'))
                     .then(function () {
-                        App.userBookmarks.splice(App.userBookmarks.indexOf(that.model.get('imdb_id')), 1);
                         win.info('Bookmark deleted (' + that.model.get('imdb_id') + ')');
-                        if (that.model.get('type') === 'movie') {
-                            // we'll make sure we dont have a cached movie
-                            Database.deleteMovie(that.model.get('imdb_id'));
-                        }
-
+                        App.userBookmarks.splice(App.userBookmarks.indexOf(that.model.get('imdb_id')), 1);
+                    })
+                    .then(function () {
+                        return Database.deleteMovie(that.model.get('imdb_id'));
+                    })
+                    .then(function () {
                         // we'll delete this element from our list view
                         $(e.currentTarget).closest('li').animate({
                             paddingLeft: '0px',
@@ -311,8 +342,8 @@
                         }, 500, function () {
                             $(this).remove();
                             $('.items').append($('<li/>').addClass('item ghost'));
-                            if ($('.items li').length === 0) {
-                                App.vent.trigger('movies:list', []);
+                            if ($('.items li[data-imdb-id]').length === 0) {
+                                App.vent.trigger('favorites:render');
                             }
                         });
                     });
@@ -396,6 +427,7 @@
                             })
                             .then(function () {
                                 win.info('Bookmark added (' + that.model.get('imdb_id') + ')');
+                                App.userBookmarks.push(that.model.get('imdb_id'));
                                 that.model.set('bookmarked', true);
                             });
                     }
@@ -415,24 +447,34 @@
                             Database.deleteTVShow(that.model.get('imdb_id'));
                         });
                 } else {
-                    this.model.set('bookmarked', true);
-                    this.ui.bookmarkIcon.addClass('selected');
                     data = provider.detail(this.model.get('imdb_id'), this.model.attributes)
                         .then(function (data) {
-                                data.provider = that.model.get('provider');
-                                Database.addTVShow(data)
-                                    .then(function (idata) {
-                                        return Database.addBookmark(that.model.get('imdb_id'), 'tvshow');
-                                    })
-                                    .then(function () {
-                                        win.info('Bookmark added (' + that.model.get('imdb_id') + ')');
-                                        that.model.set('bookmarked', true);
-                                        App.userBookmarks.push(that.model.get('imdb_id'));
-                                    });
-                            },
-                            function (err) {
-                                $('.notification_alert').text(i18n.__('Error loading data, try again later...')).fadeIn('fast').delay(2500).fadeOut('fast');
-                            });
+                            data.provider = that.model.get('provider');
+                            promisifyDb(db.tvshows.find({
+                                    imdb_id: that.model.get('imdb_id').toString(),
+                                }))
+                                .then(function (res) {
+                                    if (res != null && res.length > 0) {
+                                        return Database.updateTVShow(data);
+                                    } else {
+                                        return Database.addTVShow(data);
+                                    }
+                                })
+                                .then(function (idata) {
+                                    return Database.addBookmark(that.model.get('imdb_id'), 'tvshow');
+                                })
+                                .then(function () {
+                                    win.info('Bookmark added (' + that.model.get('imdb_id') + ')');
+                                    that.ui.bookmarkIcon.addClass('selected');
+                                    that.model.set('bookmarked', true);
+                                    App.userBookmarks.push(that.model.get('imdb_id'));
+                                }).catch(function (err) {
+                                    win.error('promisifyDb()', err);
+                                });
+                        }).catch(function (err) {
+                            win.error('provider.detail()', err);
+                            $('.notification_alert').text(i18n.__('Error loading data, try again later...')).fadeIn('fast').delay(2500).fadeOut('fast');
+                        });
                 }
                 break;
 
