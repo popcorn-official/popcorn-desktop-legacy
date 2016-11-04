@@ -407,9 +407,6 @@ var Database = {
 
                 App.vent.trigger('initHttpApi');
 
-                return AdvSettings.checkApiEndpoints([
-                    Settings.updateEndpoint
-                ]);
             })
             .then(function () {
                 // set app language

@@ -69,7 +69,7 @@
     "temp": "0.x.x",
     "torrent-tracker-health": "1.x.x",
     "trakt.tv-ondeck": "0.x",
-    "trakt.tv": "1.x.x",
+    "trakt.tv": "2.x.x",
     "underscore": "1.x.x",
     "upnp-mediarenderer-client": "^1.2.1",
     "urijs": "1.18.1",
