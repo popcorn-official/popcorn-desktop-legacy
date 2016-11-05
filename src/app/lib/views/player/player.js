@@ -193,7 +193,7 @@
 
                 this.video = videojs('video_player', {
                     techOrder: ['youtube'],
-                    forceSSL: true,
+                    forceSSL: false,
                     ytcontrols: false,
                     quality: '720p'
                 }).ready(function () {
