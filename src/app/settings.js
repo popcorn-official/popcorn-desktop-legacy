@@ -156,7 +156,7 @@ Settings.updateEndpoint = {
         proxies: [{
             url: 'https://popcorntime.sh/'
         }]
-}
+};
 
 // App Settings
 Settings.version = false;
@@ -263,86 +263,17 @@ var AdvSettings = {
     },
 
     checkApiEndpoint: function (endpoint, defer) {
+        if (Settings.automaticUpdating === false) {
+            return;
+        }
 
         defer = defer || Q.defer();
 
         endpoint.ssl = undefined;
         _.extend(endpoint, endpoint.proxies[endpoint.index]);
 
-        var url = URI.parse(endpoint.url);
-        win.debug('Checking %s endpoint', url.hostname);
-
-        if (endpoint.ssl === false) {
-            var timeoutWrapper = function (req) {
-                return function () {
-                    win.warn('[%s] Endpoint timed out',
-                        url.hostname);
-                    req.abort();
-                    tryNextEndpoint();
-                };
-            };
-            var request = http.get({
-                hostname: url.hostname
-            }, function (res) {
-                res.once('data', function (body) {
-                    clearTimeout(timeout);
-                    res.removeAllListeners('error');
-                    // Doesn't match the expected response
-                    if (!_.isRegExp(endpoint.fingerprint) || !endpoint.fingerprint.test(body.toString('utf8'))) {
-                        win.warn('[%s] Endpoint fingerprint %s does not match %s',
-                            url.hostname,
-                            endpoint.fingerprint,
-                            body.toString('utf8'));
-                        tryNextEndpoint();
-                    } else {
-                        defer.resolve();
-                    }
-                }).once('error', function (e) {
-                    win.warn('[%s] Endpoint failed [%s]',
-                        url.hostname,
-                        e.message);
-                    clearTimeout(timeout);
-                    tryNextEndpoint();
-                });
-            });
-
-            var fn = timeoutWrapper(request);
-            var timeout = setTimeout(fn, 5000);
-        } else {
-            tls.connect(443, url.hostname, {
-                servername: url.hostname,
-                rejectUnauthorized: false
-            }, function () {
-                this.setTimeout(0);
-                this.removeAllListeners('error');
-                if (!this.authorized ||
-                    this.authorizationError ||
-                    this.getPeerCertificate().fingerprint !== endpoint.fingerprint) {
-                    // "These are not the certificates you're looking for..."
-                    // Seems like they even got a certificate signed for us :O
-                    win.warn('[%s] Endpoint fingerprint %s does not match %s',
-                        url.hostname,
-                        endpoint.fingerprint,
-                        this.getPeerCertificate().fingerprint);
-                    tryNextEndpoint();
-                } else {
-                    defer.resolve();
-                }
-                this.end();
-            }).once('error', function (e) {
-                win.warn('[%s] Endpoint failed [%s]',
-                    url.hostname,
-                    e.message);
-                this.setTimeout(0);
-                tryNextEndpoint();
-            }).once('timeout', function () {
-                win.warn('[%s] Endpoint timed out',
-                    url.hostname);
-                this.removeAllListeners('error');
-                this.end();
-                tryNextEndpoint();
-            }).setTimeout(5000);
-        }
+        var _url = url.parse(endpoint.url);
+        win.debug('Checking %s endpoint', _url.hostname);
 
         function tryNextEndpoint() {
             if (endpoint.index < endpoint.proxies.length - 1) {
@@ -354,6 +285,58 @@ var AdvSettings = {
                 _.extend(endpoint, endpoint.proxies[endpoint.index]);
                 defer.resolve();
             }
+        }
+
+        if (endpoint.ssl === false) {
+            var request = http.get({
+                hostname: _url.hostname
+            }, function (res) {
+                res.once('data', function (body) {
+                    res.removeAllListeners('error');
+                    // Doesn't match the expected response
+                    if (!_.isRegExp(endpoint.fingerprint) || !endpoint.fingerprint.test(body.toString('utf8'))) {
+                        win.warn('[%s] Endpoint fingerprint %s does not match %s', _url.hostname, endpoint.fingerprint, body.toString('utf8'));
+                        tryNextEndpoint();
+                    } else {
+                        defer.resolve();
+                    }
+                }).once('error', function (e) {
+                    win.warn('[%s] Endpoint failed [%s]', _url.hostname, e.message);
+                    tryNextEndpoint();
+                });
+            }).setTimeout(5000, function () {
+                win.warn('[%s] Endpoint timed out',  _url.hostname);
+                request.abort();
+                tryNextEndpoint();
+            });
+        } else {
+            tls.connect(443, _url.hostname, {
+                servername: _url.hostname,
+                rejectUnauthorized: false
+            }, function () {
+                this.setTimeout(0);
+                this.removeAllListeners('error');
+                if (!this.authorized ||
+                    this.authorizationError ||
+                    this.getPeerCertificate().fingerprint !== endpoint.fingerprint) {
+                    // "These are not the certificates you're looking for..."
+                    // Seems like they even got a certificate signed for us :O
+                    win.warn('[%s] Endpoint fingerprint %s does not match %s', _url.hostname, endpoint.fingerprint, this.getPeerCertificate().fingerprint);
+                    tryNextEndpoint();
+                } else {
+                    defer.resolve();
+                }
+                this.end();
+            }).once('error', function (e) {
+                win.warn('[%s] Endpoint failed [%s]', _url.hostname, e.message);
+                this.setTimeout(0);
+                tryNextEndpoint();
+            }).once('timeout', function () {
+                win.warn('[%s] Endpoint timed out', _url.hostname);
+                this.removeAllListeners('error');
+                this.end();
+                tryNextEndpoint();
+            }).setTimeout(5000);
         }
 
         return defer.promise;

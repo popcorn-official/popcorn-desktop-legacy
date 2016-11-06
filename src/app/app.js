@@ -211,14 +211,6 @@ var deleteFolder = function (path) {
 
 var deleteCookies = function () {
     var nwWin = nw.Window.get();
-    nwWin.cookies.getAll({}, function (cookies) {
-        if (cookies.length > 0) {
-            win.debug('Removing ' + cookies.length + ' cookies...');
-            for (var i = 0; i < cookies.length; i++) {
-                removeCookie(cookies[i]);
-            }
-        }
-    });
 
     function removeCookie(cookie) {
         var lurl = 'http' + (cookie.secure ? 's' : '') + '://' + cookie.domain + cookie.path;
@@ -236,6 +228,15 @@ var deleteCookies = function () {
             }
         });
     }
+
+    nwWin.cookies.getAll({}, function (cookies) {
+        if (cookies.length > 0) {
+            win.debug('Removing ' + cookies.length + ' cookies...');
+            for (var i = 0; i < cookies.length; i++) {
+                removeCookie(cookies[i]);
+            }
+        }
+    });
 };
 
 win.on('resize', function (width, height) {
@@ -373,15 +374,16 @@ window.ondragenter = function (e) {
 var minimizeToTray = function () {
     win.hide();
 
+    var tray = new nw.Tray({
+        title: 'Popcorn Time',
+        icon: 'src/app/images/icon.png'
+    });
+
     var openFromTray = function () {
         win.show();
         tray.remove();
     };
 
-    var tray = new nw.Tray({
-        title: 'Popcorn Time',
-        icon: 'src/app/images/icon.png'
-    });
     tray.tooltip = 'Popcorn Time';
 
     var menu = new nw.Menu();
