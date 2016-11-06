@@ -432,7 +432,6 @@ Player.prototype.volume = function (percentAsDecimal) {
         vol = Math.max(0, Math.min(1, parseFloat(percentAsDecimal))); // Force value to between 0 and 1
         this.cache_.volume = vol;
         this.techCall_('setVolume', vol);
-        videojs.setLocalStorage('volume', vol);
 
         //let's save this bad boy
         AdvSettings.set('playerVolume', vol.toFixed(1));
