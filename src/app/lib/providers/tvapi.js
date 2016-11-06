@@ -19,6 +19,20 @@
 
     inherits(TVApi, App.Providers.Generic);
 
+    function processCloudFlareHack(options, url) {
+        const match = url.match(/^cloudflare\+(.*):\/\/(.*)/);
+        if (match) {
+            options = Object.assign(options, {
+                uri: match[1] + '://cloudflare.com/',
+                headers: {
+                    'Host': match[2],
+                    'User-Agent': 'Mozilla/5.0 (Linux) AppleWebkit/534.30 (KHTML, like Gecko) PT/3.8.0'
+                }
+            });
+        }
+        return options;
+    }
+
     function get(index, url, that) {
         var deferred = Q.defer();
 
@@ -47,20 +61,6 @@
         });
 
         return deferred.promise;
-    };
-
-    function processCloudFlareHack(options, url) {
-        const match = url.match(/^cloudflare\+(.*):\/\/(.*)/);
-        if (match) {
-            options = Object.assign(options, {
-                uri: match[1] + '://cloudflare.com/',
-                headers: {
-                    'Host': match[2],
-                    'User-Agent': 'Mozilla/5.0 (Linux) AppleWebkit/534.30 (KHTML, like Gecko) PT/3.8.0'
-                }
-            });
-        }
-        return options;
     }
 
     TVApi.prototype.extractIds = function (items) {
@@ -93,7 +93,7 @@
         var url = Settings.tvAPI[index].url + 'shows/' + filters.page + '?' + querystring.stringify(params).replace(/%25%20/g, '%20');
         return get(index, url).then(function (data) {
             data.forEach(function(entry) {
-              entry.type = 'show'
+              entry.type = 'show';
             });
 
             return {
@@ -117,9 +117,11 @@
                 }
 
                 if (!langAvailable) {
-                    return sanitize(data);
+                    return Common.sanitize(data);
                 } else {
-                    var reqTimeout = setTimeout(() => sanitize(data), 2000);
+                    var reqTimeout = setTimeout(function() {
+                        Common.sanitize(data);
+                    }, 2000);
 
                     console.info('Request to TVApi: \'%s\' - %s', old_data.title, this.language);
                     return this.tvdb.getSeriesAllById(old_data.tvdb_id).then(localization => {
@@ -138,7 +140,7 @@
                             }
                         }
 
-                        return sanitize(data);
+                        return Common.sanitize(data);
                     });
                 }
             } else {

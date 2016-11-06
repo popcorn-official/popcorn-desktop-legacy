@@ -1,4 +1,4 @@
-var Button = videojs.getComponent('Button')
+var Button = videojs.getComponent('Button');
 videojs.BiggerSubtitleButton = videojs.extend(Button, {
     /** @constructor */
     init: function (player, options) {

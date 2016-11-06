@@ -75,7 +75,7 @@
         "request": true,
         "querystring": true,
         "URI": true,
-        "webtorrent": true,
+        "WebTorrent": true,
         "child": true,
         "trakt": true,
 

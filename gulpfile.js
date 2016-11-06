@@ -421,10 +421,7 @@ gulp.task('compress', () => {
 });
 
 // prevent commiting if conditions aren't met and force beautify (bypass with `git commit -n`)
-// gulp.task('pre-commit', ['jshint']);
-gulp.task('pre-commit', () => {
-  console.log('Dissabled jshint for now.');
-});
+gulp.task('pre-commit', ['jshint']);
 
 // check entire sources for potential coding issues (tweak in .jshintrc)
 gulp.task('jshint', () => {

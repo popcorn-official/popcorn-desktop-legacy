@@ -432,6 +432,7 @@
                 App.Providers.delete('AnimeApi');
                 App.vent.trigger('movies:list');
                 App.vent.trigger('settings:show');
+                break;
             case 'bigPicture':
                 if (!ScreenResolution.SD) {
                     if (App.settings.bigPicture) {

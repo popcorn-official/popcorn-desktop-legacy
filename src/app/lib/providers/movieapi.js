@@ -40,7 +40,22 @@
             results: Common.sanitize(results),
             hasMore: true
         };
-    };
+    }
+
+    function processCloudFlareHack (options, url) {
+        var req = options;
+        var match = url.match(/^cloudflare\+(.*):\/\/(.*)/);
+        if (match) {
+            req = _.extend(req, {
+                uri: match[1] + '://cloudflare.com/',
+                headers: {
+                    'Host': match[2],
+                    'User-Agent': 'Mozilla/5.0 (Linux) AppleWebkit/534.30 (KHTML, like Gecko) PT/3.8.0'
+                }
+            });
+        }
+        return req;
+    }
 
     function get(index, url, that) {
         var deferred = Q.defer();
@@ -70,22 +85,7 @@
         });
 
         return deferred.promise;
-    };
-
-    var processCloudFlareHack = function (options, url) {
-        var req = options;
-        var match = url.match(/^cloudflare\+(.*):\/\/(.*)/);
-        if (match) {
-            req = _.extend(req, {
-                uri: match[1] + '://cloudflare.com/',
-                headers: {
-                    'Host': match[2],
-                    'User-Agent': 'Mozilla/5.0 (Linux) AppleWebkit/534.30 (KHTML, like Gecko) PT/3.8.0'
-                }
-            });
-        }
-        return req;
-    };
+    }
 
     MovieApi.prototype.extractIds = function (items) {
         return _.pluck(items.results, 'imdb_id');

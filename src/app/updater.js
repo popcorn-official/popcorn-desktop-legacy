@@ -3,7 +3,7 @@
 
     var client = new WebTorrent({
       dht: true,
-      maxConns: '5',  
+      maxConns: '5',
     }
     ),
         CHANNELS = ['stable', 'beta', 'nightly'],
@@ -94,7 +94,7 @@
                     });
                 });
 
-            };
+            }
             win.debug('Not updating because we are running the latest version');
             return false;
         });

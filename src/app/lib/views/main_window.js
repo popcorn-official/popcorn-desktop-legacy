@@ -533,8 +533,8 @@
 
         restartPopcornTime: function () {
           var children;
-          if (process.platform == "darwin") {
-            children = child.spawn("open", ["-n", "-a", process.execPath.match(/^([^\0]+?\.app)\//)[1]], {detached:true});
+          if (process.platform === 'darwin') {
+            children = child.spawn('open', ['-n', '-a', process.execPath.match(/^([^\0]+?\.app)\//)[1]], {detached:true});
           } else {
             children = child.spawn(process.execPath, [], {detached: true});
           }

@@ -5,6 +5,14 @@
     var lang;
     var httpServer;
 
+    function popcornCallback(callback, err, result) {
+        if (result === undefined) {
+            result = {};
+        }
+        result['popcornVersion'] = App.settings.version;
+        callback(err, result);
+    }
+
     var initServer = function () {
         return Q.Promise(function (resolve, reject) {
             server = rpc.Server({
@@ -54,7 +62,7 @@
 
                 //Listen for seek position change
                 App.vent.on('fullscreenchange', function () {
-                    events['fullscreen'] = nativeWindow.isFullscreen;
+                    events['fullscreen'] = win.isFullscreen;
                     reinitTimeout();
                 });
 
@@ -288,7 +296,7 @@
 
             server.expose('getfullscreen', function (args, opt, callback) {
                 popcornCallback(callback, false, {
-                    'fullscreen': nativeWindow.isFullscreen
+                    'fullscreen': win.isFullscreen
                 });
             });
 
@@ -592,7 +600,7 @@
             server.expose('togglefullscreen', function (args, opt, callback) {
                 Mousetrap.trigger('f');
                 popcornCallback(callback, false, {
-                    'fullscreen': nativeWindow.isFullscreen
+                    'fullscreen': win.isFullscreen
                 });
             });
 
@@ -646,7 +654,7 @@
                         duration: App.PlayerView.player.duration(),
                         streamUrl: $('#video_player video') === undefined ? '' : $('#video_player video').attr('src'),
                         selectedSubtitle: '',
-                        isFullscreen: nativeWindow.isFullscreen
+                        isFullscreen: win.isFullscreen
                     };
 
                     if (result.movie && result.movie !== undefined) {
@@ -700,14 +708,6 @@
             win.info('HTTP API: socket #' + i + ' destroyed');
             sockets[i].destroy();
         }
-    }
-
-    function popcornCallback(callback, err, result) {
-        if (result === undefined) {
-            result = {};
-        }
-        result['popcornVersion'] = App.settings.version;
-        callback(err, result);
     }
 
     App.vent.on('initHttpApi', function () {
