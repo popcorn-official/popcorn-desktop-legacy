@@ -1,7 +1,7 @@
 var Button = videojs.getComponent('Button');
 videojs.BiggerSubtitleButton = videojs.extend(Button, {
     /** @constructor */
-    init: function (player, options) {
+    constructor: function (player, options) {
         Button.call(this, player, options);
         this.on('click', this.onClick);
     }
@@ -17,9 +17,7 @@ videojs.BiggerSubtitleButton.prototype.onClick = function () {
 var createBiggerSubtitleButton = function () {
     var props = {
         className: 'vjs_biggersub_button vjs-control',
-        innerHTML: '<div class="vjs-control-content"><span class="vjs-control-text">A+</span></div>',
-        role: 'button',
-        'aria-live': 'polite', // let the screen reader user know that the text of the button may change
+        innerHTML: '<button class="vjs-control-content">A+</button>',
         tabIndex: 0
     };
     return videojs.createEl(null, props);
@@ -38,7 +36,7 @@ videojs.plugin('biggerSubtitle', function () {
 
 videojs.SmallerSubtitleButton = videojs.extend(Button, {
     /** @constructor */
-    init: function (player, options) {
+    constructor: function (player, options) {
         Button.call(this, player, options);
         this.on('click', this.onClick);
     }
@@ -54,9 +52,7 @@ videojs.SmallerSubtitleButton.prototype.onClick = function () {
 var createSmallerSubtitleButton = function () {
     var props = {
         className: 'vjs_smallersub_button vjs-control',
-        innerHTML: '<div class="vjs-control-content"><span class="vjs-control-text">A-</span></div>',
-        role: 'button',
-        'aria-live': 'polite', // let the screen reader user know that the text of the button may change
+        innerHTML: '<button class="vjs-control-content">A-</button>',
         tabIndex: 0
     };
     return videojs.createEl(null, props);
@@ -89,7 +85,7 @@ videojs.plugin('customSubtitles', function () {
       var CustomTrackMenuItem = videojs.extend(TextTrackMenuItem, {
 
           /*@ Constructor */
-          init: function (player, options) {
+          constructor: function (player, options) {
               options = options || {};
               // fake 'empty' track
               options['track'] = {
@@ -168,8 +164,8 @@ videojs.plugin('customSubtitles', function () {
  * Copyright (c) 2013 Michael Bensoussan; Licensed MIT */
 
 videojs.plugin('progressTips', function (options) {
-    var init;
-    init = function () {
+ 
+    var init = function () {
         var player = this;
         $('.vjs-progress-control').prepend($('<div id="vjs-tip">  <div id="vjs-tip-arrow"></div>  <div id="vjs-tip-inner"></div>  </div>'));
         $('#vjs-tip').css('top', '-30px');

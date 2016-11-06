@@ -367,7 +367,7 @@ videojs.TextTrack.prototype.load = function () {
 var MenuItem = videojs.getComponent('MenuItem');
 videojs.TextTrackMenuItem = videojs.extend(MenuItem, {
     /** @constructor */
-    init: function (player, options) {
+    constructor: function (player, options) {
         var track = this.track = options['track'];
 
         // Modify options for parent MenuItem class's init.
@@ -410,7 +410,7 @@ Player.prototype.onLoadStart = function () {
  */
 var Component = videojs.getComponent('Component');
 videojs.LoadProgressBar = videojs.extend(Component, {
-    init: function (player, options) {
+    constructor: function (player, options) {
         Component.call(this, player, options);
         this.on(player, 'progress', this.update);
     }
