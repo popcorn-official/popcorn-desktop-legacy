@@ -1,3 +1,7 @@
+# custom videojs files
+!src/app/vendor/videojshooks.js
+!src/app/vendor/videojsplugins.js
+
 # build files
 node_modules/
 src/app/vendor
