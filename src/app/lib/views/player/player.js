@@ -826,9 +826,9 @@
         },
 
         adjustSubtitleOffset: function (s) {
-            var o = this.player.options()['trackTimeOffset'];
-            this.player.options()['trackTimeOffset'] = (o + s);
-            this.displayOverlayMsg(i18n.__('Subtitles Offset') + ': ' + (-this.player.options()['trackTimeOffset'].toFixed(1)) + ' ' + i18n.__('secs'));
+            var o = this.player.options_['trackTimeOffset'];
+            this.player.options_['trackTimeOffset'] = (o + s);
+            this.displayOverlayMsg(i18n.__('Subtitles Offset') + ': ' + (-this.player.options_['trackTimeOffset'].toFixed(1)) + ' ' + i18n.__('secs'));
         },
 
         adjustPlaybackRate: function (rate, delta) {
