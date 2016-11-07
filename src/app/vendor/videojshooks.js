@@ -191,12 +191,11 @@ videojs.registerComponent('LoadProgressBar', LoadProgressBar);
 // This is a custom way of loading subtitles, since we can't use src (CORS blocks it and we can't disable it)
 // We fetch them when requested, process them and finally throw a parseCues their way
 var TextTrack = function(options) {
-    var settings = _extend(options, {
-        kind: TextTrackKind[options.kind] || 'subtitles',
+    var settings = _.extend(options, {
+        kind: 'subtitles',
         language: options.language || options.srclang || ''
     });
-    var mode = TextTrackMode[settings.mode] || 'disabled';
-    var default_ = settings.default;
+    var mode = 'disabled';
 
     if (settings.kind === 'metadata' || settings.kind === 'chapters') {
         mode = 'hidden';
@@ -205,7 +204,7 @@ var TextTrack = function(options) {
     // for every other browser this will be a normal object
     // var tt = videojs.TextTrack.call(settings);
     var src = settings.src;
-    delete settings.src
+    delete settings.src;
     var tt = TextTrack.super_.call(settings);
 
     settings.src = src;
