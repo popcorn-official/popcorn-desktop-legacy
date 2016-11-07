@@ -222,6 +222,9 @@
                 this.video = videojs('video_player', {
                     nativeControlsForTouch: false,
                     trackTimeOffset: 0,
+                    html5: {
+                        nativeTextTracks: false
+                    },
                     plugins: {
                         biggerSubtitle: {},
                         smallerSubtitle: {},
